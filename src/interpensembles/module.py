@@ -98,5 +98,7 @@ class CIFAR10EnsembleModule(CIIFAR10Module):
             mloss = self.criterion(predictions, labels)
             losses.append(mloss)
         loss = sum(losses)/self.nb_models ## calculate the average with pure python functions.    
+        accuracy = self.accuracy(predictions,labels)
+        return loss, accuracy * 100
 
 
