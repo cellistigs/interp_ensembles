@@ -77,7 +77,7 @@ class CIFAR10Module(pl.LightningModule):
         }
         return [optimizer], [scheduler]
 
-class CIFAR10EnsembleModule(CIIFAR10Module):   
+class CIFAR10EnsembleModule(CIFAR10Module):   
     """Customized module to train an ensemble of models independently.  
 
     """
@@ -91,14 +91,61 @@ class CIFAR10EnsembleModule(CIIFAR10Module):
         self.models = nn.ModuleList([all_classifiers[self.hparams.classifier] for i in range(nb_models)]) ## now we add several different instances of the model. 
     
     def forward(self,batch):
+        """for forward, we want to aggregate the ensemble output as a softmax 
+
+        """
         images, labels = batch
         losses = []
+        accs = []
         for m in self.models:
             predictions = m(images)
             mloss = self.criterion(predictions, labels)
+            accuracy = self.accuracy(predictions,labels)
             losses.append(mloss)
+            accs.append(accuracy) 
         loss = sum(losses)/self.nb_models ## calculate the average with pure python functions.    
-        accuracy = self.accuracy(predictions,labels)
-        return loss, accuracy * 100
+        avg_accuracy = sum(accs)/self.nb_models
+        return loss, avg_accuracy * 100
 
+    def training_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/train", loss)
+        self.log("acc/train", accuracy)
+        return loss
+
+
+class CIFAR10InterEnsembleModule(CIFAR10Module):
+    """Customized module to train a convex combination of a wide model and smaller models. 
+
+    """
+    def __init__(self,nb_models,lamb,hparams):
+        self.nb_models = nb_models
+        self.hparams = hparams
+
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.accuracy = Accuracy()
+
+        self.interpmodel = # define this##  
+     
+     def forward(self,batch):
+         """This forward function takes a convex combination of the original model and subnet models. 
+
+         """
+         images,labels = batch
+         losses = []
+         accs = []
+
+         main_preds = self.interpmodel.base(images)
+         main_loss = self.criterion(predictions,labels)
+         losses.append(self.lamb*main_loss)
+         accs.append(self.lamb*self.accuracy(main_preds,labels))
+
+         for m in self.interpmodel.subnets:
+             subnet_preds = m(predictions)
+             subnet_loss = self.criterion(predictions,labels)
+             losses.append((1-self.lamb)*(1/self.nb_models)*subnet_loss)
+             accs.append((1-self.lamb)*(1/self.nb_models)*self.accuracy(subnet_preds,labels))
+         loss = sum(losses)    
+         avg_accuracy = sum(accs) 
+         return loss, avg_accuracy*100
 
