@@ -82,13 +82,14 @@ class CIFAR10EnsembleModule(CIFAR10Module):
 
     """
     def __init__(self,nb_models,hparams):
+        super().__init__(hparams)
         self.nb_models = nb_models
         self.hparams = hparams
 
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
 
-        self.models = nn.ModuleList([all_classifiers[self.hparams.classifier] for i in range(nb_models)]) ## now we add several different instances of the model. 
+        self.models = torch.nn.ModuleList([all_classifiers[self.hparams.classifier] for i in range(nb_models)]) ## now we add several different instances of the model. 
     
     def forward(self,batch):
         """for forward, we want to aggregate the ensemble output as a softmax 
