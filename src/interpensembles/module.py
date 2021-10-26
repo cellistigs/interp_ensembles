@@ -91,26 +91,44 @@ class CIFAR10EnsembleModule(CIFAR10Module):
         self.models = nn.ModuleList([all_classifiers[self.hparams.classifier] for i in range(nb_models)]) ## now we add several different instances of the model. 
     
     def forward(self,batch):
-        """for forward, we want to aggregate the ensemble output as a softmax 
+        """for forward, we want to take the softmax, aggregate the ensemble output, and then take the logit.  
 
         """
+        images, labels = batch
+        softmax = torch.nn.Softmax(dim = 1)
+
+        losses = []
+        accs = []
+        softmaxes = []
+        for m in self.models:
+            predictions = m(images)
+            normed = softmax(predictions)
+            softmaxes.append(normed)
+        gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
+        ## we can pass this  through directly to the accuracy function. 
+        tloss = self.criterion(gmean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
+        accuracy = self.accuracy(gmean,labels)
+        return tloss,accuracy*100
+
+
+    def training_step(self, batch, batch_nb):
+        """When we train, we want to train independently. 
+        """
+        
         images, labels = batch
         losses = []
         accs = []
         for m in self.models:
-            predictions = m(images) ## isn't this just a bunch of 
+            predictions = m(images) ## this just a bunch of unnormalized scores? 
             mloss = self.criterion(predictions, labels)
             accuracy = self.accuracy(predictions,labels)
             losses.append(mloss)
             accs.append(accuracy) 
         loss = sum(losses)/self.nb_models ## calculate the average with pure python functions.    
         avg_accuracy = sum(accs)/self.nb_models
-        return loss, avg_accuracy * 100
 
-    def training_step(self, batch, batch_nb):
-        loss, accuracy = self.forward(batch)
         self.log("loss/train", loss)
-        self.log("acc/train", accuracy)
+        self.log("acc/train", avg_accuracy*100)
         return loss
 
 
