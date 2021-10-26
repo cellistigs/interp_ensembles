@@ -98,7 +98,7 @@ class CIFAR10EnsembleModule(CIFAR10Module):
         losses = []
         accs = []
         for m in self.models:
-            predictions = m(images)
+            predictions = m(images) ## isn't this just a bunch of 
             mloss = self.criterion(predictions, labels)
             accuracy = self.accuracy(predictions,labels)
             losses.append(mloss)
