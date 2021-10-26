@@ -125,27 +125,27 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
 
-        self.interpmodel = # define this##  
+        #self.interpmodel = # define this##  
      
-     def forward(self,batch):
-         """This forward function takes a convex combination of the original model and subnet models. 
+    def forward(self,batch):
+        """This forward function takes a convex combination of the original model and subnet models. 
 
-         """
-         images,labels = batch
-         losses = []
-         accs = []
+        """
+        images,labels = batch
+        losses = []
+        accs = []
 
-         main_preds = self.interpmodel.base(images)
-         main_loss = self.criterion(predictions,labels)
-         losses.append(self.lamb*main_loss)
-         accs.append(self.lamb*self.accuracy(main_preds,labels))
+        main_preds = self.interpmodel.base(images)
+        main_loss = self.criterion(predictions,labels)
+        losses.append(self.lamb*main_loss)
+        accs.append(self.lamb*self.accuracy(main_preds,labels))
 
-         for m in self.interpmodel.subnets:
-             subnet_preds = m(predictions)
-             subnet_loss = self.criterion(predictions,labels)
-             losses.append((1-self.lamb)*(1/self.nb_models)*subnet_loss)
-             accs.append((1-self.lamb)*(1/self.nb_models)*self.accuracy(subnet_preds,labels))
-         loss = sum(losses)    
-         avg_accuracy = sum(accs) 
-         return loss, avg_accuracy*100
+        for m in self.interpmodel.subnets:
+            subnet_preds = m(predictions)
+            subnet_loss = self.criterion(predictions,labels)
+            losses.append((1-self.lamb)*(1/self.nb_models)*subnet_loss)
+            accs.append((1-self.lamb)*(1/self.nb_models)*self.accuracy(subnet_preds,labels))
+        loss = sum(losses)    
+        avg_accuracy = sum(accs) 
+        return loss, avg_accuracy*100
 
