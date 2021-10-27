@@ -8,8 +8,8 @@ from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
-from data import CIFAR10Data,CIFAR10_1Data
-from module import CIFAR10Module
+from interpensembles.data import CIFAR10Data,CIFAR10_1Data
+from interpensembles.module import CIFAR10Module
 
 
 def main(args):
@@ -30,7 +30,7 @@ def main(args):
         trainer = Trainer(
             fast_dev_run=bool(args.dev),
             logger=logger if not bool(args.dev + args.test_phase) else None,
-        #    gpus=-1,
+            gpus=-1,
             deterministic=True,
             weights_summary=None,
             log_every_n_steps=1,
@@ -39,7 +39,8 @@ def main(args):
             precision=args.precision,
         )
 
-        model = CIFAR10Module(args)
+        #model = CIFAR10Module(args)
+        model = CIFAR10Module.load_from_checkpoint(checkpoint_path="/home/ubuntu/interp_ensembles/src/interpensembles/cifar10/resnet18/version_14/checkpoints/epoch=95-step=18719.ckpt")
         cifar10data = CIFAR10Data(args)
         cifar10_1data = CIFAR10_1Data(args)
 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=256)
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--num_workers", type=int, default=8)
-    parser.add_argument("--gpu_id", type=str, default="3")
+    parser.add_argument("--gpu_id", type=str, default="0")
 
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
