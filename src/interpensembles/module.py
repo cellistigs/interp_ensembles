@@ -90,6 +90,7 @@ class CIFAR10EnsembleModule(CIFAR10Module):
         self.accuracy = Accuracy()
 
         self.models = torch.nn.ModuleList([all_classifiers[self.hparams.classifier]() for i in range(nb_models)]) ## now we add several different instances of the model. 
+        del self.model
     
     def forward(self,batch):
         """for forward, we want to take the softmax, aggregate the ensemble output, and then take the logit.  
