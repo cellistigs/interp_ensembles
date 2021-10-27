@@ -2,28 +2,28 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.metrics import Accuracy
 
-from cifar10_models.densenet import densenet121, densenet161, densenet169
-from cifar10_models.googlenet import googlenet
-from cifar10_models.inception import inception_v3
-from cifar10_models.mobilenetv2 import mobilenet_v2
-from cifar10_models.resnet import resnet18, resnet34, resnet50
-from cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
-from schduler import WarmupCosineLR
+from .cifar10_models.densenet import densenet121, densenet161, densenet169
+from .cifar10_models.googlenet import googlenet
+from .cifar10_models.inception import inception_v3
+from .cifar10_models.mobilenetv2 import mobilenet_v2
+from .cifar10_models.resnet import resnet18, resnet34, resnet50
+from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
+from .schduler import WarmupCosineLR
 
 all_classifiers = {
-    "vgg11_bn": vgg11_bn(),
-    "vgg13_bn": vgg13_bn(),
-    "vgg16_bn": vgg16_bn(),
-    "vgg19_bn": vgg19_bn(),
-    "resnet18": resnet18(),
-    "resnet34": resnet34(),
-    "resnet50": resnet50(),
-    "densenet121": densenet121(),
-    "densenet161": densenet161(),
-    "densenet169": densenet169(),
-    "mobilenet_v2": mobilenet_v2(),
-    "googlenet": googlenet(),
-    "inception_v3": inception_v3(),
+    "vgg11_bn": vgg11_bn,
+    "vgg13_bn": vgg13_bn,
+    "vgg16_bn": vgg16_bn,
+    "vgg19_bn": vgg19_bn,
+    "resnet18": resnet18,
+    "resnet34": resnet34,
+    "resnet50": resnet50,
+    "densenet121": densenet121,
+    "densenet161": densenet161,
+    "densenet169": densenet169,
+    "mobilenet_v2": mobilenet_v2,
+    "googlenet": googlenet,
+    "inception_v3": inception_v3,
 }
 
 
@@ -35,7 +35,7 @@ class CIFAR10Module(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
 
-        self.model = all_classifiers[self.hparams.classifier]
+        self.model = all_classifiers[self.hparams.classifier]()
 
     def forward(self, batch):
         images, labels = batch
@@ -89,7 +89,7 @@ class CIFAR10EnsembleModule(CIFAR10Module):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
 
-        self.models = torch.nn.ModuleList([all_classifiers[self.hparams.classifier] for i in range(nb_models)]) ## now we add several different instances of the model. 
+        self.models = torch.nn.ModuleList([all_classifiers[self.hparams.classifier]() for i in range(nb_models)]) ## now we add several different instances of the model. 
     
     def forward(self,batch):
         """for forward, we want to take the softmax, aggregate the ensemble output, and then take the logit.  
