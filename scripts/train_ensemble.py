@@ -6,8 +6,8 @@ from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
-from data import CIFAR10Data,CIFAR10_1Data
-from module import CIFAR10EnsembleModule
+from interpensembles.data import CIFAR10Data,CIFAR10_1Data
+from interpensembles.module import CIFAR10EnsembleModule
 
 
 def main(args):
