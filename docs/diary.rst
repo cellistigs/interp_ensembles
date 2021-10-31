@@ -53,5 +53,19 @@ We should also write a script to convert the ptl checkpoint and do testing on th
 - it's possible that seeding everything does not mean that the different networks have the same weights- we're drawing multiple times after all. 
   this "version 3" might be interesting just for that reason alone...
   
+10/27/21
+--------
 
+Today I am checking the generated network structure with torchviz. It looks like the network we trained on yesterday was not a true ensemble, but rather an instance where you had weight sharing between all ensemble members, processed independently in four different streams. The graph structure of this network for two members is given in `tests/test_mats/test_weightshare_resnet18_10_26.pdf`. We checked that the weights between two different streams of this network are identical at initialization. What is strange to note is that this model should have the exact same initialization and training schema as the original resnet 18 model, but the test accuracy was better by about .06 %.  This is a tiny margin that probably doesn't matter, but given everything is deterministic it's a little weird. This is saved as `interpensembles/cifar10/resnet10/version3` on your remote instance. 
+
+TODO: follow up on this result. 
   
+Note- we don't randomize the minibatch ordering between ensemble members. This is a difference from the most "standard" ensembles. 
+As batch size increases, members of "standard ensembles" should become more similar simply bc you lose one source of data diversity. 
+
+Today we also added 5 additional resnet 18s, Geoff's wide resnets, and started training resnet ensembles. We see a similar trend- ensemble performance is pretty much smack dab on the ER = 0 line. Tomorrow we can add our other ensembles, and work with layers. 
+
+10/28/21
+--------
+
+Go back to Mania and Sur 2021. These ensembling results are predicted by this paper, no?

@@ -39,6 +39,27 @@ def plot_model_performance(modeldata,dataset):
     plt.savefig("example_model_{}.png".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S")))
 
     
+def plot_multiple_models(models,dataset,range = np.arange(1,100),markerdict = None):
+    """Given a dictionary with model names as keys and dictionaries with fields "in_dist_acc","out_dist_acc" as values, plot them on the appropriate curve. 
 
+    :param models: dictionary of model names and performances. 
+    :param dataset: the dataset we want to work with (cifar 10 or imagenet)
+    :param range: range variable giving the x range over which to plot results
+    :param markerdict: (optional) dictionary of markers to use per datapoint 
+    """
+    accs = range 
+    fig,ax = plt.subplots(figsize=(10,10))
+    plt.plot(accs,logit_transform(accs,dataset),label = "ER = 0")
+    plt.plot(accs,accs,label = "Perfect Robustness")
+    for modelname,modeldata in models.items(): 
+        if markerdict is None:
+            plt.plot(modeldata["in_dist_acc"],modeldata["out_dist_acc"],"x",label = modelname)
+        else:    
+            plt.plot(modeldata["in_dist_acc"],modeldata["out_dist_acc"],markerdict[modelname],label = modelname)
+    plt.title("Model Robustness: {}".format(dataset))
+    plt.legend()
+    plt.xlabel("InD Test Accuracy")
+    plt.ylabel("OoD Test Accuracy")
+    plt.savefig("example_model_{}.png".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S")))
 
     
