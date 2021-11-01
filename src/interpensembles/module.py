@@ -169,8 +169,29 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         self.basemodel = wideresnet18()
         self.submodels = torch.nn.ModuleList([widesubresnet18(self.basemodel,i) for i in range(4)])
      
-    def forward(self,batch):
-        """This forward function takes a convex combination of the original model and subnet models. 
+    def forward(self,batch): 
+        """First pass forward: try treating like a standard ensemble? 
+
+        """
+        images, labels = batch
+        softmax = torch.nn.Softmax(dim = 1)
+
+        losses = []
+        accs = []
+        softmaxes = []
+        for m in self.submodels:
+            predictions = m(images)
+            normed = softmax(predictions)
+            softmaxes.append(normed)
+        ## todo: should we add the main model predictions too?
+
+        gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
+        ## we can pass this  through directly to the accuracy function. 
+        tloss = self.criterion(gmean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
+        accuracy = self.accuracy(gmean,labels)
+        return tloss,accuracy*100
+    def training_step(self,batch,batch_nb):
+        """This training_step function takes a convex combination of the original model and subnet models. 
 
         """
         images,labels = batch
@@ -186,7 +207,7 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         for m in self.submodels:
             subnet_preds = m(images)
             subnet_loss = self.criterion(subnet_preds,labels)
-            losses.append((1-self.lamb)*(1/)*subnet_loss)
+            losses.append((1-self.lamb)*(1/nb_subnets)*subnet_loss)
             accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
         loss = sum(losses)    
         avg_accuracy = sum(accs) 
