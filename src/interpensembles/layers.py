@@ -17,6 +17,60 @@ import torch.nn.functional as F
 import torch
 import numpy as np
 
+
+def create_subnet_params_output_only(weights,nb_subnets):
+    """Calculate subnet parameters, but make a mask that only cares about output channels. 
+    """
+    ## First check parity: 
+    weightshape = weights.shape
+    assert weightshape[0]%nb_subnets == 0, "Out channel dim must be divisible by nb_subnets"
+    ## Now compute block dimensions:
+    blocks_perside= int(np.sqrt(nb_subnets))  ## assume perfect square 
+    blocklength = int(weightshape[0]/blocks_perside)
+    blockheight = weightshape[1]
+
+    ## Next create masks: 
+    masked_weights = {}
+    for n in range(nb_subnets):
+        ## Declare as boolean tensors: 
+        on_block = np.ones((blocklength,blockheight,weightshape[2],weightshape[3])) 
+        blocks = [np.zeros((blocklength,blockheight,weightshape[2],weightshape[3])) for ni in range(blocks_perside-1)]
+        blocks.insert(n,on_block)
+        reshaped_blocks = np.concatenate([blocks[j] for j in range(blocks_perside)],axis = 0) # should generate rows of ordered blocks
+        full_mask = torch.tensor(reshaped_blocks)
+        masked_weights[n] = {"convweights":weights,"mask":full_mask}
+
+    return masked_weights    
+
+def create_subnet_params(weights,nb_subnets):
+    """Calculate parameters for each subnet. Done by chunking the weight matrix along the input and output channel dimensions. 
+
+    :param weights: a tensor convolutional weights of shape (C_out,C_in,kernel0,kernel1)
+    :param nb_subnets: a natural number indicating how we should split the convolutional weights. 
+    :returns: a dictionary with keys (convweights,mask) where the first field gives the original convnet weights as parameters, and the second gives a tensor binary mask.     
+    """
+    ## First check parity: 
+    weightshape = weights.shape
+    assert weightshape[0]%nb_subnets == 0, "Out channel dim must be divisible by nb_subnets"
+    assert weightshape[1]%nb_subnets == 0, "In channel dim must be divisible by nb_subnets"
+    ## Now compute block dimensions:
+    blocks_perside= int(np.sqrt(nb_subnets))  ## assume perfect square 
+    blocklength = int(weightshape[0]/blocks_perside)
+    blockheight = int(weightshape[1]/blocks_perside)
+
+    ## Next create masks: 
+    masked_weights = {}
+    for n in range(nb_subnets):
+        ## Declare as boolean tensors: 
+        on_block = np.ones((blocklength,blockheight,weightshape[2],weightshape[3])) 
+        blocks = [np.zeros((blocklength,blockheight,weightshape[2],weightshape[3])) for ni in range(nb_subnets-1)]
+        blocks.insert(n,on_block)
+        reshaped_blocks = np.concatenate([np.concatenate([blocks[j+i*blocks_perside] for j in range(blocks_perside)],axis = 1) for i in range(blocks_perside)],axis = 0) # should generate rows of ordered blocks
+        full_mask = torch.tensor(reshaped_blocks)
+        masked_weights[n] = {"convweights":weights,"mask":full_mask}
+
+    return masked_weights    
+
 class Interp_Conv2d_factory(nn.Module):
     """This module initializes a standard `nn.Conv2d` layer, and also defines additional layers that act as "subnets", networks that preserve weights from different partitions of the input channels to different partitions of the output channels. This differs from group convolution in that group convolution only considers disjoint subsets of channels, while we consider all possible mappings between input and output channels.
 
@@ -147,6 +201,14 @@ class Conv2d_subnet_layer(nn.Conv2d):
     """
     def __init__(self,conv_weights,in_channels,out_channels,kernel_size,stride,padding,dilation,groups,bias,padding_mode,device,dtype):
         super().__init__(in_channels,out_channels,kernel_size,stride,padding,dilation,groups,bias,padding_mode,device,dtype)
+        if bias is not False:
+            self.bias = bias
+        else:    
+            self.bias = None
+        self.stride = stride
+        self.padding = padding
+        self.groups = groups
+        self.dilation = dilation
 
         ## create masks: 
         self.weight = conv_weights["convweights"]
@@ -156,7 +218,7 @@ class Conv2d_subnet_layer(nn.Conv2d):
         return torch.mul(self.weight,self.mask)
     
     def forward(self,input):
-        return F.conv2d(input,self.get_masked())
+        return F.conv2d(input,self.get_masked(),bias = self.bias, stride =self.stride, padding = self.padding, groups = self.groups,dilation = self.dilation)
 
 class Conv2d_subnet_layer_module(nn.Module):
     """Conv2d with awareness of sublayers. 
@@ -189,7 +251,20 @@ class Conv2d_subnet_layer_module(nn.Module):
     def forward(self,input):
         return F.conv2d(input,self.mask*self.convlayer.weight)
 
-            
+class ChannelSwitcher(nn.Module):
+    """Switches the first half and second half of channels given an activation of shape (batch, channels, height, width)
+
+    :param channelnb: number of channels total
+    """
+
+    def __init__(self,channelnb):
+        super().__init__()
+        self.width = channelnb
+
+    def forward(self,x):    
+        first_half = x[:,:int(self.width/2),:,:]
+        second_half = x[:,int(self.width/2):,:,:]
+        return torch.cat([second_half,first_half], axis = 1)
 
 
 
