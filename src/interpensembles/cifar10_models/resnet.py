@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from interpensembles.layers import create_subnet_params,Conv2d_subnet_layer
+from interpensembles.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher
 import os
 
 __all__ = [
@@ -471,11 +471,14 @@ class SubResNet(nn.Module):
         norm_layer=None,
         k = None,
         baseresnet = None,
-        nb_subnets = None
+        nb_subnets = None,
+        indices = None 
     ):
         super(SubResNet, self).__init__()
         self.baseresnet = baseresnet
-        self.nb_subnets = nb_subnets
+        self.nb_subnets = k**2
+        self.indices = indices
+        self.alt = indices["layer1"][0] in [1,2]
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
@@ -500,32 +503,32 @@ class SubResNet(nn.Module):
         )
         ### Replace with indexed replacement factor: 
         #base = self.baseresnet.conv1 ## base Conv2d module we want to use for replacement. 
-        #params = create_subnet_params(base.weight,self.nb_subnets) ## returns an indexed dictionary of weight params. 
-        #conv_subnet = subnetconv(params[indices[replaceindex]],base) ## create subnet. 
-        #setattr(self.conv1,convname,conv_subnet) ## we have to set attribute directly. 
+        params = create_subnet_params_output_only(self.conv1.weight,self.nb_subnets) ## returns an indexed dictionary of weight params. 
+        conv_subnet = subnetconv(params[self.indices["conv1"]],self.conv1) ## create subnet. ## TODO add index
+        self.conv1=conv_subnet ## we have to set attribute directly. 
 
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.replace(self.layer1,self.baseresnet.layer1, indices = [0,0,0,0])
+        self.layer1 = self._make_layer(block, 64*k, layers[0])
+        self.replace(self.layer1,self.baseresnet.layer1, indices = self.indices["layer1"])
         ## this function first looks at len(model.layer) to see how many blocks there are. 
         ## then, it looks at the type of block: is it a BottleNeck or BasicBlock. 
         ## if bottleneck, it looks for 3 convolutions, and if basic it looks for 2
         self.layer2 = self._make_layer(
-            block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
+            block, 128*k, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
         )
-        self.replace(self.layer2,self.baseresnet.layer2, indices = [0,0,0,0,0])
+        self.replace(self.layer2,self.baseresnet.layer2, indices = self.indices["layer2"])
         self.layer3 = self._make_layer(
-            block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
+            block, 256*k, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
         )
-        self.replace(self.layer3,self.baseresnet.layer3, indices = [0,0,0,0,0])
+        self.replace(self.layer3,self.baseresnet.layer3, indices = self.indices["layer3"])
         self.layer4 = self._make_layer(
-            block, 512, layers[3], stride=2,  dilate=replace_stride_with_dilation[2]
+            block, 512*k, layers[3], stride=2,  dilate=replace_stride_with_dilation[2]
         )
-        self.replace(self.layer4,self.baseresnet.layer4,indices = [0,0,0,0,0])
+        self.replace(self.layer4,self.baseresnet.layer4,indices = self.indices["layer4"])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512*k * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -597,7 +600,12 @@ class SubResNet(nn.Module):
                     base = layersource[unit_ind].downsample[0]
                     params = create_subnet_params(base.weight,self.nb_subnets)
                     conv_subnet = subnetconv(params[indices[replaceindex]],base) ## create subnet. 
-                    convset["target"].downsample[0] = conv_subnet
+                    new_downsample_layers = [conv_subnet,convset["target"].downsample[1]]
+                    if self.alt:
+                        channelswitcher = ChannelSwitcher(base.weight.shape[0])
+                        new_downsample_layers.append(channelswitcher)
+                    new_sequential = nn.Sequential(*new_downsample_layers)
+                    convset["target"].downsample = new_sequential
                     replaceindex +=1
         assert replaceindex == len(indices)        
 
@@ -653,6 +661,22 @@ class SubResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def before_fc(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = x.reshape(x.size(0), -1)
+
+        return x
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -669,6 +693,17 @@ class SubResNet(nn.Module):
         x = self.fc(x)
 
         return x
+
+def _widesubresnet(arch, block, layers, pretrained, progress, device, k, baseresnet, indices, **kwargs):
+
+    model = SubResNet(block, layers, k = k, baseresnet = baseresnet, indices = indices,**kwargs)
+    if pretrained:
+        script_dir = os.path.dirname(__file__)
+        state_dict = torch.load(
+            script_dir + "/state_dicts/" + arch + ".pt", map_location=device
+        )
+        model.load_state_dict(state_dict)
+    return model
 
 def _wideresnet(arch, block, layers, pretrained, progress, device, k, **kwargs):
     model = WideResNet(block, layers, k = k,**kwargs)
@@ -689,6 +724,49 @@ def _resnet(arch, block, layers, pretrained, progress, device, **kwargs):
         )
         model.load_state_dict(state_dict)
     return model
+
+def widesubresnet18(baseresnet, index, pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a wide (2x) ResNet-18 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+        baseresnet: base resnet model to share weights with. 
+        index: index of subresnet  
+    """
+    indices = { ## subnet indices for resnet 18
+        0:{
+            "conv1":0,
+            "layer1":[0,0,0,0],
+            "layer2":[0,0,0,0,0],
+            "layer3":[0,0,0,0,0],
+            "layer4":[0,0,0,0,0],
+            },
+        1:{
+            "conv1":0,  
+            "layer1":[2,1,2,1],
+            "layer2":[2,1,1,2,1],
+            "layer3":[2,1,1,2,1],
+            "layer4":[2,1,1,2,1],
+            },
+        2:{
+            "conv1":1, ## shifts to the second set of channels: 
+            "layer1":[1,2,1,2],
+            "layer2":[1,2,2,1,2],
+            "layer3":[1,2,2,1,2],
+            "layer4":[1,2,2,1,2],
+            },
+        3:{
+            "conv1":1, ## shifts to the second set of channels: 
+            "layer1":[3,3,3,3],
+            "layer2":[3,3,3,3,3],
+            "layer3":[3,3,3,3,3],
+            "layer4":[3,3,3,3,3],
+            },
+        }
+
+    return _widesubresnet(
+        "wideresnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, k = 2, baseresnet = baseresnet, indices = indices[index], **kwargs
+    )
 
 def wideresnet18(pretrained=False, progress=True, device="cpu", **kwargs):
     """Constructs a wide (2x) ResNet-18 model.
