@@ -218,7 +218,7 @@ class Conv2d_subnet_layer(nn.Conv2d):
         return torch.mul(self.weight,self.mask)
     
     def forward(self,input):
-        return F.conv2d(input,self.get_masked(),bias = self.bias, stride =self.stride, padding = self.padding, groups = self.groups,dilation = self.dilation)
+        return F.conv2d(input,self.get_masked().float(),bias = self.bias, stride =self.stride, padding = self.padding, groups = self.groups,dilation = self.dilation)
 
 class Conv2d_subnet_layer_module(nn.Module):
     """Conv2d with awareness of sublayers. 
