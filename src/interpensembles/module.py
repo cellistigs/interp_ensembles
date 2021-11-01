@@ -182,7 +182,7 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         accs.append(self.lamb*self.accuracy(main_preds,labels))
 
         for m in self.submodels:
-            subnet_preds = m(predictions)
+            subnet_preds = m(images)
             subnet_loss = self.criterion(subnet_preds,labels)
             losses.append((1-self.lamb)*(1/self.nb_models)*subnet_loss)
             accs.append((1-self.lamb)*(1/self.nb_models)*self.accuracy(subnet_preds,labels))
