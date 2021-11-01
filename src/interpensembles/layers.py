@@ -213,7 +213,8 @@ class Conv2d_subnet_layer(nn.Conv2d):
         ## create masks: 
         self.weight = conv_weights["convweights"]
         if use_cuda:
-            self.mask = conv_weights["mask"].to("cuda:0").float()
+            device_int = self.weight.device
+            self.mask = conv_weights["mask"].to("cuda:{}".format(device_int)).float()
         else:    
             self.mask = conv_weights["mask"].float()
     
@@ -221,7 +222,7 @@ class Conv2d_subnet_layer(nn.Conv2d):
         return torch.mul(self.weight,self.mask)
     
     def forward(self,input):
-        return F.conv2d(input,self.get_masked(),bias = self.bias, stride =self.stride, padding = self.padding, groups = self.groups,dilation = self.dilation)
+        return F.conv2d(input,self.get_masked().float(),bias = self.bias, stride =self.stride, padding = self.padding, groups = self.groups,dilation = self.dilation)
 
 class ChannelSwitcher(nn.Module):
     """Switches the first half and second half of channels given an activation of shape (batch, channels, height, width)
