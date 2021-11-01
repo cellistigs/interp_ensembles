@@ -18,6 +18,30 @@ import torch
 import numpy as np
 
 
+def create_subnet_params_output_only(weights,nb_subnets):
+    """Calculate subnet parameters, but make a mask that only cares about output channels. 
+    """
+    ## First check parity: 
+    weightshape = weights.shape
+    assert weightshape[0]%nb_subnets == 0, "Out channel dim must be divisible by nb_subnets"
+    ## Now compute block dimensions:
+    blocks_perside= int(np.sqrt(nb_subnets))  ## assume perfect square 
+    blocklength = int(weightshape[0]/blocks_perside)
+    blockheight = weightshape[1]
+
+    ## Next create masks: 
+    masked_weights = {}
+    for n in range(nb_subnets):
+        ## Declare as boolean tensors: 
+        on_block = np.ones((blocklength,blockheight,weightshape[2],weightshape[3])) 
+        blocks = [np.zeros((blocklength,blockheight,weightshape[2],weightshape[3])) for ni in range(blocks_perside-1)]
+        blocks.insert(n,on_block)
+        reshaped_blocks = np.concatenate([blocks[j] for j in range(blocks_perside)],axis = 0) # should generate rows of ordered blocks
+        full_mask = torch.tensor(reshaped_blocks)
+        masked_weights[n] = {"convweights":weights,"mask":full_mask}
+
+    return masked_weights    
+
 def create_subnet_params(weights,nb_subnets):
     """Calculate parameters for each subnet. Done by chunking the weight matrix along the input and output channel dimensions. 
 
@@ -227,7 +251,20 @@ class Conv2d_subnet_layer_module(nn.Module):
     def forward(self,input):
         return F.conv2d(input,self.mask*self.convlayer.weight)
 
-            
+class ChannelSwitcher(nn.Module):
+    """Switches the first half and second half of channels given an activation of shape (batch, channels, height, width)
+
+    :param channelnb: number of channels total
+    """
+
+    def __init__(self,channelnb):
+        super().__init__()
+        self.width = channelnb
+
+    def forward(self,x):    
+        first_half = x[:,:int(self.width/2),:,:]
+        second_half = x[:,int(self.width/2):,:,:]
+        return torch.cat([second_half,first_half], axis = 1)
 
 
 

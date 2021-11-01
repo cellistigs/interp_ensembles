@@ -6,7 +6,7 @@ from .cifar10_models.densenet import densenet121, densenet161, densenet169
 from .cifar10_models.googlenet import googlenet
 from .cifar10_models.inception import inception_v3
 from .cifar10_models.mobilenetv2 import mobilenet_v2
-from .cifar10_models.resnet import resnet18, resnet34, resnet50
+from .cifar10_models.resnet import resnet18, resnet34, resnet50, wideresnet18, widesubresnet18
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from .schduler import WarmupCosineLR
 
@@ -155,14 +155,18 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
     """Customized module to train a convex combination of a wide model and smaller models. 
 
     """
-    def __init__(self,nb_models,lamb,hparams):
-        self.nb_models = nb_models
+    def __init__(self,lamb,hparams):
+
+        super().__init__(hparams)
+        self.lamb = lamb
         self.hparams = hparams
 
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
 
         #self.interpmodel = # define this##  
+        self.basemodel = wideresnet18()
+        self.submodels = torch.nn.ModuleList([widesubresnet18(self.basemodel,i) for i in range(4)])
      
     def forward(self,batch):
         """This forward function takes a convex combination of the original model and subnet models. 
@@ -172,14 +176,14 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         losses = []
         accs = []
 
-        main_preds = self.interpmodel.base(images)
-        main_loss = self.criterion(predictions,labels)
+        main_preds = self.basemodel(images)
+        main_loss = self.criterion(main_preds,labels)
         losses.append(self.lamb*main_loss)
         accs.append(self.lamb*self.accuracy(main_preds,labels))
 
-        for m in self.interpmodel.subnets:
+        for m in self.submodels:
             subnet_preds = m(predictions)
-            subnet_loss = self.criterion(predictions,labels)
+            subnet_loss = self.criterion(subnet_preds,labels)
             losses.append((1-self.lamb)*(1/self.nb_models)*subnet_loss)
             accs.append((1-self.lamb)*(1/self.nb_models)*self.accuracy(subnet_preds,labels))
         loss = sum(losses)    
