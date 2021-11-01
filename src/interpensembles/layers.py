@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 import numpy as np
-
+use_cuda = torch.cuda.is_available()
 
 def create_subnet_params_output_only(weights,nb_subnets):
     """Calculate subnet parameters, but make a mask that only cares about output channels. 
@@ -213,43 +213,14 @@ class Conv2d_subnet_layer(nn.Conv2d):
         ## create masks: 
         self.weight = conv_weights["convweights"]
         self.mask = conv_weights["mask"]
+        if use_cuda:
+            self.mask.cuda()
     
     def get_masked(self):
         return torch.mul(self.weight,self.mask)
     
     def forward(self,input):
         return F.conv2d(input,self.get_masked(),bias = self.bias, stride =self.stride, padding = self.padding, groups = self.groups,dilation = self.dilation)
-
-class Conv2d_subnet_layer_module(nn.Module):
-    """Conv2d with awareness of sublayers. 
-    OLD implementation that subclasses directly from module. 
-
-    """
-    def __init__(self,convlayer,nb_subnets,subnet_index):
-        super().__init__()
-        self.convlayer = convlayer
-
-        ## create masks: 
-        weightshape = convlayer.weight.shape
-        assert weightshape[0]%nb_subnets == 0, "Out channel dim must be divisible by nb_subnets"
-        assert weightshape[1]%nb_subnets == 0, "In channel dim must be divisible by nb_subnets"
-        ## Now compute block dimensions:
-        blocks_perside= int(np.sqrt(nb_subnets))  ## assume perfect square 
-        blocklength = int(weightshape[0]/blocks_perside)
-        blockheight = int(weightshape[1]/blocks_perside)
-
-        ## Next create masks: 
-        ## Declare as boolean tensors: 
-        on_block = np.ones((blocklength,blockheight,weightshape[2],weightshape[3])) 
-        blocks = [np.zeros((blocklength,blockheight,weightshape[2],weightshape[3])) for ni in range(nb_subnets-1)]
-        blocks.insert(subnet_index,on_block)
-        reshaped_blocks = np.concatenate([np.concatenate([blocks[j+i*blocks_perside] for j in range(blocks_perside)],axis = 1) for i in range(blocks_perside)],axis = 0) # should generate rows of ordered blocks
-        full_mask = torch.tensor(reshaped_blocks)
-        self.mask = full_mask
-        #self.masked = self.mask*self.weight
-    
-    def forward(self,input):
-        return F.conv2d(input,self.mask*self.convlayer.weight)
 
 class ChannelSwitcher(nn.Module):
     """Switches the first half and second half of channels given an activation of shape (batch, channels, height, width)
