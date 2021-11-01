@@ -190,6 +190,7 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         tloss = self.criterion(gmean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
         accuracy = self.accuracy(gmean,labels)
         return tloss,accuracy*100
+
     def training_step(self,batch,batch_nb):
         """This training_step function takes a convex combination of the original model and subnet models. 
 
@@ -211,5 +212,5 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
             accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
         loss = sum(losses)    
         avg_accuracy = sum(accs) 
-        return loss, avg_accuracy*100
+        return loss
 
