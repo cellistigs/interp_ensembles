@@ -212,11 +212,13 @@ class Conv2d_subnet_layer(nn.Conv2d):
 
         ## create masks: 
         self.weight = conv_weights["convweights"]
-        self.mask = conv_weights["mask"]
         if use_cuda:
-            self.mask.cuda()
+            self.mask = conv_weights["mask"].to("cuda:0").float()
+        else:    
+            self.mask = conv_weights["mask"].float()
     
     def get_masked(self):
+        print(self.weight.get_device(),self.mask.get_device(),use_cuda)
         return torch.mul(self.weight,self.mask)
     
     def forward(self,input):
