@@ -7,7 +7,6 @@ from .cifar10_models.googlenet import googlenet
 from .cifar10_models.inception import inception_v3
 from .cifar10_models.mobilenetv2 import mobilenet_v2
 from .cifar10_models.resnet import resnet18, resnet34, resnet50, wideresnet18, widesubresnet18
->>>>>>> ccbb7486ea26bd37598e240448f72e02e5ca4aff
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from .schduler import WarmupCosineLR
 
@@ -182,12 +181,13 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         main_loss = self.criterion(main_preds,labels)
         losses.append(self.lamb*main_loss)
         accs.append(self.lamb*self.accuracy(main_preds,labels))
+        nb_subnets = self.submodels[0].nb_subnets
 
         for m in self.submodels:
             subnet_preds = m(images)
             subnet_loss = self.criterion(subnet_preds,labels)
-            losses.append((1-self.lamb)*(1/self.nb_models)*subnet_loss)
-            accs.append((1-self.lamb)*(1/self.nb_models)*self.accuracy(subnet_preds,labels))
+            losses.append((1-self.lamb)*(1/)*subnet_loss)
+            accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
         loss = sum(losses)    
         avg_accuracy = sum(accs) 
         return loss, avg_accuracy*100
