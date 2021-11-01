@@ -5,6 +5,7 @@ import os
 
 __all__ = [
     "ResNet",
+    "wideresnet18"
     "resnet18",
     "resnet34",
     "resnet50",
