@@ -214,3 +214,20 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         avg_accuracy = sum(accs) 
         return loss
 
+    def configure_optimizers(self):
+        optimizer = torch.optim.SGD(
+            list(self.submodels.parameters())+list(self.basemodel.parameters()),
+            lr=self.hparams.learning_rate,
+            weight_decay=self.hparams.weight_decay,
+            momentum=0.9,
+            nesterov=True,
+        )
+        total_steps = self.hparams.max_epochs * len(self.train_dataloader())
+        scheduler = {
+            "scheduler": WarmupCosineLR(
+                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
+            ),
+            "interval": "step",
+            "name": "learning_rate",
+        }
+        return [optimizer], [scheduler]
