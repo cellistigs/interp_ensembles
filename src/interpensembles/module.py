@@ -186,9 +186,12 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         ## todo: should we add the main model predictions too?
 
         gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
+        bigpred = self.basemodel(images)
+        bignormed = softmax(bigpred)
+        grand_mean = torch.mean(torch.stack([self.lamb*bignormed,(1-self.lamb)*gmean]),dim = 0)
         ## we can pass this  through directly to the accuracy function. 
-        tloss = self.criterion(gmean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
-        accuracy = self.accuracy(gmean,labels)
+        tloss = self.criterion(grand_mean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
+        accuracy = self.accuracy(grand_mean,labels)
         return tloss,accuracy*100
 
     def training_step(self,batch,batch_nb):
@@ -203,13 +206,13 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         main_loss = self.criterion(main_preds,labels)
         losses.append(self.lamb*main_loss)
         accs.append(self.lamb*self.accuracy(main_preds,labels))
-        #nb_subnets = self.submodels[0].nb_subnets
+        nb_subnets = self.submodels[0].nb_subnets
 
-        #for m in self.submodels:
-        #    subnet_preds = m(images)
-        #    subnet_loss = self.criterion(subnet_preds,labels)
-        #    losses.append((1-self.lamb)*(1/nb_subnets)*subnet_loss)
-        #    accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
+        for m in self.submodels:
+            subnet_preds = m(images)
+            subnet_loss = self.criterion(subnet_preds,labels)
+            losses.append((1-self.lamb)*(1/nb_subnets)*subnet_loss)
+            accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
         loss = sum(losses)    
         avg_accuracy = sum(accs) 
         return loss
