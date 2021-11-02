@@ -203,13 +203,13 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         main_loss = self.criterion(main_preds,labels)
         losses.append(self.lamb*main_loss)
         accs.append(self.lamb*self.accuracy(main_preds,labels))
-        nb_subnets = self.submodels[0].nb_subnets
+        #nb_subnets = self.submodels[0].nb_subnets
 
-        for m in self.submodels:
-            subnet_preds = m(images)
-            subnet_loss = self.criterion(subnet_preds,labels)
-            losses.append((1-self.lamb)*(1/nb_subnets)*subnet_loss)
-            accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
+        #for m in self.submodels:
+        #    subnet_preds = m(images)
+        #    subnet_loss = self.criterion(subnet_preds,labels)
+        #    losses.append((1-self.lamb)*(1/nb_subnets)*subnet_loss)
+        #    accs.append((1-self.lamb)*(1/nb_subnets)*self.accuracy(subnet_preds,labels))
         loss = sum(losses)    
         avg_accuracy = sum(accs) 
         return loss
