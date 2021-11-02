@@ -13,6 +13,7 @@ Of these different kinds of layers, we need to change the ones which perform ope
 
 """
 import torch.nn as nn
+import pytorch_lightning as pl
 import torch.nn.functional as F
 import torch
 import numpy as np
@@ -212,11 +213,7 @@ class Conv2d_subnet_layer(nn.Conv2d):
 
         ## create masks: 
         self.weight = conv_weights["convweights"]
-        if use_cuda:
-            device_int = self.weight.device
-            self.mask = conv_weights["mask"].to("cuda:{}".format(device_int)).float()
-        else:    
-            self.mask = conv_weights["mask"].float()
+        self.register_buffer("mask",conv_weights["mask"].type_as(self.weight))
     
     def get_masked(self):
         return torch.mul(self.weight,self.mask)
