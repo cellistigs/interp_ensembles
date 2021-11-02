@@ -1,4 +1,6 @@
 import os
+import datetime
+import json
 from argparse import ArgumentParser
 
 import torch
@@ -7,7 +9,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 from interpensembles.data import CIFAR10Data,CIFAR10_1Data
-from interpensembles.module import CIFAR10InterEnsembleModule
+from interpensembles.module import CIFAR10Module
 
 
 def main(args):
@@ -16,7 +18,7 @@ def main(args):
         CIFAR10Data.download_weights()
     else:
         seed_everything(0)
-        #os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
+        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
         if args.logger == "wandb":
             logger = WandbLogger(name=args.classifier, project="cifar10")
@@ -37,15 +39,10 @@ def main(args):
             precision=args.precision,
         )
 
-        model = CIFAR10InterEnsembleModule(args.lamb,args)
-        print("Lambda: {}".format(str(args.lamb)))
-        if args.test_phase:
-            if args.test_set == "CIFAR10":
-                data = CIFAR10Data(args)
-            elif args.test_set == "CIFAR10_1":
-                data = CIFAR10_1Data(args)
-        else:        
-            data = CIFAR10Data(args)
+        #model = CIFAR10Module(args)
+        model = CIFAR10Module.load_from_checkpoint(checkpoint_path=args.checkpoint)
+        cifar10data = CIFAR10Data(args)
+        cifar10_1data = CIFAR10_1Data(args)
 
 
         if bool(args.pretrained):
@@ -54,18 +51,18 @@ def main(args):
             )
             model.model.load_state_dict(torch.load(state_dict))
 
-        if bool(args.test_phase):
-            trainer.test(model, data.test_dataloader())
-        else:
-            trainer.fit(model, data)
-            trainer.test()
+        data = {"in_dist_acc":None,"out_dist_acc":None}
+        data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
+        data["out_dist_acc"] = trainer.test(model, cifar10_1data.test_dataloader())[0]["acc/test"]
+        with open("robust_results{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S")),"w") as f:
+            json.dump(data,f)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
+    parser.add_argument("--data_dir", type=str, default="/home/ubuntu/cifar10")
     parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
@@ -74,6 +71,7 @@ if __name__ == "__main__":
     )
 
     # TRAINER args
+    parser.add_argument("--checkpoint", type = str)
     parser.add_argument("--classifier", type=str, default="resnet18")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
 
@@ -86,8 +84,6 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
     parser.add_argument("--test_set",type = str,default = "CIFAR10",choices = ["CIFAR10","CIFAR10_1"])
-    parser.add_argument("--size_ensemble",type=int, default = 4)
-    parser.add_argument("--lamb",type=float, default = 0.5)
 
     args = parser.parse_args()
     main(args)
