@@ -37,7 +37,8 @@ def main(args):
             precision=args.precision,
         )
 
-        model = CIFAR10InterEnsembleModule(0,args)
+        model = CIFAR10InterEnsembleModule(args.lamb,args)
+        print("Lambda: {}".format(str(args.lamb)))
         if args.test_phase:
             if args.test_set == "CIFAR10":
                 data = CIFAR10Data(args)
@@ -86,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--weight_decay", type=float, default=1e-2)
     parser.add_argument("--test_set",type = str,default = "CIFAR10",choices = ["CIFAR10","CIFAR10_1"])
     parser.add_argument("--size_ensemble",type=int, default = 4)
+    parser.add_argument("--lamb",type=int, default = 0.5)
 
     args = parser.parse_args()
     main(args)
