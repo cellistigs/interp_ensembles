@@ -128,7 +128,7 @@ class CIFAR10EnsembleModule(CIFAR10Module):
             accuracy = self.accuracy(predictions,labels)
             losses.append(mloss)
             accs.append(accuracy) 
-        loss = sum(losses)/self.nb_models ## calculate the average with pure python functions.    
+        loss = sum(losses) ## calculate the average with pure python functions.    
         avg_accuracy = sum(accs)/self.nb_models
 
         self.log("loss/train", loss)
