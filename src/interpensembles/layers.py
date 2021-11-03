@@ -236,8 +236,6 @@ class ChannelSwitcher(nn.Module):
         second_half = x[:,int(self.width/2):,:,:]
         return torch.cat([second_half,first_half], axis = 1)
 
-
-
 class Interp_BatchNorm2d(nn.BatchNorm2d):
     """This special batchnorm layer swaps in different batch norm parameters if we use a subnet.   
 
@@ -248,3 +246,39 @@ class Interp_Linear(nn.Linear):
     """This special linear layer users different weights when we use a subnet, because we separate mappings to the output layer.  
 
     """
+
+class LogSoftmaxGroupLinear(nn.Linear):    
+    """This layer partitions the input features into separate groups that each project to all output channels. Before aggregating them as would be done in a normal matrix multiplication, this channel applies a logsoftmax transformation, and then takes an expectation.    
+    """
+    def __init__(self,in_features, out_features, groups, **kwargs):
+        """This layer takes in all the normal arguments that nn.Linear takes, in addition to a "groups" argument that will split the input into `groups`. 
+
+        :param in_features: number of input features. Must be divisible by group. 
+        :param out_features: number of output features. 
+        :param groups: number of groups to divide into. Must divide in_features. 
+        :param bias = True:
+        :param device = None:
+        :param dtype = None:
+        """
+        super().__init__(in_features,out_features,**kwargs)
+        self.groups = groups
+        assert in_features%self.groups == 0; "In features should be divisible by groups."
+        self.lsm = torch.nn.LogSoftmax(dim = -1)
+
+    def forward(self,x):    
+        """   
+
+        """
+        x_chunked = torch.split(x,self.groups,-1) ## shape [(batch,groupsize)]
+        weight_chunked = torch.split(self.weight,self.groups,1) ## shape [(output,input)]
+
+        actives = []
+        for x_g,weight_g in zip(x_chunked,weight_chunked):
+            actives.append(self.lsm(F.linear(x_g,weight_g))) ## actives is a list of activations, each with size (batch,*,output)
+        mean_active = sum(actives)/len(actives)    
+        return mean_active
+
+
+
+
+

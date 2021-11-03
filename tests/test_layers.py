@@ -1,4 +1,6 @@
-from interpensembles.layers import Interp_Conv2d_factory
+from interpensembles.layers import Interp_Conv2d_factory,ChannelSwitcher,LogSoftmaxGroupLinear
+import pytest
+from scipy.special import softmax
 import torch
 import numpy as np
 
@@ -168,6 +170,40 @@ class Test_Interp_Conv2d_factory():
             ## The biases should be different from the base network's biases. 
             assert torch.any(convfactory.subnets[i].bias != convfactory.base_convnet.bias)
 
+class Test_ChannelSwitcher():
+    def test_init(self):
+        cs = ChannelSwitcher(10)
+    def test_forward(self):    
+        cs = ChannelSwitcher(10)
+        dummy = torch.tensor(np.ones((1,10,32,32)))
+        out = cs(dummy)
+        assert torch.all(dummy[:,:5,:,:] == out[:,5:,:,:])
+        assert torch.all(dummy[:,5:,:,:] == out[:,:5,:,:])
 
+    def test_params(self):
+        cs = ChannelSwitcher(10)
+        params = [p for p in cs.parameters()]
+        assert params == []
 
+class Test_GroupLinear():
+    def test_init(self):
+        gl = LogSoftmaxGroupLinear(4,10,2)
+        with pytest.raises(AssertionError):
+            gl = LogSoftmaxGroupLinear(4,10,3)
+    def test_forward(self):
+        gl = LogSoftmaxGroupLinear(4,10,2)
+        dummy_inputs = torch.tensor(np.ones((1,4))).float()
+        torch.nn.init.constant_(gl.weight, 1)
+        torch.nn.init.constant_(gl.bias, 1)
+        assert np.allclose(gl(dummy_inputs).detach().numpy(), np.log(softmax(4*np.ones((1,10))))) # == a vector of length 5 of logsoftmax(5*I)
+
+        dummy_inputs = torch.tensor(np.array([[1,1,1,1,],[1,1,1,1]])).float()
+        assert np.allclose(gl(dummy_inputs).detach().numpy(),np.log(softmax(3*np.ones((1,10)))))# == a vector of length 5 of logsoftmax(5*I)
+
+        gl.weight.data = torch.tensor(np.concatenate([np.zeros((5,4)),np.concatenate([np.ones((5,2)),np.ones((5,1)),np.zeros((5,1))],axis = 1)],axis = 0)).float()
+        base = np.concatenate((np.zeros((2,5)),np.ones((2,5))),axis = 1)
+        ## expected calculates within batch, across group. Make sure we apply softmax only per group, and then take the mean! 
+        expected = np.mean(np.stack([np.log(softmax(2*base,axis=-1)),np.log(softmax(base,axis=-1))],axis=0),axis=0)
+
+        assert np.allclose(gl(dummy_inputs).detach().numpy(),expected) # == a vector of length 5 of logsoftmax(5*I)
 
