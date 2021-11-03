@@ -87,7 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("--weight_decay", type=float, default=1e-2)
     parser.add_argument("--test_set",type = str,default = "CIFAR10",choices = ["CIFAR10","CIFAR10_1"])
     parser.add_argument("--size_ensemble",type=int, default = 4)
-    parser.add_argument("--lamb",type=int, default = 0.5)
+    parser.add_argument("--lamb",type=float, default = 0.5)
 
     args = parser.parse_args()
     main(args)

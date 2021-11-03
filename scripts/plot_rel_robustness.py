@@ -1,4 +1,6 @@
 import os
+import datetime
+import json
 from argparse import ArgumentParser
 
 import torch
@@ -37,14 +39,10 @@ def main(args):
             precision=args.precision,
         )
 
-        model = CIFAR10Module(args)
-        if args.test_phase:
-            if args.test_set == "CIFAR10":
-                data = CIFAR10Data(args)
-            elif args.test_set == "CIFAR10_1":
-                data = CIFAR10_1Data(args)
-        else:        
-            data = CIFAR10Data(args)
+        #model = CIFAR10Module(args)
+        model = CIFAR10Module.load_from_checkpoint(checkpoint_path=args.checkpoint)
+        cifar10data = CIFAR10Data(args)
+        cifar10_1data = CIFAR10_1Data(args)
 
 
         if bool(args.pretrained):
@@ -53,18 +51,18 @@ def main(args):
             )
             model.model.load_state_dict(torch.load(state_dict))
 
-        if bool(args.test_phase):
-            trainer.test(model, data.test_dataloader())
-        else:
-            trainer.fit(model, data)
-            trainer.test()
+        data = {"in_dist_acc":None,"out_dist_acc":None}
+        data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
+        data["out_dist_acc"] = trainer.test(model, cifar10_1data.test_dataloader())[0]["acc/test"]
+        with open("robust_results{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S")),"w") as f:
+            json.dump(data,f)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
+    parser.add_argument("--data_dir", type=str, default="/home/ubuntu/cifar10")
     parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
@@ -73,6 +71,7 @@ if __name__ == "__main__":
     )
 
     # TRAINER args
+    parser.add_argument("--checkpoint", type = str)
     parser.add_argument("--classifier", type=str, default="resnet18")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
 

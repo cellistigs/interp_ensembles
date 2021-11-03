@@ -6,6 +6,7 @@ import os
 __all__ = [
     "ResNet",
     "wideresnet18"
+    "wideresnet18_4"
     "resnet18",
     "resnet34",
     "resnet50",
@@ -783,6 +784,16 @@ def widesubresnet18(baseresnet, index, pretrained=False, progress=True, device="
 
     return _widesubresnet(
         "wideresnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, k = 2, baseresnet = baseresnet, indices = indices[index], **kwargs
+    )
+
+def wideresnet18_4(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a wide (4x) ResNet-18 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "wideresnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, k = 4, **kwargs
     )
 
 def wideresnet18(pretrained=False, progress=True, device="cpu", **kwargs):
