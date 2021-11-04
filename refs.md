@@ -14,8 +14,9 @@
 
 ### Refs from Andreassen et al. 2021
 
+- H. Mania and S. Sra 2020; "Why do classifier accuracies show linear trends under distribution shift?" arxiv 2020: Theoretical analysis of distribution shift. Important for framework understanding of model similarity the authors propose two metrics- one of dataset similarity, and one of dominance probability (probability that a worse model gets samples right that a better model fails on). From this perspective, it's not at all surprising that ensembles do better. 
+- 
 - TOREAD H. Mania et al. 2019; "Model similarity mitigates test set overuse" arxiv 2019: empirical investigation of linear trend. 
-- TOREAD **H. Mania and S. Sra 2020; "Why do classifier accuracies show linear trends under distribution shift?" arxiv 2020: Theoretical analysis of distribution shift. Important for framework understanding of model similarity- could be useful for ensembles** 
 - TOREAD **Taori et al. 2020; "When robustness doesn't promote robustness: Synthetic vs. Natural distribution shifts on imagenet" 2020: def of effective robustness- evaluation of 204 imagenet models for effective robustness. Important bc it analyzes a great number of models.** It doesn't look like this includes pretrained models or ensembles. 
 - TOREAD Radford et al. 30; Learning transferable visual models from natural language supervision. arxiv 2021: Introduction and analysis of CLIP models. CLIP effective ER during fine tuning. 
 - TOREAD Kolesnikov et al. 2020- Big transfer (bit): General visual representation learning, 2020: the BiT model is a generic benchmark we should study too.  

@@ -69,3 +69,37 @@ Today we also added 5 additional resnet 18s, Geoff's wide resnets, and started t
 --------
 
 Go back to Mania and Sur 2021. These ensembling results are predicted by this paper, no?
+- in some ways, yes. Think about the perspective of dominance probability- this is exactly the idea of "reliability" that John said ensembles are designed to address. 
+
+11/03/21  
+--------
+## Interpolation Model Progress
+Some time has passed since the last update. Since then, we figured out the interensembles model architecture- we learned how to use either getattr/setattr or direct assignment to share weights between different models, as well as the nn.Module class- you used this to implement a `ChannelSwitcher` module that has no trainable parameters and simply switches the first half and second half of the activations in the channel dimension (necessary for identity blocks).  
+
+Training this model is slow- in the future, it might be better to instantiate from individual subresnets, and then construct a wide model by summing together the activations of the subnetworks per layer. The difference is that right now, you have a lot of dimensions zeroed out, which look like they are effectively making it so that you train a model 5x bigger than the big model. 
+
+For now, it will also be useful to implement stochastic training- flip a coin and choose either the big model or the ensemble to train. This is more efficient if we can choose where to propagate gradients, and reduces the risk of seeing weird things due to optimization dynamics. 
+
+## "Mean Field" optimization. 
+
+On 11/02 Geoff suggested a different way to address the question of how ensembles and large networks might differ- in the costs that they are being trained with. We can see the cost used to train an ensemble of neural networks as an effective "mean field" approximation to the cost of training a large network- we are training on the average loss of all of the networks, instead of training on the big network loss. One interesting thing to inspect is if this is the source of ensemble performance- is it the case that ensembles do better because they have a different loss? One way to test this is to apply the "ensemble loss" to a big network and see how it does. At the very least this seems to train very well. Take a look at old papers like [this](http://www.cs.columbia.edu/~blei/fogm/2018F/materials/SaulJaakkolaJordan1996.pdf) and see if there's a connection to the work you're doing here. 
+
+## Ensemble training. 
+
+One thing to be careful of- when taking the average, we need to be very careful of the model learning rate. We were before leaving the learning rate unchanged, but this means that each model has an effective learning rate that is divided by 4. We can change this learning rate, but we have to be careful because we have warmup and cosine annealing on- these schedulers have fixed hyperparameters that will lead to nonlinear changes in the learning rate schedule when paired with a scalar increase in the base learning rate. 
+
+We see in training an ensemble of WideResNet 2x that training on the sum of losses, as opposed to the average, seems to lead to comparable training accuracy during training, and better validation accuracy. The curves look like this:   
+
+.. image:: images/acc_train_ensembles.png
+   :width: 800
+
+This is during training. The orange curve is the training accuracy of a single wideresnet 2x model. The dark blue is the training accuracy of an ensemble of 4 wideresnet 2x models using the average loss and default hyperparameters. The light blue curve is the training accuracy (so far) of an ensemble of 4 wideresnet 2x models using the summed loss and default hyperparameters. See below for the corresponding validation: 
+
+.. image:: images/acc_val_ensembles.png
+   :width: 800
+
+We can see that training accuracy of the light blue matches that of the single model, and that the validation accuracy is consistently better. Note also, of interest is the fact that when you train with the average loss (effective 4x lower learning rate), the ensemble first does worse, then better, and then converges to basically the same solution as a single network. This is something we saw on a different occasion when we accidentally shared weights between different ensemble members as well- first they underperform, then they outperform on validation accuracy, and eventually they end up looking the same. This is pretty strange- what do we know about the effect of training a model with 4x as many parameters with 1/4th the learning rate?  
+
+One clear implication this has is that our interpensembles are being trained weird. Their learning rates need to be altered somehow, but we should be careful about how. 
+
+
