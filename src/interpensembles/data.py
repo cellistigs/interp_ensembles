@@ -98,11 +98,12 @@ class CIFAR10_1(torchvision.datasets.vision.VisionDataset):
 
 
 class CIFAR10_1Data(pl.LightningDataModule):
-    def __init__(self,args):
+    def __init__(self,args,version = "v6"):
         super().__init__()
         self.hparams = args ## check these. 
         self.mean = (0.4914, 0.4822, 0.4465)
         self.std = (0.2471, 0.2435, 0.2616)
+        self.version = version
 
     def train_dataloader(self):
         raise NotImplementedError
@@ -114,7 +115,7 @@ class CIFAR10_1Data(pl.LightningDataModule):
                 T.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR10_1(root_dir=self.hparams.data_dir, train=False, transform=transform)
+        dataset = CIFAR10_1(root_dir=self.hparams.data_dir, train=False, transform=transform,version = self.version)
         dataloader = DataLoader(
             dataset,
             batch_size=self.hparams.batch_size,
