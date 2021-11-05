@@ -281,11 +281,21 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
             nesterov=True,
         )
         total_steps = self.hparams.max_epochs * len(self.train_dataloader())
-        scheduler = {
-            "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=0, max_epochs=total_steps
-            ),
-            "interval": "step",
-            "name": "learning_rate",
-        }
+        if self.hparams.scheduler in [None,"cosine"]: 
+            scheduler = {
+                "scheduler": WarmupCosineLR(
+                    optimizer, warmup_epochs=0, max_epochs=total_steps
+                ),
+                "interval": "step",
+                "name": "learning_rate",
+            }
+        elif self.hparams.scheduler == "step":    
+            scheduler = {
+                "scheduler": torch.optim.lr_scheduler.MultiStepLR(
+                    optimizer, milestones = [60,120,160], gamma = 0.2, max_epochs=total_steps
+                ),
+                "interval": "epoch",
+                "frequency":1,
+                "name": "learning_rate",
+            }
         return [optimizer], [scheduler]
