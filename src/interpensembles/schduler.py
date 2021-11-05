@@ -52,7 +52,7 @@ class WarmupCosineLR(_LRScheduler):
         warmup_epochs: int,
         max_epochs: int,
         warmup_start_lr: float = 1e-8,
-        eta_min: float = 1e-8,
+        eta_min: float = 0,
         last_epoch: int = -1,
     ) -> None:
 

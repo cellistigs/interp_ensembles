@@ -182,7 +182,7 @@ class CIFAR10EnsembleModule(CIFAR10Module):
             accuracy = self.accuracy(predictions,labels)
             losses.append(mloss)
             accs.append(accuracy) 
-        loss = sum(losses) ## calculate the average with pure python functions.    
+        loss = sum(losses) ## calculate the sum with pure python functions.    
         avg_accuracy = sum(accs)/self.nb_models
 
         self.log("loss/train", loss)
@@ -283,7 +283,7 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
         total_steps = self.hparams.max_epochs * len(self.train_dataloader())
         scheduler = {
             "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
+                optimizer, warmup_epochs=0, max_epochs=total_steps
             ),
             "interval": "step",
             "name": "learning_rate",
