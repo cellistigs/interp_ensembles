@@ -11,6 +11,7 @@
     - Just finetuning the last layers/using a memory buffer to maintain performance on old data doesnt work. You can use the same feature extractors, or preserve performance on an OOD dataset that's further away and still do bad in terms of ER. 
         - How about distillation using the softmax probabilities from your original training set?  
     - This gives us a great evaluation protocol.
+- Miller et al. 2021: "Accuracy on the Line: On the Strong Correlation Between Out-of-Distribution and In-Distribution Generalization (https://arxiv.org/pdf/2107.04649.pdf)
 
 ### Refs from Andreassen et al. 2021
 
@@ -24,6 +25,10 @@
 ## When do ensembles do "better" than single large models? 
 
 - Kondratyuk et al. 2020; "When Ensembling Smaller Models is More Efficient than Single Large Models", arxiv 2020. Demonstration of the fact that in Imagenet and Cifar-10, you can perform better with an ensemble of smaller models with fewer flops than a larger model with more flops. The best thing to do seems to be to take N of the same network and ensemble those, at least for classification on benchmark datasets. 
+
+## Model Calibration: Single Models vs. Ensembles
+
+- Minderer et al. 2021: "" TODO add notes. 
 
 ## Training ensembles/Ensemble and single model hybrids 
 
