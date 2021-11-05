@@ -47,10 +47,14 @@
 
 ## UQ and ensembles
 
-- TOREAD Ovadia et al., 2019; "Can You Trust Your Model's Uncertainty?"
+- Ovadia et al., 2019; "Can You Trust Your Model's Uncertainty?"
   - Ensembles obtain the best accuracy and calibration on corrupted datasets (CIFAR10-C)
   - Ensembles work best for tasks like selective classification (e.g. measuring accuracy if we restrict the model to only make predictions when p(y|x) > threshold)
 - TOREAD Minderer et al., 2021; "Revisiting the Calibration of Modern Neural Networks"
+
+## Ensembles and diversity
+
+- TOREAD Fort et al., 2019; "Deep Ensembles: A Loss Landscape Perspective"
 
 ## When do ensembles do "better" than single large models? 
 
