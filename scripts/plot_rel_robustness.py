@@ -118,6 +118,8 @@ if __name__ == "__main__":
 
     # TRAINER args
     parser.add_argument("--checkpoint", type = str)
+    parser.add_argument("--module", type = str,default = "base",choices = ["base","ensemble","interpensemble"])
+    parser.add_argument("--version",type = str,default = "v4",choices = ["v4","v6"])
     parser.add_argument("--classifier", type=str, default="resnet18")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
 
@@ -130,6 +132,8 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
     parser.add_argument("--test_set",type = str,default = "CIFAR10",choices = ["CIFAR10","CIFAR10_1"])
+    parser.add_argument("--nb_models",type = int,default = 4)
+    parser.add_argument("--lamb",type = float,default = 0.5)
 
     args = parser.parse_args()
     main(args)
