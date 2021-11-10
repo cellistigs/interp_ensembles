@@ -29,13 +29,48 @@ all_classifiers = {
     "inception_v3": inception_v3,
 }
 
-class CIFAR10LinearGroupModule(pl.LightningModule):
+
+class CIFAR10_Models(pl.LightningModule):
+    """Abstract base class for CIFAR10 Models
+
+    """
+    def __init__(self,hparams):
+        super().__init__()
+        self.hparams = hparams
+    def forward(x):    
+        raise NotImplementedError
+    def training_step():
+        raise NotImplementedError
+
+    def setup_scheduler(self,optimizer,total_steps):
+        """Chooses between the cosine learning rate scheduler that came with the repo, or step scheduler based on wideresnet training. 
+
+        """
+        if self.hparams.scheduler in [None,"cosine"]: 
+            scheduler = {
+                "scheduler": WarmupCosineLR(
+                    optimizer, warmup_epochs=0, max_epochs=total_steps
+                ),
+                "interval": "step",
+                "name": "learning_rate",
+            }
+        elif self.hparams.scheduler == "step":    
+            scheduler = {
+                "scheduler": torch.optim.lr_scheduler.MultiStepLR(
+                    optimizer, milestones = [60,120,160], gamma = 0.2, last_epoch=-1
+                ),
+                "interval": "epoch",
+                "frequency":1,
+                "name": "learning_rate",
+                }
+        return scheduler    
+
+class CIFAR10LinearGroupModule(CIFAR10_Models):
     """Replaces the final layer with a LogSoftmaxGroupLinear layer, and correspondingly changes the loss. . 
 
     """
     def __init__(self, hparams):
-        super().__init__()
-        self.hparams = hparams
+        super().__init__(hparams)
 
         self.criterion = torch.nn.NLLLoss()
         self.accuracy = Accuracy()
@@ -74,19 +109,14 @@ class CIFAR10LinearGroupModule(pl.LightningModule):
             nesterov=True,
         )
         total_steps = self.hparams.max_epochs * len(self.train_dataloader())
-        scheduler = {
-            "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
-            ),
-            "interval": "step",
-            "name": "learning_rate",
-        }
+        scheduler = self.setup_scheduler(optimizer,total_steps)
         return [optimizer], [scheduler]
 
-class CIFAR10Module(pl.LightningModule):
+class CIFAR10Module(CIFAR10_Models):
     def __init__(self, hparams):
-        super().__init__()
-        self.hparams = hparams
+        super().__init__(hparams)
+        print(hparams)
+        print(self.hparams)
 
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
@@ -124,23 +154,16 @@ class CIFAR10Module(pl.LightningModule):
             nesterov=True,
         )
         total_steps = self.hparams.max_epochs * len(self.train_dataloader())
-        scheduler = {
-            "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
-            ),
-            "interval": "step",
-            "name": "learning_rate",
-        }
+        scheduler = self.setup_scheduler(optimizer,total_steps)
         return [optimizer], [scheduler]
 
-class CIFAR10EnsembleModule(CIFAR10Module):   
+class CIFAR10EnsembleModule(CIFAR10_Models):   
     """Customized module to train an ensemble of models independently.  
 
     """
     def __init__(self,nb_models,hparams):
         super().__init__(hparams)
         self.nb_models = nb_models
-        self.hparams = hparams
 
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
@@ -182,7 +205,7 @@ class CIFAR10EnsembleModule(CIFAR10Module):
             accuracy = self.accuracy(predictions,labels)
             losses.append(mloss)
             accs.append(accuracy) 
-        loss = sum(losses) ## calculate the average with pure python functions.    
+        loss = sum(losses) ## calculate the sum with pure python functions.    
         avg_accuracy = sum(accs)/self.nb_models
 
         self.log("loss/train", loss)
@@ -198,16 +221,10 @@ class CIFAR10EnsembleModule(CIFAR10Module):
             nesterov=True,
         )
         total_steps = self.hparams.max_epochs * len(self.train_dataloader())
-        scheduler = {
-            "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
-            ),
-            "interval": "step",
-            "name": "learning_rate",
-        }
+        scheduler = self.setup_scheduler(optimizer,total_steps)
         return [optimizer], [scheduler]
 
-class CIFAR10InterEnsembleModule(CIFAR10Module):
+class CIFAR10InterEnsembleModule(CIFAR10_Models):
     """Customized module to train a convex combination of a wide model and smaller models. 
 
     """
@@ -281,11 +298,6 @@ class CIFAR10InterEnsembleModule(CIFAR10Module):
             nesterov=True,
         )
         total_steps = self.hparams.max_epochs * len(self.train_dataloader())
-        scheduler = {
-            "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
-            ),
-            "interval": "step",
-            "name": "learning_rate",
-        }
+        scheduler = self.setup_scheduler(optimizer,total_steps)
         return [optimizer], [scheduler]
+
