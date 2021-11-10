@@ -46,6 +46,16 @@ class CIFAR10_Models(pl.LightningModule):
         """Calculates binned calibration metrics given 
 
         """
+
+    def validation_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/val", loss)
+        self.log("acc/val", accuracy)
+
+    def test_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("acc/test", accuracy)
+
     def setup_scheduler(self,optimizer,total_steps):
         """Chooses between the cosine learning rate scheduler that came with the repo, or step scheduler based on wideresnet training. 
 
