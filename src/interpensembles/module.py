@@ -42,6 +42,10 @@ class CIFAR10_Models(pl.LightningModule):
     def training_step():
         raise NotImplementedError
 
+    def calibration():
+        """Calculates binned calibration metrics given 
+
+        """
     def setup_scheduler(self,optimizer,total_steps):
         """Chooses between the cosine learning rate scheduler that came with the repo, or step scheduler based on wideresnet training. 
 
@@ -74,7 +78,6 @@ class CIFAR10LinearGroupModule(CIFAR10_Models):
 
         self.criterion = torch.nn.NLLLoss()
         self.accuracy = Accuracy()
-
         assert self.hparams.classifier.endswith("grouplinear"), "will give strange results for those that don't have softmax grouplinear output"
         self.model = all_classifiers[self.hparams.classifier]()
 
@@ -84,6 +87,11 @@ class CIFAR10LinearGroupModule(CIFAR10_Models):
         loss = self.criterion(predictions, labels)
         accuracy = self.accuracy(predictions, labels)
         return loss, accuracy * 100
+
+    def calibration(self, batch):
+        images, labels = batch
+        predictions = self.model(images)
+        return predictions, labels
 
     def training_step(self, batch, batch_nb):
         loss, accuracy = self.forward(batch)
@@ -130,6 +138,18 @@ class CIFAR10Module(CIFAR10_Models):
         accuracy = self.accuracy(predictions, labels)
         return loss, accuracy * 100
 
+    def calibration(self,batch,use_softmax = True):
+        """Like forward, but just exit with the softmax predictions and labels. . 
+        """
+        softmax = torch.nn.Softmax(dim = 1)
+        images, labels = batch
+        predictions = self.model(images)
+        if use_softmax:
+            smpredictions = softmax(predictions)
+        else:    
+            smpredictions = predictions
+        return smpredictions,labels
+
     def training_step(self, batch, batch_nb):
         loss, accuracy = self.forward(batch)
         self.log("loss/train", loss)
@@ -169,7 +189,7 @@ class CIFAR10EnsembleModule(CIFAR10_Models):
         self.accuracy = Accuracy()
 
         self.models = torch.nn.ModuleList([all_classifiers[self.hparams.classifier]() for i in range(nb_models)]) ## now we add several different instances of the model. 
-        del self.model
+        #del self.model
     
     def forward(self,batch):
         """for forward, we want to take the softmax, aggregate the ensemble output, and then take the logit.  
@@ -191,6 +211,21 @@ class CIFAR10EnsembleModule(CIFAR10_Models):
         accuracy = self.accuracy(gmean,labels)
         return tloss,accuracy*100
 
+    def calibration(self,batch):
+        """Like forward, but just exit with the predictions and labels. . 
+        """
+        images, labels = batch
+        softmax = torch.nn.Softmax(dim = 1)
+
+        losses = []
+        accs = []
+        softmaxes = []
+        for m in self.models:
+            predictions = m(images)
+            normed = softmax(predictions)
+            softmaxes.append(normed)
+        gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
+        return gmean,labels
 
     def training_step(self, batch, batch_nb):
         """When we train, we want to train independently. 
@@ -265,6 +300,27 @@ class CIFAR10InterEnsembleModule(CIFAR10_Models):
         tloss = self.criterion(grand_mean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
         accuracy = self.accuracy(grand_mean,labels)
         return tloss,accuracy*100
+
+    def calibration(self,batch):
+        """Like forward, but just exit with the predictions and labels. . 
+        """
+        images, labels = batch
+        softmax = torch.nn.Softmax(dim = 1)
+
+        losses = []
+        accs = []
+        softmaxes = []
+        for m in self.submodels:
+            predictions = m(images)
+            normed = softmax(predictions)
+            softmaxes.append(normed)
+        ## todo: should we add the main model predictions too?
+
+        gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
+        bigpred = self.basemodel(images)
+        bignormed = softmax(bigpred)
+        grand_mean = torch.mean(torch.stack([self.lamb*bignormed,(1-self.lamb)*gmean]),dim = 0)
+        return grand_mean,labels
 
     def training_step(self,batch,batch_nb):
         """This training_step function takes a convex combination of the original model and subnet models. 
