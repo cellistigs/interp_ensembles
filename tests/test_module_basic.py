@@ -4,7 +4,7 @@ from torchviz import make_dot, make_dot_from_trace
 import torch
 import numpy as np
 
-def test_resnet():
+def test_resnet_graph():
     
     model = resnets.resnet18().double()
     dummy_input = torch.tensor(np.random.randn(1,3,32,32))
