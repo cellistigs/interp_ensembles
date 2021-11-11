@@ -283,6 +283,7 @@ class CIFAR10InterEnsembleModule(CIFAR10_Models):
         self.accuracy = Accuracy()
 
         #self.interpmodel = # define this##  
+        self.model = all_classifiers[self.hparams.classifier]()
         self.basemodel = wideresnet18()
         self.submodels = torch.nn.ModuleList([widesubresnet18(self.basemodel,i) for i in range(4)])
      
@@ -305,7 +306,7 @@ class CIFAR10InterEnsembleModule(CIFAR10_Models):
         gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
         bigpred = self.basemodel(images)
         bignormed = softmax(bigpred)
-        grand_mean = torch.mean(torch.stack([self.lamb*bignormed,(1-self.lamb)*gmean]),dim = 0)
+        grand_mean = torch.sum(torch.stack([self.lamb*bignormed,(1-self.lamb)*gmean]),dim = 0)
         ## we can pass this  through directly to the accuracy function. 
         tloss = self.criterion(grand_mean,labels)## beware: this is a transformed input, don't evaluate on test loss of ensembles. 
         accuracy = self.accuracy(grand_mean,labels)
