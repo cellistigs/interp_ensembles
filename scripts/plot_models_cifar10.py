@@ -12,9 +12,10 @@ datapath = os.path.abspath(os.path.join(os.path.dirname(__file__),"../data_v4/")
     - UPDATED v4 WideResNet 28x10: Results given to me by Geoff for previously trained models- 5000 datapoints withheld for validation.
     - UPDATED v4 Ensemble (n=4) WideResNet 28x10: Results given to me by Geoff for previously trained models- 5000 datapoints withheld for validation. Each member of this ensemble was trained with different minibatch ordering. 
     - UPDATED v4 Ensemble (n=4) ResNet 18_1: Trained with this repo, `train_ensemble.py`, without using deterministic ops and seed everything, october 27th, 2021. (version 21)
-    - UPDATED v4 Ensemble (n=4) ResNet 18_2: Trained with this repo, `train_ensemble.py`, without using deterministic ops and seed everything, october 27th, 2021.
-    - UPDATED v4 Ensemble (n=4) ResNet 18_3: Trained with this repo, `train_ensemble.py`, without using deterministic ops and seed everything, october 28th, 2021.
-    - UPDATED v4 WideResNet 18 x2: Trained with this repo, `train.py --classifier wideresnet18`, without using deterministic ops and seed everything, october 28th, 2021.
+    - UPDATED v4 Ensemble (n=4) ResNet 18_2: Trained with this repo, `train_ensemble.py`, without using deterministic ops and seed everything, october 27th, 2021. (version 22)
+    - UPDATED v4 Ensemble (n=4) ResNet 18_3: Trained with this repo, `train_ensemble.py`, without using deterministic ops and seed everything, october 28th, 2021. (version 25)
+    - UPDATED v4 WideResNet 18 x2: Trained with this repo, `train.py --classifier wideresnet18`, without using deterministic ops and seed everything, october 28th, 2021. (scripts/cifar10/wideresnet18/version_0)
+
     - UPDATED v4 Interpensemble (n=4, x2), ResNet18, lambda = 1: Trained with this repo- should be the same as a wide resnet, using determinstic ops, nov 1st, 2021- scripts/cifar10/resnet18/version19
     - UPDATED v4 Interpensemble (n=4, x2), ResNet18, lambda = 0.5: Trained with this repo using determinstic ops, nov 1st, 2021- scripts/cifar10/resnet18/version20
     - UPDATED v4 Interpensemblee (n = 4,x2), ResNet18, lambda = 0.0: Trained with this repo using deterministic ops, nov1st, 2021. -scripts/cifar10/resnet18/verision22
