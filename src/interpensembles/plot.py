@@ -62,7 +62,7 @@ def plot_multiple_models(models,dataset,range = np.arange(1,100),formatdict = No
                 plt.plot(modeldata["in_dist_acc"],modeldata["out_dist_acc"],formatdict[modelname]["marker"],color = formatdict[modelname]["color"],markersize = 10)
         ind_conf = proportion_confint(int(modeldata["in_dist_acc"]*formatdict[modelname]["dataset_sizes"][0]/100),formatdict[modelname]["dataset_sizes"][0])        
         ood_conf = proportion_confint(int(modeldata["out_dist_acc"]*formatdict[modelname]["dataset_sizes"][1]/100),formatdict[modelname]["dataset_sizes"][1])        
-        ax.axhline(y=modeldata["out_dist_acc"],xmin = ind_conf[0],xmax=)
+        #ax.axhline(y=modeldata["out_dist_acc"],xmin = ind_conf[0],xmax=)
 
 
     plt.title("Model Robustness: {}".format(dataset))
