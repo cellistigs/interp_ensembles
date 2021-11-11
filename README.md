@@ -19,11 +19,12 @@ Pros: we can probably use similar hyperparameters, we know both ends of this spe
 Write down this ensembling thought too. 
 
 Todos: 
-- [ ] read papers that geoff sent (Friday 10/15)
-- [ ] choose datasets/models where we expect interesting behavioral transitions. (Tuesday 10/17)
-- [ ] investigate implementation of wide models in pytorch. (Week of 10/17)
-    - [ ] is it easier to build as n subnetworks that can be combined, or one big network that can be taken apart? 
-- [ ] prototype infrastructure for training these things. 
+- [X] read papers that geoff sent (Friday 10/15)
+- [X] choose datasets/models where we expect interesting behavioral transitions. (Tuesday 10/17)
+- [X] investigate implementation of wide models in pytorch. (Week of 10/17)
+    - [X] is it easier to build as n subnetworks that can be combined, or one big network that can be taken apart? 
+        - Easier to build as one big network, but this has capacity restrictions.  
+- [X] prototype infrastructure for training these things. 
 
 ## Bibiliography: 
 
