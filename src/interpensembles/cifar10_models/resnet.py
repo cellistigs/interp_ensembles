@@ -189,7 +189,7 @@ class WideResNet_GroupLinear(nn.Module):
         :param zero_init_residual:
         :ivar inplanes: init_var: 64*k.  This variable is the operant one for width determination. It updated by each make_layer function to be the "planes" argument passed to make_layer. Its state is changed through successive calls to "planes". 
         """
-        super(WideResNet, self).__init__()
+        super(WideResNet_GroupLinear, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
