@@ -42,6 +42,10 @@
 - TOREAD Radford et al. 30; Learning transferable visual models from natural language supervision. arxiv 2021: Introduction and analysis of CLIP models. CLIP effective ER during fine tuning. 
 - TOREAD Kolesnikov et al. 2020- Big transfer (bit): General visual representation learning, 2020: the BiT model is a generic benchmark we should study too.
 
+## Metrics for Ensemble Quatification
+
+- D'Amour et al. 2020 discuss "stress tests" to identify differences between models that have the same performance on in-distribution training and validation data- These could be useful for evaluating ensembles vs. single models as well. 
+
 ## "Robustness" (as measured by accuracy on a shifted/OOD dataset)
 
 - Taori et al., 2020; "Measuring Robustness to Natural Distribution Shifts in Image Classification"
