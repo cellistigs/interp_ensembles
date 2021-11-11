@@ -329,7 +329,7 @@ class CIFAR10InterEnsembleModule(CIFAR10_Models):
         gmean = torch.exp(torch.mean(torch.log(torch.stack(softmaxes)),dim = 0)) ## implementation from https://stackoverflow.com/questions/59722983/how-to-calculate-geometric-mean-in-a-differentiable-way   
         bigpred = self.basemodel(images)
         bignormed = softmax(bigpred)
-        grand_mean = torch.mean(torch.stack([self.lamb*bignormed,(1-self.lamb)*gmean]),dim = 0)
+        grand_mean = torch.sum(torch.stack([self.lamb*bignormed,(1-self.lamb)*gmean]),dim = 0)
         return grand_mean,labels
 
     def training_step(self,batch,batch_nb):
