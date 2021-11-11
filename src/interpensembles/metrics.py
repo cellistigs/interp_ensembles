@@ -1,9 +1,37 @@
 ## Tools to help calculate calibration related metrics given a predictions and labels.  
 import numpy as np
 
+class AccuracyData(object):
+    """Calculates accuracy related metrics. 
 
+    """
+    def __init__(self):
+        pass
+    
+    def accuracy(self,prob,target):
+        """Given predictions (example,class) and targets (class), will calculate the accuracy.  
 
+        """
+        selected = np.argmax(prob, axis = 1)
+        correct = target == selected
+        accuracy = sum(correct)/len(target)
+        return accuracy
 
+class NLLData(object):
+    """Calculates the negative log likelihood of the data. 
+
+    """
+    def __init__(self):
+        pass
+    
+    def nll(self,prob,target):
+        """Given predictions (example,class) and targets (class), will calculate the negative log likelihood. Important here that the probs are expected to be outputs of softmax functions.   
+
+        """
+        probs = prob[np.arange(len(target)),target]
+        logprobs = np.log(probs)
+        nll = -sum(logprobs)
+        return nll
 
 class CalibrationData(object):
     """Initializes an object to bin predictions that are fed to it in batches.  
@@ -21,7 +49,7 @@ class CalibrationData(object):
         self.binedges = [(padded[i],padded[i+1]) for i in range(len(padded)-1)]
 
     def bin(self,prob,target):
-        """Given data, a tuple of predictions and targets, will bin them according to the binedges parameter.
+        """Given predictions  (example, class) and targets  (class), will bin them according to the binedges parameter.
         Returns a dictionary with keys giving bin intervals, and values another dictionary giving the accuracy, confidence, and number of examples in the bin. 
         """
         data = self.analyze_batch(prob,target)
