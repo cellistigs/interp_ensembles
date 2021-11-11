@@ -1,6 +1,26 @@
 import pytest
 import numpy as np
-from interpensembles.calibration import CalibrationData
+from interpensembles.metrics import AccuracyData,NLLData,CalibrationData
+
+class Test_AccuracyData():
+    def test_init(self):
+        ac = AccuracyData()
+    def test_accuracy(self):    
+        ac = AccuracyData()
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        acc = ac.accuracy(probs,target)
+        assert acc == 0.5
+
+class Test_NLLData():
+    def test_init(self):
+        nld = NLLData()
+    def test_nll(self):    
+        nld = NLLData()
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = np.array([0,0,2,2])
+        nll = nld.nll(probs,target)
+        assert nll == -sum([np.log(0.15),np.log(0.1),np.log(0.4),np.log(0.5)]) 
 
 class Test_CalibrationData():
     @pytest.mark.parametrize("interval",([0,1],[0,0.40,1],[0,0.40,101],[0,0.40,1],[-10,0.30,0.50,0.90]))
