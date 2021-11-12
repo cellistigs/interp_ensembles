@@ -91,12 +91,12 @@ if __name__ == "__main__":
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
     parser.add_argument("--batch_size", type=int, default=256)
-    parser.add_argument("--max_epochs", type=int, default=200)
+    parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--num_workers", type=int, default=8)
     parser.add_argument("--gpu_id", type=str, default="0")
 
     parser.add_argument("--learning_rate", type=float, default=1e-2)
-    parser.add_argument("--weight_decay", type=float, default=5e-4)
+    parser.add_argument("--weight_decay", type=float, default=1e-2)
     parser.add_argument("--test_set",type = str,default = "CIFAR10",choices = ["CIFAR10","CIFAR10_1"])
     parser.add_argument("--nb_models",type = int,default = 4)
     parser.add_argument("--lamb",type = float,default = 0.5)
