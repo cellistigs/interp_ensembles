@@ -120,7 +120,7 @@ class CIFAR10_1Data(pl.LightningDataModule):
             dataset,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            drop_last=True,
+            drop_last=False,
             pin_memory=True,
         )
         return dataloader
@@ -196,7 +196,7 @@ class CIFAR10Data(pl.LightningDataModule):
             dataset,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            drop_last=True,
+            drop_last=False,
             pin_memory=True,
         )
         return dataloader
