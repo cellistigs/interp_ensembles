@@ -19,13 +19,14 @@ modules = {"base":CIFAR10Module,
 script_dir = os.path.abspath(os.path.dirname(__file__))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def custom_eval(model,ind_data,ood_data,device):   
+def custom_eval(model,ind_data,ood_data,device,softmax = True):   
     """Custom evaluation function to output logits as arrays from models given the trained model, in distribution data and out of distribution data. 
 
     :param model: a model from interpensembles.modules. Should have a method "calibration" that outputs predictions (logits) and labels given images and labels. 
     :param ind_data: an instance of a data class (like CIFAR10Data,CIFAR10_1Data) that has a corresponding test_dataloader. 
     :param ood_data: an instance of a data class (like CIFAR10Data,CIFAR10_1Data) that has a corresponding test_dataloader.
     :param device: device to run computations on.
+    :param softmax: whether or not to apply softmax to predictions. 
     :returns: four arrays corresponding to predictions (array of shape (batch,classes)), and labels (shape (batch,)) for ind and ood data respectively. 
 
     """
@@ -41,7 +42,7 @@ def custom_eval(model,ind_data,ood_data,device):
         for idx,batch in tqdm(enumerate(ind_data.test_dataloader())):
             ims = batch[0].to(device)
             labels = batch[1].to(device)
-            pred,label = model.calibration((ims,labels))
+            pred,label = model.calibration((ims,labels),use_softmax= softmax)
             ## to cpu
             predarray = pred.cpu().numpy() ## 256x10
             labelarray = label.cpu().numpy() ## 
@@ -50,7 +51,7 @@ def custom_eval(model,ind_data,ood_data,device):
         for idx,batch in tqdm(enumerate(ood_data.test_dataloader())):
             ims = batch[0].to(device)
             labels = batch[1].to(device)
-            pred,label = model.calibration((ims,labels))
+            pred,label = model.calibration((ims,labels),use_softmax = softmax)
             ## to cpu
             predarray = pred.cpu().numpy() ## 256x10
             labelarray = label.cpu().numpy() ## 
@@ -65,8 +66,9 @@ def custom_eval(model,ind_data,ood_data,device):
 
 def main(args):
 
-    seed_everything(0)
-    if device == "cuda":
+    if bool(args.deterministic):
+        seed_everything(0)
+    if torch.cuda.is_available():
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
     if args.logger == "wandb":
@@ -74,24 +76,24 @@ def main(args):
     elif args.logger == "tensorboard":
         logger = TensorBoardLogger("cifar10", name=args.classifier)
 
-    checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False)
+    checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False, dirpath = os.path.join(script_dir,"../","models",args.classifier,args.module,datetime.datetime.now().strftime("%m-%d-%y"),datetime.datetime.now().strftime("%H_%M_%S")))
 
     trainerargs = {
-        "default_root_dir":os.path.join(script_dir,"../","models",args.classifier,args.module),    
+        #"default_root_dir":os.path.join(script_dir,"../","models",args.classifier,args.module),    
         "fast_dev_run":bool(args.dev),
         "logger":logger if not bool(args.dev + args.test_phase) else None,
-        "deterministic":True,
+        "deterministic":bool(args.deterministic),
         "weights_summary":None,
         "log_every_n_steps":1,
         "max_epochs":args.max_epochs,
         "checkpoint_callback":checkpoint,
         "precision":args.precision,
         }
-    if device == "cuda":
-        trainerargs["gpus"] = -1
+    if torch.cuda.is_available():
+        print("training on GPU")
+        trainerargs["gpus"] = -1  
 
     trainer = Trainer(**trainerargs)
-    
 
     ## define arguments for each model class: 
     all_args = {"hparams":args} 
@@ -134,7 +136,7 @@ def main(args):
     data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
     data["out_dist_acc"] = trainer.test(model, cifar10_1data.test_dataloader())[0]["acc/test"]
 
-    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,cifar10_1data,device)
+    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,cifar10_1data,device,softmax = bool(args.softmax))
 
     results_dir = os.path.join(script_dir,"../results")
     full_path = os.path.join(results_dir,"robust_results{}_{}_{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S"),args.module,args.classifier))
@@ -154,11 +156,13 @@ if __name__ == "__main__":
 
     # PROGRAM level args
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
+    parser.add_argument("--deterministic",type = int, default = 0, choices = [0,1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
         "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb"]
     )
+    parser.add_argument("--softmax",type = int,default = 1,choices = [0,1])
 
     # TRAINER args
     parser.add_argument("--classifier", type=str, default="resnet18")
