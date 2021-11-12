@@ -63,7 +63,7 @@ class CIFAR10_Models(pl.LightningModule):
         if self.hparams.scheduler in [None,"cosine"]: 
             scheduler = {
                 "scheduler": WarmupCosineLR(
-                    optimizer, warmup_epochs=0, max_epochs=total_steps
+                    optimizer, warmup_epochs=total_steps*0.3, max_epochs=total_steps
                 ),
                 "interval": "step",
                 "name": "learning_rate",
