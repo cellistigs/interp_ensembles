@@ -6,7 +6,6 @@ from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule
 from argparse import ArgumentParser
 
 default_args = ["--data_dir", "/home/ubuntu/data/cifar10",
-        "--download_weights","0",
         "--test_phase","0",
         "--dev","0",
         "--logger","tensorboard",

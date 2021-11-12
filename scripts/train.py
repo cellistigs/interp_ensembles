@@ -1,7 +1,10 @@
 import os
+from tqdm import tqdm
 from argparse import ArgumentParser
-
+import datetime
 import torch
+import json
+import numpy as np
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
@@ -14,61 +17,136 @@ modules = {"base":CIFAR10Module,
         "interpensemble":CIFAR10InterEnsembleModule}
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def custom_eval(model,ind_data,ood_data,device):   
+    """Custom evaluation function to output logits as arrays from models given the trained model, in distribution data and out of distribution data. 
+
+    :param model: a model from interpensembles.modules. Should have a method "calibration" that outputs predictions (logits) and labels given images and labels. 
+    :param ind_data: an instance of a data class (like CIFAR10Data,CIFAR10_1Data) that has a corresponding test_dataloader. 
+    :param ood_data: an instance of a data class (like CIFAR10Data,CIFAR10_1Data) that has a corresponding test_dataloader.
+    :param device: device to run computations on.
+    :returns: four arrays corresponding to predictions (array of shape (batch,classes)), and labels (shape (batch,)) for ind and ood data respectively. 
+
+    """
+    ## This is the only place where we need to worry about devices. The model should already know what device to use. 
+    all_preds_ind = []
+    all_labels_ind = []
+    all_preds_ood = []
+    all_labels_ood = []
+
+    ## model, cifart10data,cifart10_1data,
+    model.eval()
+    with torch.no_grad():
+        for idx,batch in tqdm(enumerate(ind_data.test_dataloader())):
+            ims = batch[0].to(device)
+            labels = batch[1].to(device)
+            pred,label = model.calibration((ims,labels))
+            ## to cpu
+            predarray = pred.cpu().numpy() ## 256x10
+            labelarray = label.cpu().numpy() ## 
+            all_preds_ind.append(predarray)
+            all_labels_ind.append(labelarray)
+        for idx,batch in tqdm(enumerate(ood_data.test_dataloader())):
+            ims = batch[0].to(device)
+            labels = batch[1].to(device)
+            pred,label = model.calibration((ims,labels))
+            ## to cpu
+            predarray = pred.cpu().numpy() ## 256x10
+            labelarray = label.cpu().numpy() ## 
+            all_preds_ood.append(predarray)
+            all_labels_ood.append(labelarray)
+
+    all_preds_ind_array = np.concatenate(all_preds_ind,axis = 0)
+    all_labels_ind_array = np.concatenate(all_labels_ind,axis = 0)
+    all_preds_ood_array = np.concatenate(all_preds_ood,axis = 0)
+    all_labels_ood_array = np.concatenate(all_labels_ood,axis = 0)
+    return all_preds_ind_array,all_labels_ind_array,all_preds_ood_array,all_labels_ood_array
 
 def main(args):
 
-    if bool(args.download_weights):
-        CIFAR10Data.download_weights()
-    else:
-        seed_everything(0)
+    seed_everything(0)
+    if device == "cuda":
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
-        if args.logger == "wandb":
-            logger = WandbLogger(name=args.classifier, project="cifar10")
-        elif args.logger == "tensorboard":
-            logger = TensorBoardLogger("cifar10", name=args.classifier)
+    if args.logger == "wandb":
+        logger = WandbLogger(name=args.classifier, project="cifar10")
+    elif args.logger == "tensorboard":
+        logger = TensorBoardLogger("cifar10", name=args.classifier)
 
-        checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False)
+    checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False)
 
-        trainer = Trainer(
-            default_root_dir = os.path.join(script_dir,"../","models",args.classifier,args.module),    
-            fast_dev_run=bool(args.dev),
-            logger=logger if not bool(args.dev + args.test_phase) else None,
-            gpus=-1,
-            deterministic=True,
-            weights_summary=None,
-            log_every_n_steps=1,
-            max_epochs=args.max_epochs,
-            checkpoint_callback=checkpoint,
-            precision=args.precision,
-        )
+    trainerargs = {
+        "default_root_dir":os.path.join(script_dir,"../","models",args.classifier,args.module),    
+        "fast_dev_run":bool(args.dev),
+        "logger":logger if not bool(args.dev + args.test_phase) else None,
+        "deterministic":True,
+        "weights_summary":None,
+        "log_every_n_steps":1,
+        "max_epochs":args.max_epochs,
+        "checkpoint_callback":checkpoint,
+        "precision":args.precision,
+        }
+    if device == "cuda":
+        trainerargs["gpus"] = -1
 
+    trainer = Trainer(**trainerargs)
+    
+
+    ## define arguments for each model class: 
+    all_args = {"hparams":args} 
+    if args.module == "base":
+        pass
+    elif args.module == "ensemble":
+        all_args["nb_models"] = args.nb_models
+    elif args.module == "interpensemble":
+        all_args["lamb"] = "lamb"
+
+    
+
+    if not bool(args.test_phase):
+        model = modules[args.module](**all_args)
+    else:    
         if args.module == "base":
-            model = modules[args.module](args)
-        elif args.module == "ensemble":
-            model = modules[args.module](args.nb_models,args)
-        elif args.module == "interpensemble":
-            model = modules[args.module](args.lamb,args)
-        if args.test_phase:
-            if args.test_set == "CIFAR10":
-                data = CIFAR10Data(args)
-            elif args.test_set == "CIFAR10_1":
-                data = CIFAR10_1Data(args)
-        else:        
-            data = CIFAR10Data(args)
+            model = modules[args.module].load_from_checkpoint(checkpoint_path=args.checkpoint)
+        elif args.module == "ensemble":    
+            model = modules[args.module].load_from_checkpoint(nb_models = all_args["nb_models"],checkpoint_path=args.checkpoint)
+        elif args.module == "interpensemble":    
+            model = modules[args.module].load_from_checkpoint(lamb = all_args["lamb"],checkpoint_path=args.checkpoint)
+            
+    cifar10data = CIFAR10Data(args)
+    cifar10_1data = CIFAR10_1Data(args,version =args.version)
 
 
-        if bool(args.pretrained):
-            state_dict = os.path.join(
-                "cifar10_models", "state_dicts", args.classifier + ".pt"
-            )
-            model.model.load_state_dict(torch.load(state_dict))
+    if bool(args.pretrained):
+        state_dict = os.path.join(
+            script_dir,"../","models",
+            "cifar10_models", "state_dicts", args.classifier + ".pt"
+        )
+        model.model.load_state_dict(torch.load(state_dict))
 
-        if bool(args.test_phase):
-            trainer.test(model, data.test_dataloader())
-        else:
-            trainer.fit(model, data)
-            trainer.test()
+    if bool(args.test_phase):
+        pass
+    else:
+        trainer.fit(model, cifar10data)
+
+    data = {"in_dist_acc":None,"out_dist_acc":None}
+    data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
+    data["out_dist_acc"] = trainer.test(model, cifar10_1data.test_dataloader())[0]["acc/test"]
+
+    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,cifar10_1data,device)
+
+    results_dir = os.path.join(script_dir,"../results")
+    full_path = os.path.join(results_dir,"robust_results{}_{}_{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S"),args.module,args.classifier))
+    np.save(full_path+"ind_preds",preds_ind)
+    np.save(full_path+"ind_labels",labels_ind)
+    np.save(full_path+"ood_preds",preds_ood)
+    np.save(full_path+"ood_labels",labels_ood)
+    ## write metadata
+    metadata = vars(args)
+    metadata["save_path"] = trainer.checkpoint_callback.dirpath
+    with open(full_path+"_meta.json","w") as f:
+        json.dump(metadata,f)
 
 
 if __name__ == "__main__":
@@ -76,7 +154,6 @@ if __name__ == "__main__":
 
     # PROGRAM level args
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
-    parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(

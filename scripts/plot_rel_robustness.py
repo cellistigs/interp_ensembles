@@ -29,6 +29,17 @@ def main(args):
 
     checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False)
 
+    trainerargs = {
+        "fast_dev_run":bool(args.dev),
+        "logger":logger if not bool(args.dev + args.test_phase) else None,
+        "gpus":-1,
+        "deterministic":True,
+        "weights_summary":None,
+        "log_every_n_steps":1,
+        "max_epochs":args.max_epochs,
+        "checkpoint_callback":checkpoint,
+        "precision":args.precision,
+            }
     trainer = Trainer(
         fast_dev_run=bool(args.dev),
         logger=logger if not bool(args.dev + args.test_phase) else None,
@@ -109,7 +120,6 @@ if __name__ == "__main__":
 
     # PROGRAM level args
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/cifar10")
-    parser.add_argument("--download_weights", type=int, default=0, choices=[0, 1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
