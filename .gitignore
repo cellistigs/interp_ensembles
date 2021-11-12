@@ -1,5 +1,8 @@
 data_v4/*
 data/*
 models/*
-result/*
+results/*
 images/*
+__pycache__/*
+src/PyTorch_CIFAR10/*
+src/interpensembles.egg-info/*
