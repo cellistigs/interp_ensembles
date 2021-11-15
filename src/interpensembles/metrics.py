@@ -24,13 +24,16 @@ class NLLData(object):
     def __init__(self):
         pass
     
-    def nll(self,prob,target):
+    def nll(self,prob,target,normalize = False):
         """Given predictions (example,class) and targets (class), will calculate the negative log likelihood. Important here that the probs are expected to be outputs of softmax functions.   
 
         """
         probs = prob[np.arange(len(target)),target]
         logprobs = np.log(probs)
+
         nll = -sum(logprobs)
+        if normalize:
+            nll= nll/len(logprobs)
         return nll
 
 class CalibrationData(object):

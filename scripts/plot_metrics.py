@@ -38,31 +38,40 @@ suffixes = {
         "InD Probs": "ind_preds.npy",
         "OOD Labels":"ood_labels.npy",
         "OOD Probs": "ood_preds.npy",
+        "meta":"_meta.json"
         }
 
 bins = list(np.linspace(0,1,17)[1:-1])
 
 if __name__ == "__main__":
-    predfig,predax = plt.subplots()
-    calfig,calax = plt.subplots()
-    nllfig,nllax = plt.subplots()
+    predfig,predax = plt.subplots(figsize = (10,10))
+    calfig,calax = plt.subplots(figsize = (10,10))
+    nllfig,nllax = plt.subplots(figsize = (10,10))
 
 
     for model,path in dataindex.items():
         modelmetrics = {"ind":[],"ood":[]}
         relfig,relax = plt.subplots(1,2)
+        try:
+            with open(os.path.join(resultsfolder,path+suffixes["meta"]),"r") as f:
+                metadata = json.load(f)
+        except FileNotFoundError:
+            metadata = {"softmax":True}
+
         for di,dist in enumerate([["InD Labels","InD Probs"],["OOD Labels","OOD Probs"]]):
             labels = np.load(os.path.join(resultsfolder,path+suffixes[dist[0]]))
             probs = np.load(os.path.join(resultsfolder,path+suffixes[dist[1]]))
             if model.startswith("InterpEnsemble"):
                 probs = probs*2
+            if bool(metadata.get("softmax",True)) is False:    
+                probs = softmax(probs,axis = 1)
 
             ad = AccuracyData()
             nld = NLLData()
             cd = CalibrationData(bins)
                 
             accuracy = ad.accuracy(probs,labels)
-            nll = nld.nll(probs,labels)
+            nll = nld.nll(probs,labels,normalize = True)
             ece = cd.ece(probs,labels)
             rel = cd.bin(probs,labels)
             interval = cd.binedges[0][1]-cd.binedges[0][0]
@@ -89,11 +98,13 @@ if __name__ == "__main__":
             predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker)
             nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker)
             calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker)
-        relax[0].set_title("InD Calibration: {}".format(model))
-        relax[1].set_title("OOD Calibration: {}".format(model))
+        relfig.suptitle("{}".format(model))
+        relax[0].set_title("InD Calibration")
+        relax[1].set_title("OOD Calibration")
         relax[0].set_xlabel("Confidence")
-        relax[1].set_xlabel("Accuracy")
+        relax[1].set_ylabel("Accuracy")
         relfig.savefig(os.path.join(imagesfolder,"reliability_diag_{}.png".format(model)))    
+        plt.close(relfig)
     predax.legend()
     nllax.legend()
     calax.legend()
