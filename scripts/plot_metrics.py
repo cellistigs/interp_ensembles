@@ -9,10 +9,20 @@ from interpensembles.metrics import AccuracyData,NLLData,CalibrationData
 resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
 imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
 
-markers = {"ResNet":"rx","Ensemble-2 Synth ResNet":"r*","Ensemble-4 ResNet":"ro","Ensemble-4 Synth ResNet":"ro","WideResNet 18-2":"bx","Ensemble-2 Synth WideResNet 18-2":"b*","Ensemble-4 Synth WideResNet 18-2":"bo","WideResNet 18-4":"gx","Ensemble-2 Synth WideResNet 18-4":"g*","Ensemble-4 Synth WideResNet 18-4":"go","Ensemble-5 Synth ResNet":"r+"}
+markers = {"ResNet":"rx","Ensemble-2 Synth ResNet":"r*","Ensemble-4 ResNet":"ro","Ensemble-4 Synth ResNet":"ro","WideResNet 18-2":"bx","Ensemble-2 Synth WideResNet 18-2":"b*","Ensemble-4 Synth WideResNet 18-2":"bo","WideResNet 18-4":"gx","Ensemble-2 Synth WideResNet 18-4":"g*","Ensemble-4 Synth WideResNet 18-4":"go","Ensemble-5 Synth ResNet":"r+","VGG-11":"yx", "Ensemble-4 Synth VGG-11":"yo","VGG19":"px","Ensemble-4 Synth VGG-19":"po"}
 
 ### Now we define the common names for the data, and their prefixes: 
 dataindex = {
+            "VGG-11":"robust_results11-15-21_20:42.38_base_vgg11_bn",
+            "VGG-11.1":"robust_results11-15-21_20:55.18_base_vgg11_bn",
+            "VGG-11.2":"robust_results11-15-21_21:08.03_base_vgg11_bn",
+            "VGG-11.3":"robust_results11-15-21_21:20.48_base_vgg11_bn",
+            "VGG-11.4":"robust_results11-15-21_20:55.18_base_vgg11_bn",
+            "Ensemble-4 Synth VGG-11":"synth_ensemble_0_vgg11_bn_11_16",
+            "Ensemble-4 Synth VGG-11.1":"robust_results11-15-21_20:55.18_base_vgg11_bn",
+            "Ensemble-4 Synth VGG-11.2":"robust_results11-15-21_21:08.03_base_vgg11_bn",
+            "Ensemble-4 Synth VGG-11.3":"robust_results11-15-21_21:20.48_base_vgg11_bn",
+            "Ensemble-4 Synth VGG-11.4":"robust_results11-15-21_20:55.18_base_vgg11_bn",
             #"ResNet 18":"robust_results11-10-21_23:33.14_base_resnet18",
             #"ResNet 18.1":"robust_results11-10-21_23:34.02_base_resnet18",
             #"ResNet 18.2":"robust_results11-10-21_23:34.24_base_resnet18",
