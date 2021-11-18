@@ -1,6 +1,45 @@
 import pytest
 import numpy as np
-from interpensembles.metrics import AccuracyData,NLLData,CalibrationData
+from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData
+
+class Test_VarianceData():
+    def test_init(self):
+        vd = VarianceData("dummy")
+    def test_register(self):    
+        vd = VarianceData("dummy")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.1")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.2")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.3")
+    def test_variance(self):    
+        vd = VarianceData("dummy")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.1")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.2")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.3")
+        assert np.allclose(vd.variance(),0)
+    def test_expected_variance(self):    
+        vd = VarianceData("dummy")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.1")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.2")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.3")
+        assert np.isclose(vd.expected_variance(),0)
 
 class Test_AccuracyData():
     def test_init(self):

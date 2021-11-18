@@ -1,6 +1,54 @@
 ## Tools to help calculate calibration related metrics given a predictions and labels.  
 import numpy as np
 
+class VarianceData(object):
+    """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
+
+    """
+    def __init__(self,modelprefix):
+        """Takes a modelprefix that specifies the kinds of models over which we will be calculating variance. 
+
+        :param modelprefix: a string specifying what model names should start with. 
+        """
+        self.modelprefix = modelprefix
+        self.models = {} ## dict of dicts- key is modelname, value is dictionary of preds/labels.
+    
+    def register(self,preds,labels,modelname):
+        """Takes predictions and labels. as a rough check, will assert that the labels match those that have already been registered.  
+        :param preds: assumes softmax applied. 
+        :param labels: vector of integers. 
+        :param modelname: enforce that models we are calculating diversity over have the same model prefix. 
+        """
+        assert modelname.startswith(self.modelprefix); "modelname must start with modelprefix"
+        for model,modeldata in self.models.items():
+            assert np.all(labels == modeldata["labels"]); "labels must match already registered." 
+            assert np.all(np.sum(preds,axis = 1) == 1); "predictions must be probabilities"
+        self.models[modelname] = {"preds":preds,"labels":labels}    
+    
+    def variance(self):
+        """Calculates variance in confidence across all softmax output. 
+
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0)    
+        return np.var(array_probs, axis = 0)
+
+    def expected_variance(self):
+        """Calculates expected variance across y|x and x. This is just selecting the variance in the top probability for y|x, and then averaging over all examples for x. 
+        """
+        target = self.models[list(self.models.keys())[0]]["labels"]
+
+        all_vars = self.variance()
+        tprob_vars = all_vars[np.arange(len(target)),target]
+        return np.mean(tprob_vars)
+
+
+
+        
+
 class AccuracyData(object):
     """Calculates accuracy related metrics. 
 
