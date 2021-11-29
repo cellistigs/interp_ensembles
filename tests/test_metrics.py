@@ -1,6 +1,50 @@
 import pytest
 import numpy as np
-from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData
+from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
+
+class Test_BrierScoreData():
+    def test_init(self):
+        """Test that data object initializes correctly.
+        """
+        bs = BrierScoreData()
+
+    def test_bounds(self):
+        """Test that boundary values behave as expected.
+
+        """
+        bs = BrierScoreData()
+
+        probs = np.array([[0,1],[1,0],[0,1]])
+        target = [[1,0,1],[0,1,0]] ## first three are correct, second three are wrong. 
+        bs_expected = [0,1]
+        for ti,t in enumerate(target):
+            assert bs.brierscore(probs,t) == bs_expected[ti]
+            assert bs.brierscore_multi(probs,t) == bs_expected[ti]*2
+        
+    def test_examples(self):    
+        bs = BrierScoreData()
+
+        probs = [np.array([[0.7,0.3]]),np.array([[0.5,0.5]]),np.array([[0.3,0.7]])]
+        targ_set = [[1,1,1],[0,0,0]]
+        bs_expected = [[0.49,0.25,0.09],[0.09,0.25,0.49]]
+        for ti,target in enumerate(targ_set):
+            for ei,example in enumerate(target): 
+                assert np.isclose(bs.brierscore(probs[ei],np.array([example])),bs_expected[ti][ei]) 
+                assert np.isclose(bs.brierscore_multi(probs[ei],np.array([example])),2*bs_expected[ti][ei]) 
+
+    def test_multi(self):            
+        bs = BrierScoreData()
+        probs = [np.array([[0.7,0.15,0.15]]),np.array([[0.7,0.2,0.1]])]
+        ## assert that these look the same under the binary brier score. 
+        for pi,prob in enumerate(probs):
+            assert np.isclose(bs.brierscore(prob,np.array([0])),0.09)
+
+        ## check under the multiclass: the more even one should look better    
+        assert bs.brierscore_multi(probs[0],np.array([0])) < bs.brierscore_multi(probs[1],np.array([0]))
+
+
+
+
 
 class Test_VarianceData():
     def test_init(self):

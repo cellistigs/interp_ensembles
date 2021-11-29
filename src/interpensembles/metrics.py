@@ -1,6 +1,37 @@
 ## Tools to help calculate calibration related metrics given a predictions and labels.  
 import numpy as np
 
+class BrierScoreData(object):
+    """Calculates brier score. 
+
+    """
+    def __init__(self):
+        pass
+
+    def brierscore(self,prob,target):
+        """Given an array of probabilities, `prob`, (batch,dim) and an array of targets `target` (dim), calculates the brier score as if we were in the binary case: take the predicted probability of the target class, and just calculate based on that.
+        :param prob: array of probabilities per class. 
+        :param target: list/array of true targets. 
+
+        """
+        probs = prob[np.arange(len(target)),target]
+        deviance = probs-np.ones(probs.shape)
+        
+        return np.mean(deviance**2)
+
+    def brierscore_multi(self,prob,target):
+        """The "original" brier score definition that accounts for other classes explicitly. Note the range of this test is 0-K, where k is the number of classes. 
+        :param prob: array of probabilities per class. 
+        :param target: list/array of true targets. 
+
+        """
+        target_onehot = np.zeros(prob.shape)
+        target_onehot[np.arange(len(target)),target] = 1 ## onehot encoding. 
+        deviance = prob-target_onehot
+        return np.mean(np.sum(deviance**2,axis = 1))
+
+        
+
 class VarianceData(object):
     """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
 
@@ -46,10 +77,6 @@ class VarianceData(object):
         all_vars = self.variance()
         tprob_vars = all_vars[np.arange(len(target)),target]
         return np.mean(tprob_vars)
-
-
-
-        
 
 class AccuracyData(object):
     """Calculates accuracy related metrics. 
