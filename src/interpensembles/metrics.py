@@ -5,13 +5,15 @@ class VarianceData(object):
     """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
 
     """
-    def __init__(self,modelprefix):
+    def __init__(self,modelprefix,data):
         """Takes a modelprefix that specifies the kinds of models over which we will be calculating variance. 
 
         :param modelprefix: a string specifying what model names should start with. 
+        :param data: ind/ood, specifying if this class is calculating variance for in or out of distribution data. 
         """
         self.modelprefix = modelprefix
         self.models = {} ## dict of dicts- key is modelname, value is dictionary of preds/labels.
+        self.data = data
     
     def register(self,preds,labels,modelname):
         """Takes predictions and labels. as a rough check, will assert that the labels match those that have already been registered.  
@@ -22,7 +24,7 @@ class VarianceData(object):
         assert modelname.startswith(self.modelprefix); "modelname must start with modelprefix"
         for model,modeldata in self.models.items():
             assert np.all(labels == modeldata["labels"]); "labels must match already registered." 
-            assert np.all(np.sum(preds,axis = 1) == 1); "predictions must be probabilities"
+            assert np.allclose(np.sum(preds,axis = 1), 1); "predictions must be probabilities"
         self.models[modelname] = {"preds":preds,"labels":labels}    
     
     def variance(self):
