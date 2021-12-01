@@ -117,6 +117,7 @@ def main(args):
             model = modules[args.module].load_from_checkpoint(lamb = all_args["lamb"],checkpoint_path=args.checkpoint)
             
     cifar10data = CIFAR10Data(args)
+    if 
     cifar10_1data = CIFAR10_1Data(args,version =args.version)
 
 
@@ -155,6 +156,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
+    parser.add_argument("--ood_dataset",type = str,default = "cifar10_1",choices = ["cifar10_1","cinic10"])
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
     parser.add_argument("--deterministic",type = int, default = 0, choices = [0,1])
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
