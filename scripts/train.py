@@ -111,16 +111,16 @@ def main(args):
         model = modules[args.module](**all_args)
     else:    
         if args.module == "base":
-            model = modules[args.module].load_from_checkpoint(checkpoint_path=args.checkpoint)
+            model = modules[args.module].load_from_checkpoint(checkpoint_path=args.checkpoint,hparams = args)
         elif args.module == "ensemble":    
-            model = modules[args.module].load_from_checkpoint(nb_models = all_args["nb_models"],checkpoint_path=args.checkpoint)
+            model = modules[args.module].load_from_checkpoint(nb_models = all_args["nb_models"],checkpoint_path=args.checkpoint,hparams = args)
         elif args.module == "interpensemble":    
-            model = modules[args.module].load_from_checkpoint(lamb = all_args["lamb"],checkpoint_path=args.checkpoint)
+            model = modules[args.module].load_from_checkpoint(lamb = all_args["lamb"],checkpoint_path=args.checkpoint,hparans = args)
             
     cifar10data = CIFAR10Data(args)
-    if self.ood_dataset == "cifar10_1":
+    if args.ood_dataset == "cifar10_1":
         ood_data = CIFAR10_1Data(args,version =args.version)
-    elif self.ood_dataset == "cinic10":    
+    elif args.ood_dataset == "cinic10":    
         ood_data = CINIC10Data(args)
 
 
