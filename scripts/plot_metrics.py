@@ -4,7 +4,7 @@ import numpy as np
 import json
 from scipy.special import softmax
 import matplotlib.pyplot as plt 
-from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData
+from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
 
 resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
 imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
@@ -209,6 +209,8 @@ bins = list(np.linspace(0,1,17)[1:-1])
 if __name__ == "__main__":
     predfig,predax = plt.subplots(figsize = (15,15))
     calfig,calax = plt.subplots(figsize = (15,15))
+    bsfig,bsax = plt.subplots(figsize = (15,15))
+    bsmfig,bsmax = plt.subplots(figsize = (15,15))
     nllfig,nllax = plt.subplots(figsize = (15,15))
 
 
@@ -233,10 +235,13 @@ if __name__ == "__main__":
             ad = AccuracyData()
             nld = NLLData()
             cd = CalibrationData(bins)
+            bsd = BrierScoreData()
                 
             accuracy = ad.accuracy(probs,labels)
             nll = nld.nll(probs,labels,normalize = True)
             ece = cd.ece(probs,labels)
+            bs = bsd.brierscore(probs,labels)
+            bsm = bsd.brierscore_multi(probs,labels)
             rel = cd.bin(probs,labels)
             interval = cd.binedges[0][1]-cd.binedges[0][0]
             relax[di].bar([bi[0] for bi in cd.binedges],[bi[0] for bi in cd.binedges],width= interval,color = "red",alpha = 0.3)
@@ -244,9 +249,9 @@ if __name__ == "__main__":
             relax[di].set_aspect("equal")
 
             if dist[0] == "InD Labels":
-                modelmetrics["ind"] = [accuracy,nll,ece]
+                modelmetrics["ind"] = [accuracy,nll,ece,bs,bsm]
             if dist[0] == "OOD Labels":
-                modelmetrics["ood"] = [accuracy,nll,ece]
+                modelmetrics["ood"] = [accuracy,nll,ece,bs,bsm]
 
             for modelpre,mcand in markers.items():
                 if model.startswith(modelpre):
@@ -273,10 +278,14 @@ if __name__ == "__main__":
             predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,label = model)
             nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,label = model)
             calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,label = model)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,label = model)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,label = model)
         else:    
             predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker)
             nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker)
             calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker)
         relfig.suptitle("{}".format(model))
         relax[0].set_title("InD Calibration")
         relax[1].set_title("OOD Calibration")
@@ -304,6 +313,8 @@ if __name__ == "__main__":
     predax.legend()
     nllax.legend()
     calax.legend()
+    bsax.legend()
+    bsmax.legend()
 
     predax.set_title("Predictive Accuracy")
     predax.set_xlabel("InD Test Accuracy")
@@ -314,9 +325,17 @@ if __name__ == "__main__":
     calax.set_title("Calibration")
     calax.set_xlabel("InD ECE")
     calax.set_ylabel("OOD ECE")
+    bsax.set_title("Brier Score (Binarized)")
+    bsax.set_xlabel("InD BS")
+    bsax.set_ylabel("OOD BS")
+    bsmax.set_title("Brier Score (Multiclass)")
+    bsmax.set_xlabel("InD BS")
+    bsmax.set_ylabel("OOD BS")
     predfig.savefig(os.path.join(imagesfolder,"prediction_metrics"))    
     nllfig.savefig(os.path.join(imagesfolder,"nll_metrics"))    
     calfig.savefig(os.path.join(imagesfolder,"calibration_metrics"))    
+    bsfig.savefig(os.path.join(imagesfolder,"brierscore_metrics"))
+    bsmfig.savefig(os.path.join(imagesfolder,"brierscoremulti_metrics"))
 
 
 
