@@ -11,6 +11,7 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 from interpensembles.data import CIFAR10Data,CIFAR10_1Data
 from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10InterEnsembleModule
+from cifar10_ood.data import CINIC10Data
 
 modules = {"base":CIFAR10Module,
         "ensemble":CIFAR10EnsembleModule,
@@ -117,8 +118,10 @@ def main(args):
             model = modules[args.module].load_from_checkpoint(lamb = all_args["lamb"],checkpoint_path=args.checkpoint)
             
     cifar10data = CIFAR10Data(args)
-    if 
-    cifar10_1data = CIFAR10_1Data(args,version =args.version)
+    if self.ood_dataset == "cifar10_1":
+        ood_data = CIFAR10_1Data(args,version =args.version)
+    elif self.ood_dataset == "cinic10":    
+        ood_data = CINIC10Data(args)
 
 
     if bool(args.pretrained):
@@ -135,9 +138,9 @@ def main(args):
 
     data = {"in_dist_acc":None,"out_dist_acc":None}
     data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
-    data["out_dist_acc"] = trainer.test(model, cifar10_1data.test_dataloader())[0]["acc/test"]
+    data["out_dist_acc"] = trainer.test(model, ood_data.test_dataloader())[0]["acc/test"]
 
-    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,cifar10_1data,device,softmax = bool(args.softmax))
+    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,ood_data,device,softmax = bool(args.softmax))
 
     results_dir = os.path.join(script_dir,"../results")
     full_path = os.path.join(results_dir,"robust_results{}_{}_{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S"),args.module,args.classifier))
@@ -159,7 +162,8 @@ if __name__ == "__main__":
     parser.add_argument("--ood_dataset",type = str,default = "cifar10_1",choices = ["cifar10_1","cinic10"])
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
     parser.add_argument("--deterministic",type = int, default = 0, choices = [0,1])
-    parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
+    parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1],help = "train or evaluation mode. If evaluation, checkpoint must be provided")
+    parser.add_argument("--checkpoint",type= str,help = "Path to model checkpoint if evaluating")
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
         "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb"]
