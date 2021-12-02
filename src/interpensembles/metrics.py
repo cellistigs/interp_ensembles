@@ -58,9 +58,22 @@ class VarianceData(object):
             assert np.allclose(np.sum(preds,axis = 1), 1); "predictions must be probabilities"
         self.models[modelname] = {"preds":preds,"labels":labels}    
     
+    def mean_conf(self):
+        """Calculates mean confidence across all softmax output. 
+
+        :return: array of shape samples, classes giving per class variance. 
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0)    
+        return np.mean(array_probs, axis = 0)
+
     def variance(self):
         """Calculates variance in confidence across all softmax output. 
 
+        :return: array of shape samples,classes giving per class variance. 
         """
         all_probs = []
         for model,modeldata in self.models.items():
@@ -69,8 +82,22 @@ class VarianceData(object):
         array_probs = np.stack(all_probs,axis = 0)    
         return np.var(array_probs, axis = 0)
 
+    def variance_confidence(self):
+        """Calculates an array of shape (sample, 2) that gives the mean and variance of confidence estimates together per datapoint.   
+
+        """
+        target = self.models[list(self.models.keys())[0]]["labels"]
+
+        all_vars = self.variance()
+        all_conf = self.mean_conf()
+        tprob_vars = all_vars[np.arange(len(target)),target]
+        tprob_confs = all_conf[np.arange(len(target)),target]
+        return np.stack([tprob_confs,tprob_vars],axis = 1)
+
     def expected_variance(self):
         """Calculates expected variance across y|x and x. This is just selecting the variance in the top probability for y|x, and then averaging over all examples for x. 
+
+        :return: scalar expected variance
         """
         target = self.models[list(self.models.keys())[0]]["labels"]
 
