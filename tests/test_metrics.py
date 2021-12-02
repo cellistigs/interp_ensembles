@@ -43,14 +43,11 @@ class Test_BrierScoreData():
         assert bs.brierscore_multi(probs[0],np.array([0])) < bs.brierscore_multi(probs[1],np.array([0]))
 
 
-
-
-
 class Test_VarianceData():
     def test_init(self):
-        vd = VarianceData("dummy")
+        vd = VarianceData("dummy","ind")
     def test_register(self):    
-        vd = VarianceData("dummy")
+        vd = VarianceData("dummy","ind")
         probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
         target = [0,0,2,2]
         vd.register(probs,target,"dummy.1")
@@ -61,7 +58,7 @@ class Test_VarianceData():
         target = [0,0,2,2]
         vd.register(probs,target,"dummy.3")
     def test_variance(self):    
-        vd = VarianceData("dummy")
+        vd = VarianceData("dummy","ind")
         probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
         target = [0,0,2,2]
         vd.register(probs,target,"dummy.1")
@@ -72,8 +69,34 @@ class Test_VarianceData():
         target = [0,0,2,2]
         vd.register(probs,target,"dummy.3")
         assert np.allclose(vd.variance(),0)
+    def test_meanconf(self):
+        vd = VarianceData("dummy","ind")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.1")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.2")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.3")
+        assert np.allclose(vd.mean_conf(),probs)
+
+    def test_variance_confidence(self):    
+        vd = VarianceData("dummy","ind")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.1")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.2")
+        probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
+        target = [0,0,2,2]
+        vd.register(probs,target,"dummy.3")
+        assert np.allclose(vd.variance_confidence(),np.array([[0.15,0],[0.1,0],[0.4,0],[0.5,0]]))
+
     def test_expected_variance(self):    
-        vd = VarianceData("dummy")
+        vd = VarianceData("dummy","ind")
         probs = np.array([[0.15,0.15,0.7],[0.1,0.1,0.8],[0.3,0.3,0.4],[0.2,0.3,0.5]])
         target = [0,0,2,2]
         vd.register(probs,target,"dummy.1")
