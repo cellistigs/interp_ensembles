@@ -146,8 +146,12 @@ def main(args):
     full_path = os.path.join(results_dir,"robust_results{}_{}_{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S"),args.module,args.classifier))
     np.save(full_path+"ind_preds",preds_ind)
     np.save(full_path+"ind_labels",labels_ind)
-    np.save(full_path+"ood_preds",preds_ood)
-    np.save(full_path+"ood_labels",labels_ood)
+    if args.ood_dataset == "cifar10_1":
+        np.save(full_path+"ood_preds",preds_ood)
+        np.save(full_path+"ood_labels",labels_ood)
+    elif args.ood_dataset == "cinic10":    
+        np.save(full_path+"ood_cinic_preds",preds_ood)
+        np.save(full_path+"ood_cinic_labels",labels_ood)
     ## write metadata
     metadata = vars(args)
     metadata["save_path"] = trainer.checkpoint_callback.dirpath
