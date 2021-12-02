@@ -35,8 +35,6 @@ if __name__ == "__main__":
     ## dictionary: {"modelcode":{"checkpoint":"checkpointpath","orig_stub":,"cinic10_path":}
     # 1. get the metadata files containing model checkpoints: -> checkpointpath
     # 2. run train.py for each of these model checkpoints. -> cinic10_path
-    # 3. collect new prefixes for models we care about. -> 
-    # 4. run synthesize_ensemble for each model collection. -> 
     for d,dstub in dataindex.items():
         try:
             if not d.startswith("Ensemble"):
