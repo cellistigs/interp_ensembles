@@ -5,6 +5,7 @@ import json
 from scipy.special import softmax
 import matplotlib.pyplot as plt 
 from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
+from argparse import ArgumentParser
 
 resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
 imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
@@ -42,7 +43,7 @@ for modelprefix in markers:
 
 
 ### Now we define the common names for the data, and their prefixes: 
-dataindex = {
+all_dataindices = {"cifar10.1":{
             "WideResNet-28-10":"cifar10_wrn28_s1_",
             "WideResNet-28-10.1":"cifar10_wrn28_s2_",
             "WideResNet-28-10.2":"cifar10_wrn28_s3_",
@@ -194,19 +195,120 @@ dataindex = {
             "Ensemble-4 Synth WideResNet 18-4.2":"synth_ensemble_2_base_wideresnet18_4_",
             "Ensemble-4 Synth WideResNet 18-4.3":"synth_ensemble_3_base_wideresnet18_4_",
             "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_"
+            },
+            "cinic10":{
+                "DenseNet-121":"robust_results12-02-21_05:17.33_base_densenet121",
+                "DenseNet-121.1":"robust_results12-02-21_05:18.02_base_densenet121",
+                "DenseNet-121.2":"robust_results12-02-21_05:18.30_base_densenet121",
+                "DenseNet-121.3":"robust_results12-02-21_05:18.59_base_densenet121",
+                "DenseNet-121.4":"robust_results12-02-21_05:19.27_base_densenet121",
+                "Ensemble-4 Synth DenseNet-121":"synth_ensemble_0_base_densenet121_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-121.1":"synth_ensemble_1_base_densenet121_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-121.2":"synth_ensemble_2_base_densenet121_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-121.3":"synth_ensemble_3_base_densenet121_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-121.4":"synth_ensemble_4_base_densenet121_e4_cinic_",
+                "DenseNet-169":"robust_results12-02-21_05:20.06_base_densenet169",
+                "DenseNet-169.1":"robust_results12-02-21_05:20.44_base_densenet169",
+                "DenseNet-169.2":"robust_results12-02-21_05:21.22_base_densenet169",
+                "DenseNet-169.3":"robust_results12-02-21_05:22.00_base_densenet169",
+                "DenseNet-169.4":"robust_results12-02-21_05:22.39_base_densenet169",
+                "Ensemble-4 Synth DenseNet-169":"synth_ensemble_0_base_densenet169_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-169.1":"synth_ensemble_1_base_densenet169_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-169.2":"synth_ensemble_2_base_densenet169_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-169.3":"synth_ensemble_3_base_densenet169_e4_cinic_",
+                "Ensemble-4 Synth DenseNet-169.4":"synth_ensemble_4_base_densenet169_e4_cinic_",
+                "Inception-v3":"robust_results12-02-21_05:24.11_base_inception_v3",
+                "Inception-v3.1":"robust_results12-02-21_05:25.44_base_inception_v3",
+                "Inception-v3.2":"robust_results12-02-21_05:27.17_base_inception_v3",
+                "Inception-v3.3":"robust_results12-02-21_05:28.50_base_inception_v3",
+                "Inception-v3.4":"robust_results12-02-21_05:30.22_base_inception_v3",
+                "Ensemble-4 Synth Inception-v3":"synth_ensemble_0_base_inception_v3_e4_cinic_",
+                "Ensemble-4 Synth Inception-v3.1":"synth_ensemble_1_base_inception_v3_e4_cinic_",
+                "Ensemble-4 Synth Inception-v3.2":"synth_ensemble_2_base_inception_v3_e4_cinic_",
+                "Ensemble-4 Synth Inception-v3.3":"synth_ensemble_3_base_inception_v3_e4_cinic_",
+                "Ensemble-4 Synth Inception-v3.4":"synth_ensemble_4_base_inception_v3_e4_cinic_",
+                "GoogleNet":"robust_results12-02-21_05:31.07_base_googlenet",
+                "GoogleNet.1":"robust_results12-02-21_05:31.52_base_googlenet",
+                "GoogleNet.2":"robust_results12-02-21_05:32.36_base_googlenet",
+                "GoogleNet.3":"robust_results12-02-21_05:33.21_base_googlenet",
+                "GoogleNet.4":"robust_results12-02-21_05:34.05_base_googlenet",
+                "Ensemble-4 Synth GoogleNet":"synth_ensemble_0_base_googlenet_e4_cinic_",
+                "Ensemble-4 Synth GoogleNet.1":"synth_ensemble_1_base_googlenet_e4_cinic_",
+                "Ensemble-4 Synth GoogleNet.2":"synth_ensemble_2_base_googlenet_e4_cinic_",
+                "Ensemble-4 Synth GoogleNet.3":"synth_ensemble_3_base_googlenet_e4_cinic_",
+                "Ensemble-4 Synth GoogleNet.4":"synth_ensemble_4_base_googlenet_e4_cinic_",
+                "VGG-11":"robust_results12-02-21_05:34.26_base_vgg11_bn",
+                "VGG-11.1":"robust_results12-02-21_05:34.47_base_vgg11_bn",
+                "VGG-11.2":"robust_results12-02-21_05:35.08_base_vgg11_bn",
+                "VGG-11.3":"robust_results12-02-21_05:35.28_base_vgg11_bn",
+                "VGG-11.4":"robust_results12-02-21_05:35.49_base_vgg11_bn",
+                "Ensemble-4 Synth VGG-11":"synth_ensemble_0_base_vgg11_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-11.1":"synth_ensemble_1_base_vgg11_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-11.2":"synth_ensemble_2_base_vgg11_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-11.3":"synth_ensemble_3_base_vgg11_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-11.4":"synth_ensemble_4_base_vgg11_bn_e4_cinic_",
+                "VGG-19":"robust_results12-02-21_05:36.12_base_vgg19_bn",
+                "VGG-19.1":"robust_results12-02-21_05:36.35_base_vgg19_bn",
+                "VGG-19.2":"robust_results12-02-21_05:36.57_base_vgg19_bn",
+                "VGG-19.3":"robust_results12-02-21_05:37.20_base_vgg19_bn",
+                "VGG-19.4":"robust_results12-02-21_05:37.43_base_vgg19_bn",
+                "Ensemble-4 Synth VGG-19":"synth_ensemble_0_base_vgg19_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-19.1":"synth_ensemble_1_base_vgg19_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-19.2":"synth_ensemble_2_base_vgg19_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-19.3":"synth_ensemble_3_base_vgg19_bn_e4_cinic_",
+                "Ensemble-4 Synth VGG-19.4":"synth_ensemble_4_base_vgg19_bn_e4_cinic_",
+                "ResNet 18":"robust_results12-02-21_05:38.04_base_resnet18",
+                "ResNet 18.7":"robust_results12-02-21_05:38.24_base_resnet18",
+                "ResNet 18.8":"robust_results12-02-21_05:38.45_base_resnet18",
+                "ResNet 18.9":"robust_results12-02-21_05:39.05_base_resnet18",
+                "ResNet 18.10":"robust_results12-02-21_05:39.26_base_resnet18",
+                "Ensemble-4 Synth ResNet 18":"synth_ensemble_0_base_resnet18_e4_cinic_",
+                "Ensemble-4 Synth ResNet 18.6":"synth_ensemble_1_base_resnet18_e4_cinic_",
+                "Ensemble-4 Synth ResNet 18.7":"synth_ensemble_2_base_resnet18_e4_cinic_",
+                "Ensemble-4 Synth ResNet 18.8":"synth_ensemble_3_base_resnet18_e4_cinic_",
+                "Ensemble-4 Synth ResNet 18.9":"synth_ensemble_4_base_resnet18_e4_cinic_",
+                "WideResNet 18-2":"robust_results12-02-21_05:39.49_base_wideresnet18",
+                "WideResNet 18-2.1":"robust_results12-02-21_05:40.12_base_wideresnet18",
+                "WideResNet 18-2.2":"robust_results12-02-21_05:40.35_base_wideresnet18",
+                "WideResNet 18-2.3":"robust_results12-02-21_05:40.58_base_wideresnet18",
+                "WideResNet 18-2.4":"robust_results12-02-21_05:41.21_base_wideresnet18",
+                "Ensemble-4 Synth WideResNet 18-2":"synth_ensemble_0_base_wideresnet18_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-2.1":"synth_ensemble_1_base_wideresnet18_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-2.2":"synth_ensemble_2_base_wideresnet18_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-2.3":"synth_ensemble_3_base_wideresnet18_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-2.4":"synth_ensemble_4_base_wideresnet18_e4_cinic_",
+                "WideResNet 18-4":"robust_results12-02-21_05:42.05_base_wideresnet18_4",
+                "WideResNet 18-4.1":"robust_results12-02-21_05:42.50_base_wideresnet18_4",
+                "WideResNet 18-4.2":"robust_results12-02-21_05:43.35_base_wideresnet18_4",
+                "WideResNet 18-4.3":"robust_results12-02-21_05:44.20_base_wideresnet18_4",
+                "WideResNet 18-4.4":"robust_results12-02-21_05:45.04_base_wideresnet18_4",
+                "Ensemble-4 Synth WideResNet 18-4":"synth_ensemble_0_base_wideresnet18_4_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-4.1":"synth_ensemble_1_base_wideresnet18_4_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-4.2":"synth_ensemble_2_base_wideresnet18_4_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-4.3":"synth_ensemble_3_base_wideresnet18_4_e4_cinic_",
+                "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_e4_cinic_"
+                    },
             }
 
-suffixes = {
+all_suffixes = {"cifar10.1":{
         "InD Labels":"ind_labels.npy",
         "InD Probs": "ind_preds.npy",
         "OOD Labels":"ood_labels.npy",
         "OOD Probs": "ood_preds.npy",
         "meta":"_meta.json"
+        },
+        "cinic10":{
+        "InD Labels":"ind_labels.npy",
+        "InD Probs": "ind_preds.npy",
+        "OOD Labels":"ood_cinic_labels.npy",
+        "OOD Probs": "ood_cinic_preds.npy",
+        "meta":"_meta.json"
+        }
         }
 
 bins = list(np.linspace(0,1,17)[1:-1])
 
-if __name__ == "__main__":
+def main(args,dataindex,suffixes):
     predfig,predax = plt.subplots(figsize = (15,15))
     calfig,calax = plt.subplots(figsize = (15,15))
     bsfig,bsax = plt.subplots(figsize = (15,15))
@@ -291,7 +393,7 @@ if __name__ == "__main__":
         relax[1].set_title("OOD Calibration")
         relax[0].set_xlabel("Confidence")
         relax[1].set_ylabel("Accuracy")
-        relfig.savefig(os.path.join(imagesfolder,"reliability_diag_{}.png".format(model)))    
+        relfig.savefig(os.path.join(imagesfolder,"reliability_diag_{}_{}.png".format(model,args.ood_dataset)))    
         plt.close(relfig)
     ## Variance data: 
     varfig,varax = plt.subplots(figsize = (10,10))
@@ -308,7 +410,7 @@ if __name__ == "__main__":
     varax.set_title("Ensemble Variance-ECE Ratio")
     varax.set_xlabel("InD/OOD LL variance ratio")
     varax.set_ylabel("InD/OOD ECE ratio")
-    varfig.savefig(os.path.join(imagesfolder,"variance_metrics"))    
+    varfig.savefig(os.path.join(imagesfolder,"variance_metrics_{}.png").format(args.ood_dataset))    
 
     predax.legend()
     nllax.legend()
@@ -331,18 +433,17 @@ if __name__ == "__main__":
     bsmax.set_title("Brier Score (Multiclass)")
     bsmax.set_xlabel("InD BS")
     bsmax.set_ylabel("OOD BS")
-    predfig.savefig(os.path.join(imagesfolder,"prediction_metrics"))    
-    nllfig.savefig(os.path.join(imagesfolder,"nll_metrics"))    
-    calfig.savefig(os.path.join(imagesfolder,"calibration_metrics"))    
-    bsfig.savefig(os.path.join(imagesfolder,"brierscore_metrics"))
-    bsmfig.savefig(os.path.join(imagesfolder,"brierscoremulti_metrics"))
+    predfig.savefig(os.path.join(imagesfolder,"prediction_metrics_{}.png").format(args.ood_dataset))    
+    nllfig.savefig(os.path.join(imagesfolder,"nll_metrics_{}.png").format(args.ood_dataset))    
+    calfig.savefig(os.path.join(imagesfolder,"calibration_metrics_{}.png").format(args.ood_dataset))    
+    bsfig.savefig(os.path.join(imagesfolder,"brierscore_metrics_{}.png").format(args.ood_dataset))
+    bsmfig.savefig(os.path.join(imagesfolder,"brierscoremulti_metrics_{}.png").format(args.ood_dataset))
 
-
-
-            
-
-
-
-
-
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("-od","--ood_dataset",help = "which ood dataset to analyze for",default = "cifar10.1",choices = ["cifar10.1","cinic10"])
+    args = parser.parse_args()
+    dataindex = all_dataindices[args.ood_dataset]
+    suffixes = all_suffixes[args.ood_dataset]
+    main(args,dataindex,suffixes)
 
