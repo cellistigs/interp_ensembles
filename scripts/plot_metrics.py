@@ -397,15 +397,29 @@ def main(args,dataindex,suffixes):
         plt.close(relfig)
     ## Variance data: 
     varfig,varax = plt.subplots(figsize = (10,10))
-    print(variancecalc.items())
     for modelclass,modeldata in variancecalc.items():
+        varconffig,varconfax = plt.subplots(2,2,figsize=(20,20))
+        print(variancecalc.items())
         if not modelclass.startswith("Ensemble"):
             try:
                 print(np.mean(modeldata["ind_ens_cal"]),np.mean(modeldata["ood_ens_cal"]))
                 varax.plot(modeldata["ind"].expected_variance()/modeldata["ood"].expected_variance(),(np.mean(modeldata["ind_ens_cal"])-np.mean(modeldata["ind_cal"]))/(np.mean(modeldata["ood_ens_cal"])-np.mean(modeldata["ood_cal"])),markers[modelclass],label = modelclass)
                 
+                modeldata["ood"].variance_confidence()
+                varconfax[0,0].scatter(*modeldata["ind"].variance_confidence().T,c = markers[modelclass][:-1],marker=markers[modelclass][-1],label = modelclass)
+                varconfax[0,1].scatter(*modeldata["ood"].variance_confidence().T,c = markers[modelclass][:-1],marker=markers[modelclass][-1],label = modelclass)
+                varconfax[1,0].hist(modeldata["ind"].variance_confidence()[:,0],bins = 100, density = True, log = True)
+                varconfax[1,1].hist(modeldata["ood"].variance_confidence()[:,0],bins = 100, density = True, log = True)
             except IndexError:    
                 pass
+        for i,d in enumerate(["ind","ood"]):
+            varconfax[0,i].legend()    
+            varconfax[0,i].set_title("Ensemble Confidence/Variance: {} ({})".format(modelclass,d))
+            varconfax[0,i].set_xlabel("Mean Confidence")
+            varconfax[1,i].set_xlabel("Mean Confidence")
+            varconfax[0,i].set_ylabel("Variance")
+            varconfax[1,i].set_title("Sample Density per mean confidence: {} ({})".format(modelclass,d))
+        varconffig.savefig(os.path.join(imagesfolder,"variance_confidence_metrics_{}_{}.png".format(modelclass,args.ood_dataset)))    
     varax.legend()    
     varax.set_title("Ensemble Variance-ECE Ratio")
     varax.set_xlabel("InD/OOD LL variance ratio")
