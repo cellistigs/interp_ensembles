@@ -4,25 +4,115 @@ import numpy as np
 import json
 from scipy.special import softmax
 import matplotlib.pyplot as plt 
-from interpensembles.metrics import AccuracyData,NLLData,CalibrationData
+from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
 
 resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
 imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
 
-markers = {"ResNet":"rx","Ensemble-2 Synth ResNet":"r*","Ensemble-4 ResNet":"ro","Ensemble-4 Synth ResNet":"ro","WideResNet 18-2":"bx","Ensemble-2 Synth WideResNet 18-2":"b*","Ensemble-4 Synth WideResNet 18-2":"bo","WideResNet 18-4":"gx","Ensemble-2 Synth WideResNet 18-4":"g*","Ensemble-4 Synth WideResNet 18-4":"go","Ensemble-5 Synth ResNet":"r+","VGG-11":"yx", "Ensemble-4 Synth VGG-11":"yo","VGG19":"px","Ensemble-4 Synth VGG-19":"po"}
+markers = {"ResNet":"rx",
+        "Ensemble-2 Synth ResNet":"r*",
+        "Ensemble-4 ResNet":"ro",
+        "Ensemble-4 Synth ResNet":"ro",
+        "WideResNet 18-2":"bx",
+        "Ensemble-2 Synth WideResNet 18-2":"b*",
+        "Ensemble-4 Synth WideResNet 18-2":"bo",
+        "WideResNet 18-4":"gx",
+        "Ensemble-2 Synth WideResNet 18-4":"g*",
+        "Ensemble-4 Synth WideResNet 18-4":"go",
+        "Ensemble-5 Synth ResNet":"r+",
+        "VGG-11":"yx",
+        "Ensemble-4 Synth VGG-11":"yo",
+        "VGG-19":"mx",
+        "Ensemble-4 Synth VGG-19":"mo",
+        "GoogleNet":"cx",
+        "Ensemble-4 Synth GoogleNet":"co",
+        "Inception-v3":"kx",
+        "Ensemble-4 Synth Inception-v3":"ko",
+        "DenseNet-121":"C0x",
+        "Ensemble-4 Synth DenseNet-121":"C0o",
+        "DenseNet-169":"C2x",
+        "Ensemble-4 Synth DenseNet-169":"C2o",
+        "WideResNet-28-10":"C1x",
+        "Ensemble-4 Synth WideResNet-28-10":"C1o"
+        }
+
+variancecalc = {}
+for modelprefix in markers:
+    variancecalc[modelprefix] = {"ind":VarianceData(modelprefix,"ind"),"ood":VarianceData(modelprefix,"ood"),"ind_cal":[],"ood_cal":[],"ind_ens_cal":[],"ood_ens_cal":[]}
+
 
 ### Now we define the common names for the data, and their prefixes: 
 dataindex = {
+            "WideResNet-28-10":"cifar10_wrn28_s1_",
+            "WideResNet-28-10.1":"cifar10_wrn28_s2_",
+            "WideResNet-28-10.2":"cifar10_wrn28_s3_",
+            "WideResNet-28-10.3":"cifar10_wrn28_s4_",
+            "WideResNet-28-10.4":"cifar10_wrn28_s5_",
+            "Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet_28_10_11_17_",
+            "Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet_28_10_11_17_",
+            "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet_28_10_11_17_",
+            "Ensemble-4 Synth WideResNet-28-10.3":"synth_ensemble_3_wideresnet_28_10_11_17_",
+            "Ensemble-4 Synth WideResNet-28-10.4":"synth_ensemble_4_wideresnet_28_10_11_17_",
+            "DenseNet-121":"robust_results11-17-21_00:55.03_base_densenet121",
+            "DenseNet-121.1":"robust_results11-17-21_01:36.53_base_densenet121",
+            "DenseNet-121.2":"robust_results11-17-21_02:19.01_base_densenet121",
+            "DenseNet-121.3":"robust_results11-17-21_03:01.03_base_densenet121",
+            "DenseNet-121.4":"robust_results11-17-21_03:43.39_base_densenet121",
+            "Ensemble-4 Synth DenseNet-121":"synth_ensemble_0_densenet121_11_17_",
+            "Ensemble-4 Synth DenseNet-121.1":"synth_ensemble_1_densenet121_11_17_",
+            "Ensemble-4 Synth DenseNet-121.2":"synth_ensemble_2_densenet121_11_17_",
+            "Ensemble-4 Synth DenseNet-121.3":"synth_ensemble_3_densenet121_11_17_",
+            "Ensemble-4 Synth DenseNet-121.4":"synth_ensemble_4_densenet121_11_17_",
+            "DenseNet-169":"robust_results11-17-21_20:28.21_base_densenet169",
+            "DenseNet-169.1":"robust_results11-17-21_21:23.18_base_densenet169",
+            "DenseNet-169.2":"robust_results11-17-21_22:20.10_base_densenet169",
+            "DenseNet-169.3":"robust_results11-17-21_23:17.03_base_densenet169",
+            "DenseNet-169.4":"robust_results11-18-21_00:13.12_base_densenet169",
+            "Ensemble-4 Synth DenseNet-169":"synth_ensemble_0_densenet169_11_17_",
+            "Ensemble-4 Synth DenseNet-169.1":"synth_ensemble_1_densenet169_11_17_",
+            "Ensemble-4 Synth DenseNet-169.2":"synth_ensemble_2_densenet169_11_17_",
+            "Ensemble-4 Synth DenseNet-169.3":"synth_ensemble_3_densenet169_11_17_",
+            "Ensemble-4 Synth DenseNet-169.4":"synth_ensemble_4_densenet169_11_17_",
+            "Inception-v3":"robust_results11-16-21_18:58.44_base_inception_v3",
+            "Inception-v3.1":"robust_results11-16-21_22:29.39_base_inception_v3",
+            "Inception-v3.2":"robust_results11-17-21_02:00.37_base_inception_v3",
+            "Inception-v3.3":"robust_results11-17-21_05:31.50_base_inception_v3",
+            "Inception-v3.4":"robust_results11-17-21_09:02.26_base_inception_v3",
+            "Ensemble-4 Synth Inception-v3":"synth_ensemble_0_inception_11_17_",
+            "Ensemble-4 Synth Inception-v3.1":"synth_ensemble_1_inception_11_17_",
+            "Ensemble-4 Synth Inception-v3.2":"synth_ensemble_2_inception_11_17_",
+            "Ensemble-4 Synth Inception-v3.3":"synth_ensemble_3_inception_11_17_",
+            "Ensemble-4 Synth Inception-v3.4":"synth_ensemble_4_inception_11_17_",
+            "GoogleNet":"robust_results11-17-21_01:19.42_base_googlenet",
+            "GoogleNet.1":"robust_results11-17-21_02:53.46_base_googlenet",
+            "GoogleNet.2":"robust_results11-17-21_04:27.55_base_googlenet",
+            "GoogleNet.3":"robust_results11-17-21_06:02.07_base_googlenet",
+            "GoogleNet.4":"robust_results11-17-21_07:36.23_base_googlenet",
+            "Ensemble-4 Synth GoogleNet":"synth_ensemble_0_googlenet_11_17_",
+            "Ensemble-4 Synth GoogleNet.1":"synth_ensemble_1_googlenet_11_17_",
+            "Ensemble-4 Synth GoogleNet.2":"synth_ensemble_2_googlenet_11_17_",
+            "Ensemble-4 Synth GoogleNet.3":"synth_ensemble_3_googlenet_11_17_",
+            "Ensemble-4 Synth GoogleNet.4":"synth_ensemble_4_googlenet_11_17_",
             "VGG-11":"robust_results11-15-21_20:42.38_base_vgg11_bn",
             "VGG-11.1":"robust_results11-15-21_20:55.18_base_vgg11_bn",
             "VGG-11.2":"robust_results11-15-21_21:08.03_base_vgg11_bn",
             "VGG-11.3":"robust_results11-15-21_21:20.48_base_vgg11_bn",
             "VGG-11.4":"robust_results11-15-21_20:55.18_base_vgg11_bn",
-            "Ensemble-4 Synth VGG-11":"synth_ensemble_0_vgg11_bn_11_16",
-            "Ensemble-4 Synth VGG-11.1":"robust_results11-15-21_20:55.18_base_vgg11_bn",
-            "Ensemble-4 Synth VGG-11.2":"robust_results11-15-21_21:08.03_base_vgg11_bn",
-            "Ensemble-4 Synth VGG-11.3":"robust_results11-15-21_21:20.48_base_vgg11_bn",
-            "Ensemble-4 Synth VGG-11.4":"robust_results11-15-21_20:55.18_base_vgg11_bn",
+            "Ensemble-4 Synth VGG-11":"synth_ensemble_0_vgg11_bn_11_16_",
+            "Ensemble-4 Synth VGG-11.1":"synth_ensemble_1_vgg11_bn_11_16_",
+            "Ensemble-4 Synth VGG-11.2":"synth_ensemble_2_vgg11_bn_11_16_",
+            "Ensemble-4 Synth VGG-11.3":"synth_ensemble_3_vgg11_bn_11_16_",
+            "Ensemble-4 Synth VGG-11.4":"synth_ensemble_4_vgg11_bn_11_16_",
+            "VGG-19":"robust_results11-15-21_22:29.03_base_vgg19_bn",
+            "VGG-19.1":"robust_results11-15-21_22:49.10_base_vgg19_bn",
+            "VGG-19.2":"robust_results11-15-21_23:09.19_base_vgg19_bn",
+            "VGG-19.3":"robust_results11-15-21_23:29.30_base_vgg19_bn",
+            "VGG-19.4":"robust_results11-15-21_23:49.39_base_vgg19_bn",
+            "Ensemble-4 Synth VGG-19":"synth_ensemble_0_vgg19_bn_11_16_",
+            "Ensemble-4 Synth VGG-19.1":"synth_ensemble_1_vgg19_bn_11_16_",
+            "Ensemble-4 Synth VGG-19.2":"synth_ensemble_2_vgg19_bn_11_16_",
+            "Ensemble-4 Synth VGG-19.3":"synth_ensemble_3_vgg19_bn_11_16_",
+            "Ensemble-4 Synth VGG-19.4":"synth_ensemble_4_vgg19_bn_11_16_",
             #"ResNet 18":"robust_results11-10-21_23:33.14_base_resnet18",
             #"ResNet 18.1":"robust_results11-10-21_23:34.02_base_resnet18",
             #"ResNet 18.2":"robust_results11-10-21_23:34.24_base_resnet18",
@@ -117,9 +207,11 @@ suffixes = {
 bins = list(np.linspace(0,1,17)[1:-1])
 
 if __name__ == "__main__":
-    predfig,predax = plt.subplots(figsize = (10,10))
-    calfig,calax = plt.subplots(figsize = (10,10))
-    nllfig,nllax = plt.subplots(figsize = (10,10))
+    predfig,predax = plt.subplots(figsize = (15,15))
+    calfig,calax = plt.subplots(figsize = (15,15))
+    bsfig,bsax = plt.subplots(figsize = (15,15))
+    bsmfig,bsmax = plt.subplots(figsize = (15,15))
+    nllfig,nllax = plt.subplots(figsize = (15,15))
 
 
     for model,path in dataindex.items():
@@ -132,20 +224,24 @@ if __name__ == "__main__":
             metadata = {"softmax":True}
 
         for di,dist in enumerate([["InD Labels","InD Probs"],["OOD Labels","OOD Probs"]]):
-            labels = np.load(os.path.join(resultsfolder,path+suffixes[dist[0]]))
+            labels = np.load(os.path.join(resultsfolder,path+suffixes[dist[0]])).astype(int)
             probs = np.load(os.path.join(resultsfolder,path+suffixes[dist[1]]))
             if model.startswith("InterpEnsemble"):
                 probs = probs*2
             if bool(metadata.get("softmax",True)) is False:    
+                print("applying softmax to: {} for {}".format(model,dist[1]))
                 probs = softmax(probs,axis = 1)
 
             ad = AccuracyData()
             nld = NLLData()
             cd = CalibrationData(bins)
+            bsd = BrierScoreData()
                 
             accuracy = ad.accuracy(probs,labels)
             nll = nld.nll(probs,labels,normalize = True)
             ece = cd.ece(probs,labels)
+            bs = bsd.brierscore(probs,labels)
+            bsm = bsd.brierscore_multi(probs,labels)
             rel = cd.bin(probs,labels)
             interval = cd.binedges[0][1]-cd.binedges[0][0]
             relax[di].bar([bi[0] for bi in cd.binedges],[bi[0] for bi in cd.binedges],width= interval,color = "red",alpha = 0.3)
@@ -153,24 +249,43 @@ if __name__ == "__main__":
             relax[di].set_aspect("equal")
 
             if dist[0] == "InD Labels":
-                modelmetrics["ind"] = [accuracy,nll,ece]
+                modelmetrics["ind"] = [accuracy,nll,ece,bs,bsm]
             if dist[0] == "OOD Labels":
-                modelmetrics["ood"] = [accuracy,nll,ece]
+                modelmetrics["ood"] = [accuracy,nll,ece,bs,bsm]
+
+            for modelpre,mcand in markers.items():
+                if model.startswith(modelpre):
+                    if dist[0] == "InD Labels":
+                        ## track diversity metrics
+                        variancecalc[modelpre]["ind"].register(probs,labels,model)
+                        variancecalc[modelpre]["ind_cal"].append(ece) 
+                    elif dist[0] == "OOD Labels":    
+                        variancecalc[modelpre]["ood"].register(probs,labels,model)
+                        variancecalc[modelpre]["ood_cal"].append(ece) 
+                elif model.startswith("Ensemble-4 Synth "+modelpre):        
+                    if dist[0] == "InD Labels":
+                        variancecalc[modelpre]["ind_ens_cal"].append(ece) 
+                    elif dist[0] == "OOD Labels":    
+                        variancecalc[modelpre]["ood_ens_cal"].append(ece) 
 
         for modelpre,mcand in markers.items():
             if model.startswith(modelpre):
+                ## set marker
                 marker = mcand
-                break
             else:    
                 pass
         if len(model.split(".")) == 1: 
             predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,label = model)
             nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,label = model)
             calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,label = model)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,label = model)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,label = model)
         else:    
             predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker)
             nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker)
             calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker)
         relfig.suptitle("{}".format(model))
         relax[0].set_title("InD Calibration")
         relax[1].set_title("OOD Calibration")
@@ -178,9 +293,28 @@ if __name__ == "__main__":
         relax[1].set_ylabel("Accuracy")
         relfig.savefig(os.path.join(imagesfolder,"reliability_diag_{}.png".format(model)))    
         plt.close(relfig)
+    ## Variance data: 
+    varfig,varax = plt.subplots(figsize = (10,10))
+    print(variancecalc.items())
+    for modelclass,modeldata in variancecalc.items():
+        if not modelclass.startswith("Ensemble"):
+            try:
+                print(np.mean(modeldata["ind_ens_cal"]),np.mean(modeldata["ood_ens_cal"]))
+                varax.plot(modeldata["ind"].expected_variance()/modeldata["ood"].expected_variance(),(np.mean(modeldata["ind_ens_cal"])-np.mean(modeldata["ind_cal"]))/(np.mean(modeldata["ood_ens_cal"])-np.mean(modeldata["ood_cal"])),markers[modelclass],label = modelclass)
+                
+            except IndexError:    
+                pass
+    varax.legend()    
+    varax.set_title("Ensemble Variance-ECE Ratio")
+    varax.set_xlabel("InD/OOD LL variance ratio")
+    varax.set_ylabel("InD/OOD ECE ratio")
+    varfig.savefig(os.path.join(imagesfolder,"variance_metrics"))    
+
     predax.legend()
     nllax.legend()
     calax.legend()
+    bsax.legend()
+    bsmax.legend()
 
     predax.set_title("Predictive Accuracy")
     predax.set_xlabel("InD Test Accuracy")
@@ -191,9 +325,18 @@ if __name__ == "__main__":
     calax.set_title("Calibration")
     calax.set_xlabel("InD ECE")
     calax.set_ylabel("OOD ECE")
+    bsax.set_title("Brier Score (Binarized)")
+    bsax.set_xlabel("InD BS")
+    bsax.set_ylabel("OOD BS")
+    bsmax.set_title("Brier Score (Multiclass)")
+    bsmax.set_xlabel("InD BS")
+    bsmax.set_ylabel("OOD BS")
     predfig.savefig(os.path.join(imagesfolder,"prediction_metrics"))    
     nllfig.savefig(os.path.join(imagesfolder,"nll_metrics"))    
     calfig.savefig(os.path.join(imagesfolder,"calibration_metrics"))    
+    bsfig.savefig(os.path.join(imagesfolder,"brierscore_metrics"))
+    bsmfig.savefig(os.path.join(imagesfolder,"brierscoremulti_metrics"))
+
 
 
             

@@ -1,6 +1,83 @@
 ## Tools to help calculate calibration related metrics given a predictions and labels.  
 import numpy as np
 
+class BrierScoreData(object):
+    """Calculates brier score. 
+
+    """
+    def __init__(self):
+        pass
+
+    def brierscore(self,prob,target):
+        """Given an array of probabilities, `prob`, (batch,dim) and an array of targets `target` (dim), calculates the brier score as if we were in the binary case: take the predicted probability of the target class, and just calculate based on that.
+        :param prob: array of probabilities per class. 
+        :param target: list/array of true targets. 
+
+        """
+        probs = prob[np.arange(len(target)),target]
+        deviance = probs-np.ones(probs.shape)
+        
+        return np.mean(deviance**2)
+
+    def brierscore_multi(self,prob,target):
+        """The "original" brier score definition that accounts for other classes explicitly. Note the range of this test is 0-K, where k is the number of classes. 
+        :param prob: array of probabilities per class. 
+        :param target: list/array of true targets. 
+
+        """
+        target_onehot = np.zeros(prob.shape)
+        target_onehot[np.arange(len(target)),target] = 1 ## onehot encoding. 
+        deviance = prob-target_onehot
+        return np.mean(np.sum(deviance**2,axis = 1))
+
+        
+
+class VarianceData(object):
+    """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
+
+    """
+    def __init__(self,modelprefix,data):
+        """Takes a modelprefix that specifies the kinds of models over which we will be calculating variance. 
+
+        :param modelprefix: a string specifying what model names should start with. 
+        :param data: ind/ood, specifying if this class is calculating variance for in or out of distribution data. 
+        """
+        self.modelprefix = modelprefix
+        self.models = {} ## dict of dicts- key is modelname, value is dictionary of preds/labels.
+        self.data = data
+    
+    def register(self,preds,labels,modelname):
+        """Takes predictions and labels. as a rough check, will assert that the labels match those that have already been registered.  
+        :param preds: assumes softmax applied. 
+        :param labels: vector of integers. 
+        :param modelname: enforce that models we are calculating diversity over have the same model prefix. 
+        """
+        assert modelname.startswith(self.modelprefix); "modelname must start with modelprefix"
+        for model,modeldata in self.models.items():
+            assert np.all(labels == modeldata["labels"]); "labels must match already registered." 
+            assert np.allclose(np.sum(preds,axis = 1), 1); "predictions must be probabilities"
+        self.models[modelname] = {"preds":preds,"labels":labels}    
+    
+    def variance(self):
+        """Calculates variance in confidence across all softmax output. 
+
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0)    
+        return np.var(array_probs, axis = 0)
+
+    def expected_variance(self):
+        """Calculates expected variance across y|x and x. This is just selecting the variance in the top probability for y|x, and then averaging over all examples for x. 
+        """
+        target = self.models[list(self.models.keys())[0]]["labels"]
+
+        all_vars = self.variance()
+        tprob_vars = all_vars[np.arange(len(target)),target]
+        return np.mean(tprob_vars)
+
 class AccuracyData(object):
     """Calculates accuracy related metrics. 
 
