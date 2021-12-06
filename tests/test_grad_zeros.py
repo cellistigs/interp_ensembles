@@ -1,5 +1,5 @@
 ## Test if we can use pytorch/ptl to manually zero out weights during training. 
-import pytorch-lightning as pl
+import pytorch_lightning as pl
 from torch import nn
 import torch.nn.functional as F
 
