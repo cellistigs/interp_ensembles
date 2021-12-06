@@ -12,4 +12,4 @@ src/interpensembles.egg-info/*
 docs/_build/*
 etc/*
 scripts/cifar-10-python.tar.gz
-scripts.cifar-10-batches-py/*
+scripts/cifar-10-batches-py/*
