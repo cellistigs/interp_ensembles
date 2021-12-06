@@ -5,4 +5,6 @@ results/*
 images/*
 */__pycache__/*
 src/PyTorch_CIFAR10/*
+./src/PyTorch_CIFAR10/cifar10_models/*
 src/interpensembles.egg-info/*
+docs/_build/*
