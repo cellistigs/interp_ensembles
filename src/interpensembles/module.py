@@ -7,6 +7,7 @@ from .cifar10_models.googlenet import googlenet
 from .cifar10_models.inception import inception_v3
 from .cifar10_models.mobilenetv2 import mobilenet_v2
 from .cifar10_models.resnet import resnet18, resnet34, resnet50, wideresnet18, wideresnet18_4, widesubresnet18,wideresnet18_4_grouplinear
+from .cifar10_models.wideresnet_28 import wideresnet28_10
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from .schduler import WarmupCosineLR
 
@@ -18,6 +19,7 @@ all_classifiers = {
     "wideresnet18":wideresnet18,
     "wideresnet18_4":wideresnet18_4,
     "wideresnet18_4_grouplinear":wideresnet18_4_grouplinear,
+    "wideresnet28_10":wideresnet28_10,
     "resnet18": resnet18,
     "resnet34": resnet34,
     "resnet50": resnet50,
