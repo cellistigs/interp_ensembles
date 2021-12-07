@@ -287,7 +287,12 @@ all_dataindices = {"cifar10.1":{
                 "Ensemble-4 Synth WideResNet 18-4.1":"synth_ensemble_1_base_wideresnet18_4_e4_cinic_",
                 "Ensemble-4 Synth WideResNet 18-4.2":"synth_ensemble_2_base_wideresnet18_4_e4_cinic_",
                 "Ensemble-4 Synth WideResNet 18-4.3":"synth_ensemble_3_base_wideresnet18_4_e4_cinic_",
-                "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_e4_cinic_"
+                "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_e4_cinic_",
+                "WideResNet-28-10":"robust_results12-07-21_04:09.42_base_wideresnet28_10",
+                "WideResNet-28-10.1":"robust_results12-07-21_04:19.27_base_wideresnet28_10",
+                "WideResNet-28-10.2":"robust_results12-07-21_04:21.39_base_wideresnet28_10",
+                "WideResNet-28-10.3":"robust_results12-07-21_04:23.48_base_wideresnet28_10",
+                "WideResNet-28-10.4":"robust_results12-07-21_04:26.08_base_wideresnet28_10",
                     },
             }
 
