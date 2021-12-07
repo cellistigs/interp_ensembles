@@ -5,4 +5,11 @@ results/*
 images/*
 */__pycache__/*
 src/PyTorch_CIFAR10/*
+src/PyTorch_CIFAR10/cifar10_models/*
+src/interpensembles/cifar-10-batches-py/*
+src/interpensembles/cifar-10-python.tar.gz
 src/interpensembles.egg-info/*
+docs/_build/*
+etc/*
+scripts/cifar-10-python.tar.gz
+scripts/cifar-10-batches-py/*
