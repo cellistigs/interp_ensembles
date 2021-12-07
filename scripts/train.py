@@ -11,7 +11,7 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 from interpensembles.data import CIFAR10Data,CIFAR10_1Data
 from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10InterEnsembleModule
-from cifar10_ood.data import CINIC10Data
+from cifar10_ood.data import CINIC10_Data
 
 modules = {"base":CIFAR10Module,
         "ensemble":CIFAR10EnsembleModule,
@@ -107,28 +107,31 @@ def main(args):
 
     
 
-    if not bool(args.test_phase):
-        model = modules[args.module](**all_args)
-    else:    
+    if bool(args.test_phase) and not bool(args.pretrained): ## if loading from checkpoints: 
         if args.module == "base":
             model = modules[args.module].load_from_checkpoint(checkpoint_path=args.checkpoint,hparams = args)
         elif args.module == "ensemble":    
             model = modules[args.module].load_from_checkpoint(nb_models = all_args["nb_models"],checkpoint_path=args.checkpoint,hparams = args)
         elif args.module == "interpensemble":    
             model = modules[args.module].load_from_checkpoint(lamb = all_args["lamb"],checkpoint_path=args.checkpoint,hparans = args)
+    else: ## if training from scratch or loading from state dict:    
+        model = modules[args.module](**all_args)
             
     cifar10data = CIFAR10Data(args)
     if args.ood_dataset == "cifar10_1":
         ood_data = CIFAR10_1Data(args,version =args.version)
     elif args.ood_dataset == "cinic10":    
-        ood_data = CINIC10Data(args)
+        ood_data = CINIC10_Data(args)
 
 
     if bool(args.pretrained):
-        state_dict = os.path.join(
-            script_dir,"../","models",
-            "cifar10_models", "state_dicts", args.classifier + ".pt"
-        )
+        if args.pretrained_path is None:
+            state_dict = os.path.join(
+                script_dir,"../","models",
+                "cifar10_models", "state_dicts", args.classifier + ".pt"
+            )
+        else:     
+            state_dict = args.pretrained_path
         model.model.load_state_dict(torch.load(state_dict))
 
     if bool(args.test_phase):
@@ -177,6 +180,7 @@ if __name__ == "__main__":
     # TRAINER args
     parser.add_argument("--classifier", type=str, default="resnet18")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
+    parser.add_argument("--pretrained-path",type = str, default = None)
     parser.add_argument("--module", type = str,default = "base",choices = ["base","ensemble","interpensemble"])
     parser.add_argument("--version",type = str,default = "v4",choices = ["v4","v6"])
 
