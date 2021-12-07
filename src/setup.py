@@ -3,8 +3,8 @@ import os
 
 loc = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(loc,"../","README.md"),"r") as fh:
-    long_description = fh.read()
+#with open(os.path.join(loc,"../","README.md"),"r") as fh:
+#    long_description = fh.read()
 
 setuptools.setup(
         name = "interpensembles",
@@ -12,7 +12,7 @@ setuptools.setup(
         author = "Taiga Abe",
         author_email = "ta2507@columbia.edu",
         description = "Interpolation-ensembles", 
-        long_description = long_description,
+        long_description = "",
         long_description_content_type = "test/markdown", 
         url = "https://github.com/cellistigs/interp-ensembles",
         packages = setuptools.find_packages(),
