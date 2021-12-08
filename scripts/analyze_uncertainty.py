@@ -46,6 +46,7 @@ def main(alldata,data):
 
     """
     exclude = {"cifar10.1":["Ensemble"],"cinic10":["Ensemble"]} 
+    corr_data = {"ind":{},"ood":{}}
     for modelclass, modeldata in alldata.items():
         print(modelclass)
         if not np.any([modelclass.startswith(stub) for stub in exclude[data]]):
@@ -70,6 +71,7 @@ def main(alldata,data):
 
                 #corr,p = spearmanr(a=normed[dataclass][0],b=normed[dataclass][1])
                 corr,p = pearsonr(normed[dataclass][0],normed[dataclass][1])
+                corr_data[dataclass][modelclass] = (corr,p)
                 ax[di,0].plot(normed[dataclass][1],normed[dataclass][0],"o",label ="{}: pearson r: {}, p = {}".format(dataclass,str(corr)[:5],p),markersize = 0.5)
                 idline = np.linspace(xmin,xmax,100)
                 ax[di,0].plot(idline,idline,"--",color = "black",label = "y=x")
@@ -98,13 +100,16 @@ def main(alldata,data):
 
             plt.savefig(os.path.join(img_dir,"mean_brier_vs_variance_{}_{}.png".format(modelclass,data)))        
             plt.close()
+    joblib.dump(corr_data,os.path.join(agg_dir,"corr_data_{}".format(data)))        
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--data",type = str,default = "cifar10.1",choices = ["cifar10.1","cinic10"])
     args = parser.parse_args()
+    datasets = ["cifar10.1","cinic10"]
+    for datas in datasets:
 
-    data = joblib.load(os.path.join(agg_dir,"ensembledata_{}".format(args.data)))
-    main(data,args.data)
+        data = joblib.load(os.path.join(agg_dir,"ensembledata_{}".format(datas)))
+        main(data,datas)
 
