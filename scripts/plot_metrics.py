@@ -35,6 +35,7 @@ markers = {"ResNet":"rx",
         "DenseNet-169":"C2x",
         "Ensemble-4 Synth DenseNet-169":"C2o",
         "WideResNet-28-10":"C1x",
+        "Conv WideResNet-28-10":"C1*",
         "Ensemble-4 Synth WideResNet-28-10":"C1o"
         }
 
@@ -50,6 +51,11 @@ all_dataindices = {"cifar10.1":{
             "WideResNet-28-10.2":"cifar10_wrn28_s3_",
             "WideResNet-28-10.3":"cifar10_wrn28_s4_",
             "WideResNet-28-10.4":"cifar10_wrn28_s5_",
+            "Conv WideResNet-28-10":"robust_results12-07-21_21:54.17_base_wideresnet28_10",
+            "Conv WideResNet-28-10.1":"robust_results12-07-21_21:55.20_base_wideresnet28_10",
+            "Conv WideResNet-28-10.2":"robust_results12-07-21_21:56.19_base_wideresnet28_10",
+            "Conv WideResNet-28-10.3":"robust_results12-07-21_21:57.14_base_wideresnet28_10",
+            "Conv WideResNet-28-10.4":"robust_results12-07-21_21:58.22_base_wideresnet28_10",
             "Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet_28_10_11_17_",
             "Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet_28_10_11_17_",
             "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet_28_10_11_17_",
@@ -293,6 +299,11 @@ all_dataindices = {"cifar10.1":{
                 "WideResNet-28-10.2":"robust_results12-07-21_04:21.39_base_wideresnet28_10",
                 "WideResNet-28-10.3":"robust_results12-07-21_04:23.48_base_wideresnet28_10",
                 "WideResNet-28-10.4":"robust_results12-07-21_04:26.08_base_wideresnet28_10",
+                "Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet28_10_12_6_",
+                "Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet28_10_12_6_",
+                "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet28_10_12_6_",
+                "Ensemble-4 Synth WideResNet-28-10.3":"synth_ensemble_3_wideresnet28_10_12_6_",
+                "Ensemble-4 Synth WideResNet-28-10.4":"synth_ensemble_4_wideresnet28_10_12_6_",
                     },
             }
 
@@ -403,7 +414,7 @@ def main(args,dataindex,suffixes):
         plt.close(relfig)
     ## Variance data: 
     varfig,varax = plt.subplots(figsize = (10,10))
-    joblib.dump(variancecalc,"ensembledata_{}".format(args.ood_dataset))
+    joblib.dump(variancecalc,os.path.join("..","results","aggregated_ensembleresults","ensembledata_{}".format(args.ood_dataset)))
     for modelclass,modeldata in variancecalc.items():
         varconffig,varconfax = plt.subplots(2,2,figsize=(20,20))
         if not modelclass.startswith("Ensemble"):

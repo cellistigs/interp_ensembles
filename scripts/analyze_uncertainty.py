@@ -1,8 +1,9 @@
 import joblib
-from scipy.stats import spearmanr
+from scipy.stats import spearmanr,pearsonr
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
 from matplotlib.colors import SymLogNorm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 from argparse import ArgumentParser
 import os 
@@ -16,8 +17,8 @@ img_dir = os.path.join(here,"../images/variance_quant")
 def get_aleatoric_uncertainty(predslabels):
     """Assume predslabels is a dictionary with keys giving modelnames and values dictionaries with keys "labels","preds". 
 
-    we define the aleatoric uncertainty contribution to the Brier score as: 
-    $A = \sum_k \mu_k(1-\mu_k) - \mathcal{E}[(p_ik-\mu_k)^2]$
+    we define the the mean ensemble Brier score as: 
+    $A = \mathcal{E}[(p_ik-\mu_k)^2]$
     """
     ## first, calculate a mu_k: 
     factors = []
@@ -44,27 +45,41 @@ def main(alldata,data):
     as well as a string specifying ind vs. ood data. 
 
     """
-    exclude = {"cifar10.1":["Ensemble"],"cinic10":["Ensemble","WideResNet-28"]} 
+    exclude = {"cifar10.1":["Ensemble"],"cinic10":["Ensemble"]} 
     for modelclass, modeldata in alldata.items():
         print(modelclass)
         if not np.any([modelclass.startswith(stub) for stub in exclude[data]]):
             fig,ax = plt.subplots(2,2,figsize=(10,10),sharex = True, sharey = True)
+            normed = {}
+            xmin,xmax = np.inf,-np.inf 
+            ymin,ymax = np.inf,-np.inf 
             for di,dataclass in enumerate(["ood","ind"]):
                 mean_model_brier,norm = get_aleatoric_uncertainty(modeldata[dataclass])
                 variance =modeldata[dataclass].variance()
-                normed = (np.mean(mean_model_brier,axis = 1),np.mean(variance,axis = 1))
-                xmin,xmax = np.min(normed[0]),np.max(normed[0])
-                ymin,ymax = np.min(normed[1]),np.max(normed[1])
+                normed[dataclass] = (np.mean(mean_model_brier,axis = 1),np.mean(variance,axis = 1))
+                xmin,xmax = min(xmin,np.min(normed[dataclass][0])),max(xmax,np.max(normed[dataclass][0]))
+                ymin,ymax = min(ymin,np.min(normed[dataclass][1])),max(ymax,np.max(normed[dataclass][1]))
+
+            for di,dataclass in enumerate(["ood","ind"]):
                 xx,yy = np.mgrid[xmin:xmax:int(abs(xmax-xmin)*1000)*1j,ymin:ymax:int(abs(ymax-ymin)*1000)*1j]
                 eps = 0 #1e-2
                 samplepositions = np.vstack([xx.ravel(),yy.ravel()]) 
-                kernel = gaussian_kde(normed,bw_method = len(normed[0])**(-1/4))
-                f = np.flipud(np.reshape(kernel(samplepositions).T,xx.shape))
+                kernel = gaussian_kde(normed[dataclass],bw_method = len(normed[dataclass][0])**(-1/4))
+                #f = np.flipud(np.reshape(kernel(samplepositions).T,xx.shape))
+                f = np.reshape(kernel(samplepositions).T,xx.shape)
 
-                corr,p = spearmanr(a=normed[0],b=normed[1])
-                ax[di,0].plot(normed[1],normed[0],"o",label ="{}: spearman r: {}, p = {}".format(dataclass,str(corr)[:5],p),markersize = 0.5)
-                axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto")
-                fig.colorbar(axlognorm,ax = ax[di,1],extend = "max")
+                #corr,p = spearmanr(a=normed[dataclass][0],b=normed[dataclass][1])
+                corr,p = pearsonr(normed[dataclass][0],normed[dataclass][1])
+                ax[di,0].plot(normed[dataclass][1],normed[dataclass][0],"o",label ="{}: pearson r: {}, p = {}".format(dataclass,str(corr)[:5],p),markersize = 0.5)
+                idline = np.linspace(xmin,xmax,100)
+                ax[di,0].plot(idline,idline,"--",color = "black",label = "y=x")
+                axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
+                divider = make_axes_locatable(ax[di,1])
+                cax = divider.append_axes("right",size = "5%",pad = 0.17)
+                cax.set_axis_off()
+                #asp = np.diff(ax[di,0].get_xlim())[0]/np.diff(ax[di,0].get_ylim())[0]
+                #axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto")
+                fig.colorbar(axlognorm,ax = cax)
                 
                 ax[di,0].set_ylabel(r'$\frac{1}{K}\sum_k \mathcal{E}(p_{ik}-\mu_k)$')
                 ax[di,0].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
@@ -79,7 +94,7 @@ def main(alldata,data):
             ax[0,1].set_title("kde (ood)")
             ax[1,0].set_title("scatter (ind)")
             ax[1,1].set_title("kde (ind)")
-            plt.tight_layout()
+            #plt.tight_layout()
 
             plt.savefig(os.path.join(img_dir,"mean_brier_vs_variance_{}_{}.png".format(modelclass,data)))        
             plt.close()
