@@ -15,7 +15,6 @@ def get_ckptpath(orig_stub):
         checkpoint = os.listdir(checkpointpath)
         classifier = metadict["classifier"]
         softmax = metadict.get("softmax","1")
-        import pdb; pdb.set_trace
     command_data = {"checkpointpath":os.path.join(checkpointpath,checkpoint[0]),"classifier":classifier,"softmax":str(softmax)}   
     return command_data     
 
