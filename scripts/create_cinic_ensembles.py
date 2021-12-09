@@ -45,7 +45,7 @@ def create_synth_ensembles(classifier_stubs,ood_set):
     for classifier,stubdata in classifier_stubs.items():
         module = stubdata[0]["metadata"]["module"]
         #command = ["export MKL_THREADING_LAYER=GNU;","python", os.path.join(here,"train.py"),"--classifier",command_data["classifier"],"--softmax",command_data["softmax"],"--checkpoint",command_data["checkpointpath"],"--test_phase","1","--ood_dataset","cinic10","--module","base"]
-        command = ["python",os.path.join(here,"create_synth_ensembles.py"),"-e","4","-s","--nameprefix","{}_{}_{}".format(module,classifier,"e4_{}".format(ood_set)),"-os","ood_cinic_"]
+        command = ["python",os.path.join(here,"create_synth_ensembles.py"),"-e","4","-s","--nameprefix","{}_{}_{}".format(module,classifier,"e4_{}".format(ood_set)),"-os","ood_{}_".format(ood_set)]
         for s in stubdata:
             command.append("-r {}".format(s["stub"])) 
         try:
