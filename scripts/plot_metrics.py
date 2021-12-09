@@ -11,6 +11,18 @@ from argparse import ArgumentParser
 resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
 imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
 
+commonname_map = {"resnet18": "ResNet",
+        "wideresnet18":"WideResNet 18-2",
+        "wideresnet18_4":"WideResNet 18-4",
+        "vgg11_bn":"VGG-11",
+        "vgg19_bn":"VGG-19",
+        "googlenet":"GoogleNet",
+        "inception_v3":"Inception-v3",
+        "densenet121":"DenseNet-121",
+        "densenet169":"DenseNet-169",
+        "wideresnet28_10""WideResNet-28-10",
+        }
+
 markers = {"ResNet":"rx",
         "Ensemble-2 Synth ResNet":"r*",
         "Ensemble-4 ResNet":"ro",
