@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 for mi,model in enumerate(data):
                     name = plot_metrics.commonname_map[classifier]+"{}".format(indexes[mi])
                     ood_dict[name] = model["stub"]
-                    ood_dict["Ensemble-4 Synth "+name] = "synth_ensemble_{}_{}".format(mi,ensembleprefix)
+                    ood_dict["Ensemble-4 Synth "+name] = "synth_ensemble_{}_{}_".format(mi,ensembleprefix)
             all_ood[ood_set] = ood_dict    
     with open("cifar10c_all_stubs.json","w") as f:
         json.dump(all_ood,f,indent = 4)        
