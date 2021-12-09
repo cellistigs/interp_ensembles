@@ -20,7 +20,7 @@ commonname_map = {"resnet18": "ResNet",
         "inception_v3":"Inception-v3",
         "densenet121":"DenseNet-121",
         "densenet169":"DenseNet-169",
-        "wideresnet28_10""WideResNet-28-10",
+        "wideresnet28_10":"WideResNet-28-10",
         }
 
 markers = {"ResNet":"rx",
