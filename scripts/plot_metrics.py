@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
 from argparse import ArgumentParser
 
-resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
-imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
+here = os.path.abspath(os.path.dirname(__file__))
+resultsfolder = os.path.join(here,"../results")
+imagesfolder = os.path.join(here,"../images")
 
 commonname_map = {"resnet18": "ResNet",
         "wideresnet18":"WideResNet 18-2",
@@ -54,7 +55,6 @@ markers = {"ResNet":"rx",
 variancecalc = {}
 for modelprefix in markers:
     variancecalc[modelprefix] = {"ind":VarianceData(modelprefix,"ind"),"ood":VarianceData(modelprefix,"ood"),"ind_cal":[],"ood_cal":[],"ind_ens_cal":[],"ood_ens_cal":[]}
-
 
 ### Now we define the common names for the data, and their prefixes: 
 all_dataindices = {"cifar10.1":{
@@ -319,6 +319,12 @@ all_dataindices = {"cifar10.1":{
                     },
             }
 
+with open(os.path.join(here,"cifar10c_all_stubs.json"),"r") as f:
+    cifar10c_indices = json.load(f)
+
+all_dataindices.update(cifar10c_indices)
+            
+
 all_suffixes = {"cifar10.1":{
         "InD Labels":"ind_labels.npy",
         "InD Probs": "ind_preds.npy",
@@ -332,8 +338,19 @@ all_suffixes = {"cifar10.1":{
         "OOD Labels":"ood_cinic_labels.npy",
         "OOD Probs": "ood_cinic_preds.npy",
         "meta":"_meta.json"
+        },
         }
-        }
+
+for corruption in ["fog","brightness","gaussian_noise","contrast"]:
+    for level in [1,5]:
+        ident = "cifar10_c_{}_{}".format(corruption,level)
+        all_suffixes[ident] = {
+            "InD Labels":"ind_labels.npy",
+            "InD Probs": "ind_preds.npy",
+            "OOD Labels":"ood_{}_labels.npy".format(ident),
+            "OOD Probs": "ood_{}_preds.npy".format(ident),
+            "meta":"_meta.json"
+                }
 
 bins = list(np.linspace(0,1,17)[1:-1])
 
@@ -484,7 +501,7 @@ def main(args,dataindex,suffixes):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-od","--ood_dataset",help = "which ood dataset to analyze for",default = "cifar10.1",choices = ["cifar10.1","cinic10"])
+    parser.add_argument("-od","--ood_dataset",help = "which ood dataset to analyze for",default = "cifar10.1",choices = ["cifar10.1","cinic10","cifar10_c_fog_1","cifar10_c_fog_5","cifar10_c_brightness_1","cifar10_c_brightness_5","cifar10_c_gaussian_noise_1","cifar10_c_gaussian_noise_5","cifar10_c_contrast_1","cifar10_c_contrast_5"])
     args = parser.parse_args()
     dataindex = all_dataindices[args.ood_dataset]
     suffixes = all_suffixes[args.ood_dataset]
