@@ -159,6 +159,11 @@ def main(args):
     elif args.ood_dataset == "cinic10":    
         np.save(full_path+"ood_cinic_preds",preds_ood)
         np.save(full_path+"ood_cinic_labels",labels_ood)
+    elif args.ood_dataset == "cifar10_c":    
+        np.save(full_path+"ood_cifar10_c_{}_{}_preds".format(args.corruption,args.level),preds_ood)
+        np.save(full_path+"ood_cifar10_c_{}_{}_labels".format(args.corruption,args.level),labels_ood)
+    else:     
+        raise Exception("option for ood dataset not recognized.")
     ## write metadata
     metadata = vars(args)
     metadata["save_path"] = trainer.checkpoint_callback.dirpath
