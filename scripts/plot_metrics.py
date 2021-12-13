@@ -49,7 +49,9 @@ markers = {"ResNet":"rx",
         "Ensemble-4 Synth DenseNet-169":"C2o",
         "WideResNet-28-10":"C1x",
         "Conv WideResNet-28-10":"C1*",
-        "Ensemble-4 Synth WideResNet-28-10":"C1o"
+        "Native WideResNet-28-10":"C1+",
+        "Ensemble-4 Synth WideResNet-28-10":"C1o",
+        "Ensemble-4 Synth Native WideResNet-28-10":"C1^",
         }
 
 variancecalc = {}
@@ -216,6 +218,17 @@ all_dataindices = {"cifar10.1":{
             "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_"
             },
             "cinic10":{
+                #"Native WideResNet-28-10":"robust_results12-10-21_04:33.30_base_wideresnet28_10",
+                "Native WideResNet-28-10":"robust_results12-10-21_08:34.51_base_wideresnet28_10",
+                "Native WideResNet-28-10.1":"robust_results12-10-21_12:33.43_base_wideresnet28_10",
+                "Native WideResNet-28-10.2":"robust_results12-10-21_16:32.41_base_wideresnet28_10",
+                "Native WideResNet-28-10.3":"robust_results12-10-21_20:31.58_base_wideresnet28_10",
+                "Native WideResNet-28-10.4":"robust_results12-11-21_00:31.33_base_wideresnet28_10",
+                "Ensemble-4 Synth Native WideResNet-28-10":"synth_ensemble_0_base_wideresnet28_10_12_10_",
+                "Ensemble-4 Synth Native WideResNet-28-10.1":"synth_ensemble_1_base_wideresnet28_10_12_10_",
+                "Ensemble-4 Synth Native WideResNet-28-10.2":"synth_ensemble_2_base_wideresnet28_10_12_10_",
+                "Ensemble-4 Synth Native WideResNet-28-10.3":"synth_ensemble_3_base_wideresnet28_10_12_10_",
+                "Ensemble-4 Synth Native WideResNet-28-10.4":"synth_ensemble_4_base_wideresnet28_10_12_10_",
                 "DenseNet-121":"robust_results12-02-21_05:17.33_base_densenet121",
                 "DenseNet-121.1":"robust_results12-02-21_05:18.02_base_densenet121",
                 "DenseNet-121.2":"robust_results12-02-21_05:18.30_base_densenet121",
@@ -316,17 +329,6 @@ all_dataindices = {"cifar10.1":{
                 "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet28_10_12_6_",
                 "Ensemble-4 Synth WideResNet-28-10.3":"synth_ensemble_3_wideresnet28_10_12_6_",
                 "Ensemble-4 Synth WideResNet-28-10.4":"synth_ensemble_4_wideresnet28_10_12_6_",
-                "WideResNet-28-10.5":"robust_results12-10-21_04:33.30_base_wideresnet28_10",
-                "WideResNet-28-10.6":"robust_results12-10-21_08:34.51_base_wideresnet28_10",
-                "WideResNet-28-10.7":"robust_results12-10-21_12:33.43_base_wideresnet28_10",
-                "WideResNet-28-10.8":"robust_results12-10-21_16:32.41_base_wideresnet28_10",
-                "WideResNet-28-10.9":"robust_results12-10-21_20:31.58_base_wideresnet28_10",
-                "WideResNet-28-10.10":"robust_results12-11-21_00:31.33_base_wideresnet28_10",
-                "Ensemble-4 Synth WideResNet-28-10.5":"synth_ensemble_0_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth WideResNet-28-10.6":"synth_ensemble_1_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth WideResNet-28-10.7":"synth_ensemble_2_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth WideResNet-28-10.8":"synth_ensemble_3_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth WideResNet-28-10.9":"synth_ensemble_4_base_wideresnet28_10_12_10_",
                     },
             }
 
