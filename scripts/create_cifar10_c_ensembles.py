@@ -19,7 +19,6 @@ if __name__ == "__main__":
             #3. get corresponding metadata files. 
             metadata = create_cinic_ensembles.get_metadata(output)
             sample = metadata[list(metadata.keys())[0]]["metadata"]
-            ensembleprefix = "{}_{}_{}".format(sample["module"],sample["classifier"],"e4_{}".format(ood_set))
 
             #4. group similar stubs based on this.  
             classifier_stubs = create_cinic_ensembles.sort_classifier(metadata)
@@ -32,6 +31,7 @@ if __name__ == "__main__":
             ood_dict = {}
             for classifier,data in tqdm.tqdm(classifier_stubs.items()):
                 for mi,model in enumerate(data):
+                    ensembleprefix = "{}_{}_{}".format(sample["module"],classifier,"e4_{}".format(ood_set))
                     name = plot_metrics.commonname_map[classifier]+"{}".format(indexes[mi])
                     ood_dict[name] = model["stub"]
                     ood_dict["Ensemble-4 Synth "+name] = "synth_ensemble_{}_{}_".format(mi,ensembleprefix)
