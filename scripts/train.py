@@ -68,8 +68,8 @@ def custom_eval(model,ind_data,ood_data,device,softmax = True):
 
 def main(args):
 
-    if bool(args.deterministic):
-        seed_everything(0)
+    if args.seed is not None:
+        seed_everything(args.seed)
     if torch.cuda.is_available():
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
@@ -182,6 +182,7 @@ if __name__ == "__main__":
     parser.add_argument("--level",type = int,default = None) ## for cifar10_c
     parser.add_argument("--corruption",type = str,default = None) ## for cifar10_c
     parser.add_argument("--deterministic",type = int, default = 0, choices = [0,1])
+    parser.add_argument("--seed",type = int, default =None)
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1],help = "train or evaluation mode. If evaluation, checkpoint must be provided")
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
