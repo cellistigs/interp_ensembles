@@ -27,7 +27,7 @@ class BrierScoreMax():
         """Give the number of classes, k to initialize. 
 
         """
-        self.k = k
+        self.k = 1
 
     def get_maxpoints_corr(self,e):    
         """Given the ensemble size, e, will calculate the ensemble brier score and variance corresponding to cases where c/e of the models are correct, and the errors are perfectly correlated.   
