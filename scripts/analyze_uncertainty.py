@@ -43,10 +43,12 @@ def get_mean_model_brier(predslabels):
     return mean_model_brier#,normalization
 
 def main(alldata,data):
-    """This function takes a dictionary that looks like: 
-    {"ind":VarianceData,"ood":VarianceData},
-    where VarianceData has fields data, models, and modelclass, indicating the ood/ind, actual labels and predictions and prefix for the model, respectively.  
-    as well as a string specifying ind vs. ood data. 
+    """This function takes a dictionary of dictionaries as primary input, that looks like:.
+    {"modelname1":{"ind":VarianceData,"ood":VarianceData},"modelname2":{"ind":VarianceData,"ood":VarianceData}...}
+
+    where VarianceData has fields `data`, `models`, and `modelclass`, indicating the ood/ind labels, predictions, and model class prefix  respectively.  
+    :param alldata: dictionary of dicts (see above) 
+    :param data: string specifying the ood dataset.
 
     """
     exclude = {"cifar10.1":["Ensemble"],"cinic10":["Ensemble"]} 
