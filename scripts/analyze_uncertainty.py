@@ -119,9 +119,9 @@ def main(alldata,data):
                     #axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto")
                     fig.colorbar(axlognorm,ax = cax)
                     
-                    ax[di,0].set_ylabel(r'$\mathcal{E} \frac{1}{K}\sum_k (p_{ik}-y_i)^2$')
+                    ax[di,0].set_ylabel(r'$\mathcal{E} \sum_k (p_{ik}-y_i)^2$')
                     ax[di,0].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
-                    ax[di,1].set_ylabel(r'$\mathcal{E} \frac{1}{K}\sum_k (p_{ik}-y_i)^2$')
+                    ax[di,1].set_ylabel(r'$\mathcal{E} \sum_k (p_{ik}-y_i)^2$')
                     ax[di,1].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
                     ax[di,0].legend()        
                 #ax[0].set_xlim(0,1.5*np.mean(norm))
