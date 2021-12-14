@@ -1,7 +1,8 @@
 import joblib
 import tqdm
-from interpensembles.mmd import RBFKernel, MMDModule
+#from interpensembles.mmd import RBFKernel, MMDModule
 from interpensembles.uncertainty import BrierScoreMax
+from interpensembles.density_estimates import Variance_Decomp
 from scipy.stats import spearmanr,pearsonr
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
@@ -88,12 +89,15 @@ def main(alldata,data):
                 #witnessfunc = mmdmod.compute_witness(*xy_samples)
 
                 for di,dataclass in enumerate(["ood","ind"]):
-                    xx,yy = np.mgrid[xmin:xmax:int(abs(xmax-xmin)*500)*1j,ymin:ymax:int(abs(ymax-ymin)*500)*1j]
-                    eps = 0 #1e-2
-                    samplepositions = np.vstack([xx.ravel(),yy.ravel()]) 
+                    vd = Variance_Decomp(xmin,xmax,ymin,ymax,500)
+                    f = vd.joint_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed[dataclass][0])**(-1/4))
+                    f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed[dataclass][0])**(-1/4))
+                    #xx,yy = np.mgrid[xmin:xmax:int(abs(xmax-xmin)*500)*1j,ymin:ymax:int(abs(ymax-ymin)*500)*1j]
+                    #eps = 0 #1e-2
+                    #samplepositions = np.vstack([xx.ravel(),yy.ravel()]) 
                     #witnesseval = witnessfunc(samplepositions)
-                    kernel = gaussian_kde(normed[dataclass],bw_method = len(normed[dataclass][0])**(-1/4))
-                    f = np.reshape(kernel(samplepositions).T,xx.shape)
+                    #kernel = gaussian_kde(normed[dataclass],bw_method = len(normed[dataclass][0])**(-1/4))
+                    #f = np.reshape(kernel(samplepositions).T,xx.shape)
 
                     #corr,p = spearmanr(a=normed[dataclass][0],b=normed[dataclass][1])
                     corr,p = pearsonr(normed[dataclass][0],normed[dataclass][1])
@@ -102,6 +106,7 @@ def main(alldata,data):
                     idline = np.linspace(ymin,ymax,100)
                     ax[di,0].plot(idline,idline,"--",color = "black",label = "y=x")
                     axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
+                    axlognorm = ax[di,2].matshow(f_cond,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
                     for mi in range(len(maxpoints_corr)):
                         if mi == 0:
                             ax[di,0].plot(*maxpoints_corr[mi],"*",label = "max variance (corr. errors)")
@@ -117,9 +122,11 @@ def main(alldata,data):
                     #axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto")
                     fig.colorbar(axlognorm,ax = cax)
                     
-                    ax[di,0].set_ylabel(r'$\mathcal{E} \frac{1}{K}\sum_k (p_{ik}-y_i)^2$')
+                    ax[di,0].set_ylabel(r'$\mathcal{E} \sum_k (p_{ik}-y_i)^2$')
                     ax[di,0].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
-                    ax[di,1].set_ylabel(r'$\mathcal{E} \frac{1}{K}\sum_k (p_{ik}-y_i)^2$')
+                    ax[di,1].set_ylabel(r'$\mathcal{E} \sum_k (p_{ik}-y_i)^2$')
+                    ax[di,1].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
+                    ax[di,1].set_ylabel(r'$\mathcal{E} \sum_k (p_{ik}-y_i)^2$')
                     ax[di,1].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
                     ax[di,0].legend()        
                 #ax[0].set_xlim(0,1.5*np.mean(norm))
@@ -127,12 +134,15 @@ def main(alldata,data):
                 #ax[1].set_ylim(np.mean(norm)-0.025,np.mean(norm)+0.01)
                 #ax[1].set_xlim(0,0.0002)
                 ax[0,0].set_title("scatter (ood)")
-                ax[0,1].set_title("kde (ood)")
+                ax[0,1].set_title("joint kde (ood)")
+                ax[0,1].set_title("conditional var kde (ood)")
+
                 ax[1,0].set_title("scatter (ind)")
                 ax[1,1].set_title("kde (ind)")
+                ax[1,1].set_title("conditional var kde (ind)")
                 #plt.tight_layout()
 
-                plt.savefig(os.path.join(img_dir,"mean_brier_vs_variance_{}_{}.png".format(modelclass,data)))        
+                plt.savefig(os.path.join(img_dir,"mean_brier_vs_variance_cond_{}_{}.png".format(modelclass,data)))        
                 plt.close()
             except Exception as e:   
                 print("something went wrong with this model: {}".format(e))
