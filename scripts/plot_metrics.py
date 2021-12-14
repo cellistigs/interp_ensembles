@@ -220,17 +220,6 @@ all_dataindices = {"cifar10.1":{
             "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_"
             },
             "cinic10":{
-                #"Native WideResNet-28-10":"robust_results12-10-21_04:33.30_base_wideresnet28_10",
-                "Native WideResNet-28-10":"robust_results12-10-21_08:34.51_base_wideresnet28_10",
-                "Native WideResNet-28-10.1":"robust_results12-10-21_12:33.43_base_wideresnet28_10",
-                "Native WideResNet-28-10.2":"robust_results12-10-21_16:32.41_base_wideresnet28_10",
-                "Native WideResNet-28-10.3":"robust_results12-10-21_20:31.58_base_wideresnet28_10",
-                "Native WideResNet-28-10.4":"robust_results12-11-21_00:31.33_base_wideresnet28_10",
-                "Ensemble-4 Synth Native WideResNet-28-10":"synth_ensemble_0_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth Native WideResNet-28-10.1":"synth_ensemble_1_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth Native WideResNet-28-10.2":"synth_ensemble_2_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth Native WideResNet-28-10.3":"synth_ensemble_3_base_wideresnet28_10_12_10_",
-                "Ensemble-4 Synth Native WideResNet-28-10.4":"synth_ensemble_4_base_wideresnet28_10_12_10_",
                 "DenseNet-121":"robust_results12-02-21_05:17.33_base_densenet121",
                 "DenseNet-121.1":"robust_results12-02-21_05:18.02_base_densenet121",
                 "DenseNet-121.2":"robust_results12-02-21_05:18.30_base_densenet121",
@@ -321,16 +310,26 @@ all_dataindices = {"cifar10.1":{
                 "Ensemble-4 Synth WideResNet 18-4.2":"synth_ensemble_2_base_wideresnet18_4_e4_cinic_",
                 "Ensemble-4 Synth WideResNet 18-4.3":"synth_ensemble_3_base_wideresnet18_4_e4_cinic_",
                 "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_e4_cinic_",
-                "WideResNet-28-10":"robust_results12-07-21_04:09.42_base_wideresnet28_10",
-                "WideResNet-28-10.1":"robust_results12-07-21_04:19.27_base_wideresnet28_10",
-                "WideResNet-28-10.2":"robust_results12-07-21_04:21.39_base_wideresnet28_10",
-                "WideResNet-28-10.3":"robust_results12-07-21_04:23.48_base_wideresnet28_10",
-                "WideResNet-28-10.4":"robust_results12-07-21_04:26.08_base_wideresnet28_10",
-                "Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet28_10_12_6_",
-                "Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet28_10_12_6_",
-                "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet28_10_12_6_",
-                "Ensemble-4 Synth WideResNet-28-10.3":"synth_ensemble_3_wideresnet28_10_12_6_",
-                "Ensemble-4 Synth WideResNet-28-10.4":"synth_ensemble_4_wideresnet28_10_12_6_",
+                #"WideResNet-28-10":"robust_results12-07-21_04:09.42_base_wideresnet28_10",
+                #"WideResNet-28-10.1":"robust_results12-07-21_04:19.27_base_wideresnet28_10",
+                #"WideResNet-28-10.2":"robust_results12-07-21_04:21.39_base_wideresnet28_10",
+                #"WideResNet-28-10.3":"robust_results12-07-21_04:23.48_base_wideresnet28_10",
+                #"WideResNet-28-10.4":"robust_results12-07-21_04:26.08_base_wideresnet28_10",
+                #"Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.3":"synth_ensemble_3_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.4":"synth_ensemble_4_wideresnet28_10_12_6_",
+                "Native WideResNet-28-10":"robust_results12-13-21_20:45.11_base_wideresnet28_10",
+                "Native WideResNet-28-10.1":"robust_results12-14-21_00:49.36_base_wideresnet28_10",
+                "Native WideResNet-28-10.2":"robust_results12-14-21_04:53.58_base_wideresnet28_10",
+                "Native WideResNet-28-10.3":"robust_results12-14-21_08:58.12_base_wideresnet28_10",
+                "Native WideResNet-28-10.4":"robust_results12-14-21_13:02.36_base_wideresnet28_10",
+                "Ensemble-4 Synth Native WideResNet-28-10":"synth_ensemble_0_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.1":"synth_ensemble_1_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.2":"synth_ensemble_2_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.3":"synth_ensemble_3_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.4":"synth_ensemble_4_base_wideresnet28_10_12_14_",
                     },
             }
 
@@ -454,7 +453,7 @@ def main(args,dataindex,suffixes):
         relax[1].set_title("OOD Calibration")
         relax[0].set_xlabel("Confidence")
         relax[1].set_ylabel("Accuracy")
-        relfig.savefig(os.path.join(imagesfolder,"reliability_diag_{}_{}.png".format(model,args.ood_dataset)))    
+        relfig.savefig(os.path.join(imagesfolder,"reliability","reliability_diag_{}_{}.png".format(model,args.ood_dataset)))    
         plt.close(relfig)
     ## Variance data: 
     varfig,varax = plt.subplots(figsize = (10,10))
@@ -484,7 +483,7 @@ def main(args,dataindex,suffixes):
             varconfax[1,i].set_xlabel("Mean Confidence")
             varconfax[0,i].set_ylabel("Variance")
             varconfax[1,i].set_title("Sample Density per mean confidence: {} ({})".format(modelclass,d))
-        varconffig.savefig(os.path.join(imagesfolder,"variance_confidence_metrics_{}_{}.png".format(modelclass,args.ood_dataset)))    
+        varconffig.savefig(os.path.join(imagesfolder,"variance_confidence","variance_confidence_metrics_{}_{}.png".format(modelclass,args.ood_dataset)))    
         plt.close(varconffig)
     varax.legend()    
     varax.set_title("Ensemble Variance-ECE Ratio")
