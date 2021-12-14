@@ -11,6 +11,7 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 from interpensembles.data import CIFAR10Data,CIFAR10_1Data
 from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10InterEnsembleModule
+
 from cifar10_ood.data import CINIC10_Data,CIFAR10_CData
 
 modules = {"base":CIFAR10Module,

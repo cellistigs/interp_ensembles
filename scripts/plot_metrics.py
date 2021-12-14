@@ -6,6 +6,8 @@ import json
 from scipy.special import softmax
 import matplotlib.pyplot as plt 
 from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
+from interpensembles.uncertainty import variance_c_perclass
+
 from argparse import ArgumentParser
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -466,6 +468,11 @@ def main(args,dataindex,suffixes):
                 
                 varconfax[0,0].scatter(*modeldata["ind"].variance_confidence().T,c = markers[modelclass][:-1],marker=markers[modelclass][-1],label = modelclass)
                 varconfax[0,1].scatter(*modeldata["ood"].variance_confidence().T,c = markers[modelclass][:-1],marker=markers[modelclass][-1],label = modelclass)
+                e = 5 # ensemble size
+                for c in range(e+1):
+                    var = variance_c_perclass(c,e)
+                    varconfax[0,0].plot(c/(e),var,marker = "*",label = "max var: {} correct".format(c))
+                    varconfax[0,1].plot(c/(e),var,marker = "*")
                 varconfax[1,0].hist(modeldata["ind"].variance_confidence()[:,0],bins = 100, density = True, log = True)
                 varconfax[1,1].hist(modeldata["ood"].variance_confidence()[:,0],bins = 100, density = True, log = True)
             except IndexError:    

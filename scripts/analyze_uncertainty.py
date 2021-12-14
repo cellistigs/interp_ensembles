@@ -1,6 +1,7 @@
 import joblib
 import tqdm
 from interpensembles.mmd import RBFKernel, MMDModule
+from interpensembles.uncertainty import BrierScoreMax
 from scipy.stats import spearmanr,pearsonr
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
@@ -16,11 +17,12 @@ here = os.path.dirname(os.path.abspath(__file__))
 agg_dir = os.path.join(here,"../results/aggregated_ensembleresults/")
 img_dir = os.path.join(here,"../images/variance_quant")
 
-def get_aleatoric_uncertainty(predslabels):
+def get_mean_model_brier(predslabels):
     """Assume predslabels is a dictionary with keys giving modelnames and values dictionaries with keys "labels","preds". 
 
     we define the the mean ensemble Brier score as: 
     $A = \mathcal{E}[(p_ik-\mu_k)^2]$
+    :returns: array of shape 10000, that gives the mean model brier score in each dim. 
     """
     ## first, calculate a mu_k: 
     factors = []
@@ -32,13 +34,13 @@ def get_aleatoric_uncertainty(predslabels):
         y_onehot = np.zeros(prob.shape)
         y_onehot[np.arange(len(labels)),labels] = 1
         deviance = prob-y_onehot
-        brier_factor = deviance**2
+        brier_factor = np.sum(deviance**2,axis = 1)
         #brier_factor = (predslabels.models[model]["preds"]-mu_k)**2 ## (examples,classes) - (classes,)
         factors.append(brier_factor)
-    mean_model_brier = np.sum(np.stack(factors,axis = 0),axis = 0) ## shape (examples,classes)   
-    normalization = (mu_k)*(1-mu_k)
-    aleatoric_uncertainty = normalization - mean_model_brier ## shape (examples,classes)
-    return mean_model_brier,normalization
+    mean_model_brier = np.mean(np.stack(factors,axis = 0),axis = 0) ## shape (examples,classes)   
+    #normalization = (mu_k)*(1-mu_k)
+    #aleatoric_uncertainty = normalization - mean_model_brier ## shape (examples,classes)
+    return mean_model_brier#,normalization
 
 def main(alldata,data):
     """This function takes a dictionary that looks like: 
@@ -49,26 +51,31 @@ def main(alldata,data):
     """
     exclude = {"cifar10.1":["Ensemble"],"cinic10":["Ensemble"]} 
     corr_data = {"ind":{},"ood":{}}
+    bsm = BrierScoreMax(10)
+    maxpoints_uncorr = bsm.get_maxpoints_uncorr(5)
+    maxpoints_corr = bsm.get_maxpoints_corr(5)
     for modelclass, modeldata in alldata.items():
         print(modelclass)
         if not np.any([modelclass.startswith(stub) for stub in ["Ensemble"]]):
-            fig,ax = plt.subplots(2,3,figsize=(10,15),sharex = True, sharey = True)
+            fig,ax = plt.subplots(2,3,figsize=(15,10),sharex = True, sharey = True)
             normed = {}
-            xmin,xmax = np.inf,-np.inf 
             ymin,ymax = np.inf,-np.inf 
+            xmin,kmax = np.inf,-np.inf 
+            eps = 0.01
+            xmin,xmax = np.min(maxpoints_uncorr[:,1]),np.max(maxpoints_uncorr[:,1]) + eps
+            ymin,ymax = np.min(maxpoints_uncorr[:,0]),np.max(maxpoints_uncorr[:,0]) + eps
             try:
                 for di,dataclass in enumerate(["ood","ind"]):
-                    mean_model_brier,norm = get_aleatoric_uncertainty(modeldata[dataclass])
+                    mean_model_brier = get_mean_model_brier(modeldata[dataclass])
                     variance =modeldata[dataclass].variance()
-                    normed[dataclass] = (np.mean(mean_model_brier,axis = 1),np.mean(variance,axis = 1))
-                    xmin,xmax = min(xmin,np.min(normed[dataclass][0])),max(xmax,np.max(normed[dataclass][0]))
-                    ymin,ymax = min(ymin,np.min(normed[dataclass][1])),max(ymax,np.max(normed[dataclass][1]))
+                    normed[dataclass] = (mean_model_brier,np.mean(variance,axis = 1))
+                    #xmin,xmax = min(xmin,np.min(normed[dataclass][0])),max(xmax,np.max(normed[dataclass][0]))
+                    #ymin,ymax = min(ymin,np.min(normed[dataclass][1])),max(ymax,np.max(normed[dataclass][1]))
 
 
                 ## Calculate the median distance between points for mmd: . 
                 xy_samples = [np.stack(normed[dataclass],axis = 1) for dataclass in ["ind","ood"]]
                 all_datapoints = np.concatenate(xy_samples,axis = 0)
-                import pdb; pdb.set_trace()
                 all_dists = []
                 #for i in tqdm.tqdm(range(len(all_datapoints))):
                 #    for j in range(len(all_datapoints)):
@@ -78,24 +85,31 @@ def main(alldata,data):
                 l = 0.001
                 rbf = RBFKernel(2,l)
                 mmdmod = MMDModule(rbf)
-                witnessfunc = mmdmod.compute_witness(*xy_samples)
+                #witnessfunc = mmdmod.compute_witness(*xy_samples)
 
                 for di,dataclass in enumerate(["ood","ind"]):
-                    xx,yy = np.mgrid[xmin:xmax:int(abs(xmax-xmin)*1000)*1j,ymin:ymax:int(abs(ymax-ymin)*1000)*1j]
+                    xx,yy = np.mgrid[xmin:xmax:int(abs(xmax-xmin)*500)*1j,ymin:ymax:int(abs(ymax-ymin)*500)*1j]
                     eps = 0 #1e-2
                     samplepositions = np.vstack([xx.ravel(),yy.ravel()]) 
-                    witnesseval = witnessfunc(samplepositions)
+                    #witnesseval = witnessfunc(samplepositions)
                     kernel = gaussian_kde(normed[dataclass],bw_method = len(normed[dataclass][0])**(-1/4))
-                    #f = np.flipud(np.reshape(kernel(samplepositions).T,xx.shape))
                     f = np.reshape(kernel(samplepositions).T,xx.shape)
 
                     #corr,p = spearmanr(a=normed[dataclass][0],b=normed[dataclass][1])
                     corr,p = pearsonr(normed[dataclass][0],normed[dataclass][1])
                     corr_data[dataclass][modelclass] = (corr,p)
                     ax[di,0].plot(normed[dataclass][1],normed[dataclass][0],"o",label ="{}: pearson r: {}, p = {}".format(dataclass,str(corr)[:5],p),markersize = 0.5)
-                    idline = np.linspace(xmin,xmax,100)
+                    idline = np.linspace(ymin,ymax,100)
                     ax[di,0].plot(idline,idline,"--",color = "black",label = "y=x")
                     axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
+                    for mi in range(len(maxpoints_corr)):
+                        if mi == 0:
+                            ax[di,0].plot(*maxpoints_corr[mi],"*",label = "max variance (corr. errors)")
+                            ax[di,0].plot(*maxpoints_uncorr[mi],"^",label = "max variance (uncorr. errors)")
+                        else:    
+                            ax[di,0].plot(*maxpoints_corr[mi],"*")
+                            ax[di,0].plot(*maxpoints_uncorr[mi],"^")
+
                     divider = make_axes_locatable(ax[di,1])
                     cax = divider.append_axes("right",size = "5%",pad = 0.17)
                     cax.set_axis_off()
@@ -103,9 +117,9 @@ def main(alldata,data):
                     #axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto")
                     fig.colorbar(axlognorm,ax = cax)
                     
-                    ax[di,0].set_ylabel(r'$\frac{1}{K}\sum_k \mathcal{E}(p_{ik}-\mu_k)$')
+                    ax[di,0].set_ylabel(r'$\mathcal{E} \frac{1}{K}\sum_k (p_{ik}-y_i)^2$')
                     ax[di,0].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
-                    ax[di,1].set_ylabel(r'$\frac{1}{K}\sum_k \mathcal{E}(p_{ik}-\mu_k)$')
+                    ax[di,1].set_ylabel(r'$\mathcal{E} \frac{1}{K}\sum_k (p_{ik}-y_i)^2$')
                     ax[di,1].set_xlabel(r'$\frac{1}{K}\sum_{k}Var(p_{ik})$')
                     ax[di,0].legend()        
                 #ax[0].set_xlim(0,1.5*np.mean(norm))
@@ -120,8 +134,8 @@ def main(alldata,data):
 
                 plt.savefig(os.path.join(img_dir,"mean_brier_vs_variance_{}_{}.png".format(modelclass,data)))        
                 plt.close()
-            except Exception:   
-                print("something went wrong with this model, skipping")
+            except Exception as e:   
+                print("something went wrong with this model: {}".format(e))
     joblib.dump(corr_data,os.path.join(agg_dir,"corr_data_{}".format(data)))        
 
 
@@ -130,7 +144,6 @@ if __name__ == "__main__":
     parser.add_argument("--data",type = str,default = "cifar10.1",choices = ["cifar10.1","cinic10","cifar10_c_fog_1","cifar10_c_fog_5","cifar10_c_brightness_1","cifar10_c_brightness_5","cifar10_c_gaussian_noise_1","cifar10_c_gaussian_noise_5","cifar10_c_contrast_1","cifar10_c_contrast_5"])
     args = parser.parse_args()
     datasets = ["cifar10.1","cinic10","cifar10_c_fog_1","cifar10_c_fog_5","cifar10_c_brightness_1","cifar10_c_brightness_5","cifar10_c_gaussian_noise_1","cifar10_c_gaussian_noise_5","cifar10_c_contrast_1","cifar10_c_contrast_5"]
-    datasets = ["cifar10_c_fog_5","cifar10_c_brightness_1","cifar10_c_brightness_5","cifar10_c_gaussian_noise_1","cifar10_c_gaussian_noise_5","cifar10_c_contrast_1","cifar10_c_contrast_5"]
     for datas in datasets:
 
         data = joblib.load(os.path.join(agg_dir,"ensembledata_{}".format(datas)))
