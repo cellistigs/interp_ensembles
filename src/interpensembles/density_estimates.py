@@ -1,5 +1,12 @@
 import numpy as np
+import os 
+from joblib import Memory
 from scipy.stats import gaussian_kde
+
+here = os.path.dirname(os.path.abspath(__file__))
+
+cachedir = os.path.join(here,"../../etc/")
+memory = Memory(cachedir,verbose = 0)
 ## Density estimation module. 
 
 class Variance_Decomp():
@@ -24,6 +31,7 @@ class Variance_Decomp():
         self.xx = xx ## repeated grid
         self.yy = yy ## repeated grid 
 
+    @memory.cache
     def joint_kde(self,metric,var,bw_method = None):    
         """ Return the joint kde estimate of metric and variance. 
 
@@ -37,6 +45,7 @@ class Variance_Decomp():
         return f
         
 
+    @memory.cache
     def marginal_metric_kde(self,metric,bw_method= None):
         """ Return the marginal kde estimate of metric. 
 
@@ -49,6 +58,7 @@ class Variance_Decomp():
         f = kernel(sample_positions)
         return f
 
+    @memory.cache
     def conditional_variance_kde(self,metric,var,bw_method = None):
         """Return the conditional kde estimate of variance given metric. 
 
