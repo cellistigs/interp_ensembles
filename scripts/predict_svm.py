@@ -37,13 +37,14 @@ def get_datasets(args):
         datasets[dname] = {"data":dobj.data,"labels":dobj.targets}
     return datasets    
 
-def create_svm_pipeline():
+def create_svm_pipeline(args):
     """Creates a function that first mean subtracts and normalizes the variance of constituent data. 
 
+    :param args: arguments with field args.iterations: max iterations for fitting svm. 
     :returns: return pipeline that can be fit and predict. 
     """
     clf = make_pipeline(StandardScaler(),
-            LinearSVC(random_state=0, tol=1e-5,verbose = 1))
+            LinearSVC(random_state=0, tol=1e-5,verbose = 1,dual = True, max_iter=int(args.iterations)))
     return clf
 
 def fit_svm(clf,traindata,trainlabels):
@@ -69,7 +70,7 @@ def output_svm(clf,testdata):
 def main(args):
 
     datasets= get_datasets(args)
-    svm_model = create_svm_pipeline()
+    svm_model = create_svm_pipeline(args)
     traindata,trainlabels = datasets["train"]["data"],datasets["train"]["labels"]
     fit_svm(svm_model,traindata,trainlabels)
     dataoutputs = {}
@@ -79,11 +80,11 @@ def main(args):
             
         predicts,logits = output_svm(svm_model,dataset["data"])
         dataoutputs[dataname] = (predicts,logits,dataset["labels"])
-        np.save(os.path.join(results,"svm_{}_ind_labels".format(dataname)),dataoutputs["test"][-1])
-        np.save(os.path.join(results,"svm_{}_ind_preds".format(dataname)),dataoutputs["test"][1])
-        np.save(os.path.join(results,"svm_{}_ood_{}_labels".format(dataname,dataname)),dataset["labels"])
-        np.save(os.path.join(results,"svm_{}_ood_{}_preds".format(dataname,dataname)),logits)
-        with open(os.path.join(results,"svm_{}__meta.json".format(dataname)),"w") as f:
+        np.save(os.path.join(results,"svm_its_{}_{}_ind_labels".format(args.iterations,dataname)),dataoutputs["test"][-1])
+        np.save(os.path.join(results,"svm_its_{}_{}_ind_preds".format(args.iterations,dataname)),dataoutputs["test"][1])
+        np.save(os.path.join(results,"svm_its_{}_{}_ood_{}_labels".format(args.iterations,dataname,dataname)),dataset["labels"])
+        np.save(os.path.join(results,"svm_its_{}_{}_ood_{}_preds".format(args.iterations,dataname,dataname)),logits)
+        with open(os.path.join(results,"svm_its_{}_{}__meta.json".format(args.iterations,dataname)),"w") as f:
             json.dump({"softmax":False},f)
 
 
@@ -92,5 +93,6 @@ if __name__ == "__main__":
 
     # PROGRAM level args
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
+    parser.add_argument("--iterations", type=str, default=1000)
     args = parser.parse_args()
     main(args)
