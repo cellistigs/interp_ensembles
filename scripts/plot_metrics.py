@@ -50,10 +50,11 @@ markers = {"ResNet":"rx",
         "DenseNet-169":"C2x",
         "Ensemble-4 Synth DenseNet-169":"C2o",
         "WideResNet-28-10":"C1x",
-        "Conv WideResNet-28-10":"C1*",
-        "Native WideResNet-28-10":"C1+",
+        #"Conv WideResNet-28-10":"C1*",
+        "Native WideResNet-28-10":"C1x",
         "Ensemble-4 Synth WideResNet-28-10":"C1o",
-        "Ensemble-4 Synth Native WideResNet-28-10":"C1^",
+        "Ensemble-4 Synth Native WideResNet-28-10":"C1o",
+        "SVM":"C4x"
         }
 
 variancecalc = {}
@@ -62,16 +63,17 @@ for modelprefix in markers:
 
 ### Now we define the common names for the data, and their prefixes: 
 all_dataindices = {"cifar10.1":{
+            "SVM":"svm_cifar10.1_",
             "WideResNet-28-10":"cifar10_wrn28_s1_",
             "WideResNet-28-10.1":"cifar10_wrn28_s2_",
             "WideResNet-28-10.2":"cifar10_wrn28_s3_",
             "WideResNet-28-10.3":"cifar10_wrn28_s4_",
             "WideResNet-28-10.4":"cifar10_wrn28_s5_",
-            "Conv WideResNet-28-10":"robust_results12-07-21_21:54.17_base_wideresnet28_10",
-            "Conv WideResNet-28-10.1":"robust_results12-07-21_21:55.20_base_wideresnet28_10",
-            "Conv WideResNet-28-10.2":"robust_results12-07-21_21:56.19_base_wideresnet28_10",
-            "Conv WideResNet-28-10.3":"robust_results12-07-21_21:57.14_base_wideresnet28_10",
-            "Conv WideResNet-28-10.4":"robust_results12-07-21_21:58.22_base_wideresnet28_10",
+            #"Conv WideResNet-28-10":"robust_results12-07-21_21:54.17_base_wideresnet28_10",
+            #"Conv WideResNet-28-10.1":"robust_results12-07-21_21:55.20_base_wideresnet28_10",
+            #"Conv WideResNet-28-10.2":"robust_results12-07-21_21:56.19_base_wideresnet28_10",
+            #"Conv WideResNet-28-10.3":"robust_results12-07-21_21:57.14_base_wideresnet28_10",
+            #"Conv WideResNet-28-10.4":"robust_results12-07-21_21:58.22_base_wideresnet28_10",
             "Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet_28_10_11_17_",
             "Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet_28_10_11_17_",
             "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet_28_10_11_17_",
@@ -116,7 +118,7 @@ all_dataindices = {"cifar10.1":{
             "Ensemble-4 Synth GoogleNet.1":"synth_ensemble_1_googlenet_11_17_",
             "Ensemble-4 Synth GoogleNet.2":"synth_ensemble_2_googlenet_11_17_",
             "Ensemble-4 Synth GoogleNet.3":"synth_ensemble_3_googlenet_11_17_",
-            "Ensemble-4 Synth GoogleNet.4":"synth_ensemble_4_googlenet_11_17_",
+            "Ensemble-3 Synth GoogleNet.4":"synth_ensemble_4_googlenet_11_17_",
             "VGG-11":"robust_results11-15-21_20:42.38_base_vgg11_bn",
             "VGG-11.1":"robust_results11-15-21_20:55.18_base_vgg11_bn",
             "VGG-11.2":"robust_results11-15-21_21:08.03_base_vgg11_bn",
@@ -217,9 +219,10 @@ all_dataindices = {"cifar10.1":{
             "Ensemble-4 Synth WideResNet 18-4.1":"synth_ensemble_1_base_wideresnet18_4_",
             "Ensemble-4 Synth WideResNet 18-4.2":"synth_ensemble_2_base_wideresnet18_4_",
             "Ensemble-4 Synth WideResNet 18-4.3":"synth_ensemble_3_base_wideresnet18_4_",
-            "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_"
+            "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_",
             },
             "cinic10":{
+                "SVM":"svm_cinic10_",
                 "DenseNet-121":"robust_results12-02-21_05:17.33_base_densenet121",
                 "DenseNet-121.1":"robust_results12-02-21_05:18.02_base_densenet121",
                 "DenseNet-121.2":"robust_results12-02-21_05:18.30_base_densenet121",
