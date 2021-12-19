@@ -1,5 +1,6 @@
 ## Generate accuracy and probabilistic metrics for linear SVM model. 
 from argparse import ArgumentParser
+import json
 import os
 import numpy as np
 from cifar10_ood.data import CIFAR10,CIFAR10_1,CINIC10,CIFAR10_C
@@ -78,10 +79,12 @@ def main(args):
             
         predicts,logits = output_svm(svm_model,dataset["data"])
         dataoutputs[dataname] = (predicts,logits,dataset["labels"])
-        np.save(os.path.join(results,"svm_{}_labels_ind".format(dataname)),dataoutputs["test"][-1])
-        np.save(os.path.join(results,"svm_{}_preds_ind".format(dataname)),dataoutputs["test"][1])
-        np.save(os.path.join(results,"svm_{}_labels_ood".format(dataname)),dataset["labels"])
-        np.save(os.path.join(results,"svm_{}_preds_ood".format(dataname)),logits)
+        np.save(os.path.join(results,"svm_{}_ind_labels".format(dataname)),dataoutputs["test"][-1])
+        np.save(os.path.join(results,"svm_{}_ind_preds".format(dataname)),dataoutputs["test"][1])
+        np.save(os.path.join(results,"svm_{}_ood_{}_labels".format(dataname,dataname)),dataset["labels"])
+        np.save(os.path.join(results,"svm_{}_ood_{}_preds".format(dataname,dataname)),logits)
+        with open(os.path.join(results,"svm_{}__meta.json".format(dataname)),"w") as f:
+            json.dump({"softmax":False},f)
 
 
 if __name__ == "__main__":
