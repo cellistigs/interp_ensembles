@@ -4,12 +4,15 @@ import numpy as np
 import joblib
 import json
 from scipy.special import softmax
+import matplotlib
 import matplotlib.pyplot as plt 
 from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
 from interpensembles.uncertainty import variance_c_perclass
 
 from argparse import ArgumentParser
 
+plt.rc('font', size = 22)
+plt.rc('legend',fontsize = 12)
 here = os.path.abspath(os.path.dirname(__file__))
 resultsfolder = os.path.join(here,"../results")
 imagesfolder = os.path.join(here,"../images")
@@ -54,7 +57,8 @@ markers = {"ResNet":"rx",
         "Native WideResNet-28-10":"C1x",
         "Ensemble-4 Synth WideResNet-28-10":"C1o",
         "Ensemble-4 Synth Native WideResNet-28-10":"C1o",
-        "SVM":"C4x"
+        "SVM-1000":"C4x",
+        "SVM-2000":"C5x",
         }
 
 variancecalc = {}
@@ -63,7 +67,8 @@ for modelprefix in markers:
 
 ### Now we define the common names for the data, and their prefixes: 
 all_dataindices = {"cifar10.1":{
-            "SVM":"svm_cifar10.1_",
+            #"SVM-1000":"svm_cifar10.1_",
+            #"SVM-2000":"svm_its_2000_cifar10.1_",
             "WideResNet-28-10":"cifar10_wrn28_s1_",
             "WideResNet-28-10.1":"cifar10_wrn28_s2_",
             "WideResNet-28-10.2":"cifar10_wrn28_s3_",
@@ -222,7 +227,8 @@ all_dataindices = {"cifar10.1":{
             "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_",
             },
             "cinic10":{
-                "SVM":"svm_cinic10_",
+                #"SVM-1000":"svm_cinic10_",
+                #"SVM-2000":"svm_its_2000_cinic10_",
                 "DenseNet-121":"robust_results12-02-21_05:17.33_base_densenet121",
                 "DenseNet-121.1":"robust_results12-02-21_05:18.02_base_densenet121",
                 "DenseNet-121.2":"robust_results12-02-21_05:18.30_base_densenet121",
@@ -380,6 +386,11 @@ def main(args,dataindex,suffixes):
 
 
     for model,path in dataindex.items():
+        if model not in ["WideResNet 18-4.2","Ensemble-4 Synth ResNet 18","ResNet 18"]:
+            alpha = 0.1
+        else:    
+            alpha = 1
+        
         modelmetrics = {"ind":[],"ood":[]}
         relfig,relax = plt.subplots(1,2)
         try:
@@ -440,17 +451,17 @@ def main(args,dataindex,suffixes):
             else:    
                 pass
         if len(model.split(".")) == 1: 
-            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,label = model)
-            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,label = model)
-            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,label = model)
-            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,label = model)
-            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,label = model)
+            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,label = model,alpha=alpha)
+            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,label = model,alpha=alpha)
+            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,label = model,alpha=alpha)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,label = model,alpha=alpha)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,label = model,alpha=alpha)
         else:    
-            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker)
-            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker)
-            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker)
-            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker)
-            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker)
+            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,alpha=alpha)
+            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,alpha=alpha)
+            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,alpha=alpha)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,alpha=alpha)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,alpha=alpha)
         relfig.suptitle("{}".format(model))
         relax[0].set_title("InD Calibration")
         relax[1].set_title("OOD Calibration")
@@ -515,11 +526,11 @@ def main(args,dataindex,suffixes):
     bsmax.set_title("Brier Score (Multiclass)")
     bsmax.set_xlabel("InD BS")
     bsmax.set_ylabel("OOD BS")
-    predfig.savefig(os.path.join(imagesfolder,"prediction_metrics_{}.png").format(args.ood_dataset))    
-    nllfig.savefig(os.path.join(imagesfolder,"nll_metrics_{}.png").format(args.ood_dataset))    
-    calfig.savefig(os.path.join(imagesfolder,"calibration_metrics_{}.png").format(args.ood_dataset))    
-    bsfig.savefig(os.path.join(imagesfolder,"brierscore_metrics_{}.png").format(args.ood_dataset))
-    bsmfig.savefig(os.path.join(imagesfolder,"brierscoremulti_metrics_{}.png").format(args.ood_dataset))
+    predfig.savefig(os.path.join(imagesfolder,"prediction_metrics_{}frame_vgg_wrn18_4.png").format(args.ood_dataset))    
+    nllfig.savefig(os.path.join(imagesfolder,"nll_metrics_{}frame_vgg_wrn18_4.png").format(args.ood_dataset))    
+    calfig.savefig(os.path.join(imagesfolder,"calibration_metrics_{}frame_vgg_wrn18_4.png").format(args.ood_dataset))    
+    bsfig.savefig(os.path.join(imagesfolder,"brierscore_metrics_{}frame_vgg_wrn18_4.png").format(args.ood_dataset))
+    bsmfig.savefig(os.path.join(imagesfolder,"brierscoremulti_metrics_{}frame_vgg_wrn18_4.png").format(args.ood_dataset))
 
 if __name__ == "__main__":
     parser = ArgumentParser()
