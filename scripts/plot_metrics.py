@@ -388,8 +388,10 @@ def main(args,dataindex,suffixes):
     for model,path in dataindex.items():
         if model not in ["WideResNet 18-4.2","Ensemble-4 Synth ResNet 18","ResNet 18"]:
             alpha = 0.1
+            markersize = 1
         else:    
             alpha = 1
+            markersize = 10
         
         modelmetrics = {"ind":[],"ood":[]}
         relfig,relax = plt.subplots(1,2)
@@ -451,17 +453,17 @@ def main(args,dataindex,suffixes):
             else:    
                 pass
         if len(model.split(".")) == 1: 
-            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,label = model,alpha=alpha)
-            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,label = model,alpha=alpha)
-            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,label = model,alpha=alpha)
-            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,label = model,alpha=alpha)
-            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,label = model,alpha=alpha)
+            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,label = model,alpha=alpha,markersize =markersize)
+            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,label = model,alpha=alpha,markersize =markersize)
+            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,label = model,alpha=alpha,markersize =markersize)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,label = model,alpha=alpha,markersize =markersize)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,label = model,alpha=alpha,markersize =markersize)
         else:    
-            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,alpha=alpha)
-            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,alpha=alpha)
-            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,alpha=alpha)
-            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,alpha=alpha)
-            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,alpha=alpha)
+            predax.plot(modelmetrics["ind"][0],modelmetrics["ood"][0],marker,alpha=alpha,markersize =markersize)
+            nllax.plot(modelmetrics["ind"][1],modelmetrics["ood"][1],marker,alpha=alpha,markersize =markersize)
+            calax.plot(modelmetrics["ind"][2],modelmetrics["ood"][2],marker,alpha=alpha,markersize =markersize)
+            bsax.plot(modelmetrics["ind"][3],modelmetrics["ood"][3],marker,alpha=alpha,markersize =markersize)
+            bsmax.plot(modelmetrics["ind"][4],modelmetrics["ood"][4],marker,alpha=alpha,markersize =markersize)
         relfig.suptitle("{}".format(model))
         relax[0].set_title("InD Calibration")
         relax[1].set_title("OOD Calibration")
