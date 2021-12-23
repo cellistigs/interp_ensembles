@@ -15,8 +15,56 @@ def variance_c_perclass(c,e):
     """
     return (c*(1-c/e)**2+(e-c)*(-c/e)**2)/e ## variance term from the correct class. 
 
+class ConfidenceMax():
+    """Saturation of variance related to model confidence. The relevant variance quantity in this case is the variance in the probability estimate of the class given the maximum probability in the ensemble average.  
+
+    """
+    def __init__(self,k):
+        """We need to initialize with k, the number of classes. This is because the confidence of the ensemble can never be less than 1/K. (must normalize to 1, taking max across k classes) 
+
+        """
+        self.k = k 
+
+    def get_maxpoints(self,e):
+        """Given the ensemble size e, will calculate the ensemble brier score and variance corresponding to cases where c/e of the models agree on the class that has the maximum probability. 
+
+        :param e: number of ensembles 
+        """
+        all_points = []
+        ## at 1/k, the variance must be zero (all models are perfectly uncertain). 
+        all_points.append([0,1/self.k])
+        ## the point at which we can consider models with 0 aleatoric uncertainty as bounding the variance is when at least e/2 of the models agree on the correct class: 
+        for c in range(e+1):
+            confidence = c/e
+            if confidence < 1/self.k:
+                continue
+            maxclass_variance = variance_c_perclass(c,e)
+            all_points.append([maxclass_variance,confidence])
+        return np.array(all_points)    
+
+class LikelihoodMax():
+    """Saturation of variance related to the model likelihood. The relevant variance quantity in this case is the variance in the probability estimate of the true class.  
+
+    """
+    def __init__(self):
+        """Init. 
+
+        """
+    
+    def get_maxpoints(self,e):
+        """Given the ensemble size e, will calculate the ensemble brier score and variance corresponding to cases where c/e oof the models are correct. 
+
+        :param e:
+        """
+        all_points = []
+        for c in range(e+1):
+            trueclass_variance = variance_c_perclass(c,e)
+            likelihood = (e-c)/e
+            all_points.append([trueclass_variance,likelihood])
+        return np.array(all_points)    
+
 class BrierScoreMax():
-    """Variance quantities related to the model brier score. The relevant variance quantity in this case is the average variance across all classes. 
+    """Saturation of variance quantities related to the model brier score. The relevant variance quantity in this case is the sum/average variance across all classes. 
 
     We can consider two cases: 
     1. errors perfectly correlated. This is close to what we observe. 
@@ -24,7 +72,7 @@ class BrierScoreMax():
 
     """
     def __init__(self,k):
-        """Give the number of classes, k to initialize. 
+        """Give the number of classes, k to initialize. Set K = 1 will calculate the sum of variances instead. 
 
         """
         self.k = k
