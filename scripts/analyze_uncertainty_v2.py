@@ -19,10 +19,12 @@ from pathlib import Path
 import numpy as np
 
 
-#here = os.path.dirname(os.path.abspath(__file__))
+here = os.path.dirname(os.path.abspath(__file__))
+test_dir = os.path.join(here,"../tests/test_mats/")
 #agg_dir = os.path.join(here,"../results/aggregated_ensembleresults/")
-#img_dir = os.path.join(here,"../images/variance_quant")
-img_dir = '/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/images/variance_quant'
+results_dir = os.path.join(here,"../results/imagenet/")#'/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/'
+img_dir = os.path.join(here,"../images/variance_quant")
+#img_dir = '/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/images/variance_quant'
 
 def get_mean_model_brier(predslabels):
     """Assume predslabels is a dictionary with keys giving modelnames and values dictionaries with keys "labels","preds". 
@@ -109,6 +111,7 @@ def main(alldata,data,num_classes=10, ensemble_size=5):
                     samplepositions = np.vstack([xx.ravel(),yy.ravel()]) 
                     kernel = gaussian_kde(normed[dataclass])
                     f = np.reshape(kernel(samplepositions).T,xx.shape)
+                    np.save(os.path.join(test_dir,"hist_{}_imagenet".format(dataclass)),f)
                     #corr,p = spearmanr(a=normed[dataclass][0],b=normed[dataclass][1])
                     corr,p = pearsonr(normed[dataclass][0], normed[dataclass][1])
                     corr_data[dataclass][modelclass] = (corr, p)
@@ -176,7 +179,6 @@ if __name__ == "__main__":
 
     def create_cls(data_type, dataset):
         models_to_register = ["deepens1", "deepens2", "deepens3", "deepens4", "deepens5"]
-        results_dir = '/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/'
         modelprefix = 'deepens'
 
         data_cls = VarianceData(modelprefix, data_type)
