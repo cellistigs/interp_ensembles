@@ -20,6 +20,7 @@ nb_classes = 10
 here = os.path.dirname(os.path.abspath(__file__))
 agg_dir = os.path.join(here,"../results/aggregated_ensembleresults/")
 img_dir = os.path.join(here,"../images/variance_quant")
+test_dir = os.path.join(here,"../tests/test_mats/")
 
 def compute_witnessfunc(normed,normed_incorrect):
     """Given two dictionaries `normed`, normed_incorrect with keys "ind", "ood", computes witness functions for each. 
@@ -186,7 +187,7 @@ def main(alldata,data,metric = "Brier"):
                         normed_incorrect[dataclass] = (confs,variance)
 
 
-                ## Calculate the median distance between points for mmd: . 
+                ## Calculate the median distance between points for mmd: 
                 if metric != "Brier":
                     witness,witness_incorrect = compute_witnessfunc(normed,normed_incorrect)
                 else:    
@@ -204,6 +205,7 @@ def main(alldata,data,metric = "Brier"):
                     d =2 
                     bw = n_total**(-1./(d+4))
                     f = vd.joint_kde(normed[dataclass][0],normed[dataclass][1],bw_method = bw)
+                    np.save(os.path.join(test_dir,"hist_{}_{}_cifar10.npy".format(dataclass,modelclass)),f)
                     sample_positions = np.vstack([vd.xx.ravel(),vd.yy.ravel()])
                     print("evaluating correct witness func")
                     witness_eval = np.reshape(witness(sample_positions.T),vd.xx.shape)
@@ -342,6 +344,7 @@ if __name__ == "__main__":
     parser.add_argument("--metric",type = str,choices = ["Brier","Likelihood","Confidence"])
     args = parser.parse_args()
     datasets = ["cifar10.1","cinic10","cifar10_c_fog_1","cifar10_c_fog_5","cifar10_c_brightness_1","cifar10_c_brightness_5","cifar10_c_gaussian_noise_1","cifar10_c_gaussian_noise_5","cifar10_c_contrast_1","cifar10_c_contrast_5"]
+    ## data looks like: {"modelname":{"ind":VarianceData,"ood":VarianceData}}. 
     data = joblib.load(os.path.join(agg_dir,"ensembledata_{}".format(args.data)))
     main(data,args.data,args.metric)
 
