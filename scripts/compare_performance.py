@@ -56,8 +56,11 @@ def main(args):
         ax[di].set_title(title)    
     ax[0].set_xlabel(args.model1)
     ax[0].set_ylabel(args.model2)
-    ax[0].axis("equal")
-    ax[1].axis("equal")
+    if args.metric == "Brier_Score":
+        ax[0].set_xlim(-2,2)
+        ax[0].set_ylim(-2,2)
+        ax[1].set_xlim(-2,2)
+        ax[1].set_ylim(-2,2)
     plt.savefig(os.path.join(ims,"compare_{}_{}_{}_{}.png".format(args.model1,args.model2,args.metric,args.basemodel)))    
 
 def get_metrics_outputs(stubname,metric,data): 
