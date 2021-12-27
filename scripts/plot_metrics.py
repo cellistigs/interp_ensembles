@@ -6,10 +6,25 @@ import json
 from scipy.special import softmax
 import matplotlib.pyplot as plt 
 from interpensembles.metrics import AccuracyData,NLLData,CalibrationData,VarianceData,BrierScoreData
+from interpensembles.uncertainty import variance_c_perclass
+
 from argparse import ArgumentParser
 
-resultsfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../results")
-imagesfolder = os.path.join(os.path.abspath(os.path.dirname(__file__)),"../images")
+here = os.path.abspath(os.path.dirname(__file__))
+resultsfolder = os.path.join(here,"../results")
+imagesfolder = os.path.join(here,"../images")
+
+commonname_map = {"resnet18": "ResNet",
+        "wideresnet18":"WideResNet 18-2",
+        "wideresnet18_4":"WideResNet 18-4",
+        "vgg11_bn":"VGG-11",
+        "vgg19_bn":"VGG-19",
+        "googlenet":"GoogleNet",
+        "inception_v3":"Inception-v3",
+        "densenet121":"DenseNet-121",
+        "densenet169":"DenseNet-169",
+        "wideresnet28_10":"WideResNet-28-10",
+        }
 
 markers = {"ResNet":"rx",
         "Ensemble-2 Synth ResNet":"r*",
@@ -35,13 +50,15 @@ markers = {"ResNet":"rx",
         "DenseNet-169":"C2x",
         "Ensemble-4 Synth DenseNet-169":"C2o",
         "WideResNet-28-10":"C1x",
-        "Ensemble-4 Synth WideResNet-28-10":"C1o"
+        "Conv WideResNet-28-10":"C1*",
+        "Native WideResNet-28-10":"C1+",
+        "Ensemble-4 Synth WideResNet-28-10":"C1o",
+        "Ensemble-4 Synth Native WideResNet-28-10":"C1^",
         }
 
 variancecalc = {}
 for modelprefix in markers:
     variancecalc[modelprefix] = {"ind":VarianceData(modelprefix,"ind"),"ood":VarianceData(modelprefix,"ood"),"ind_cal":[],"ood_cal":[],"ind_ens_cal":[],"ood_ens_cal":[]}
-
 
 ### Now we define the common names for the data, and their prefixes: 
 all_dataindices = {"cifar10.1":{
@@ -50,6 +67,11 @@ all_dataindices = {"cifar10.1":{
             "WideResNet-28-10.2":"cifar10_wrn28_s3_",
             "WideResNet-28-10.3":"cifar10_wrn28_s4_",
             "WideResNet-28-10.4":"cifar10_wrn28_s5_",
+            "Conv WideResNet-28-10":"robust_results12-07-21_21:54.17_base_wideresnet28_10",
+            "Conv WideResNet-28-10.1":"robust_results12-07-21_21:55.20_base_wideresnet28_10",
+            "Conv WideResNet-28-10.2":"robust_results12-07-21_21:56.19_base_wideresnet28_10",
+            "Conv WideResNet-28-10.3":"robust_results12-07-21_21:57.14_base_wideresnet28_10",
+            "Conv WideResNet-28-10.4":"robust_results12-07-21_21:58.22_base_wideresnet28_10",
             "Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet_28_10_11_17_",
             "Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet_28_10_11_17_",
             "Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet_28_10_11_17_",
@@ -288,13 +310,34 @@ all_dataindices = {"cifar10.1":{
                 "Ensemble-4 Synth WideResNet 18-4.2":"synth_ensemble_2_base_wideresnet18_4_e4_cinic_",
                 "Ensemble-4 Synth WideResNet 18-4.3":"synth_ensemble_3_base_wideresnet18_4_e4_cinic_",
                 "Ensemble-4 Synth WideResNet 18-4.4":"synth_ensemble_4_base_wideresnet18_4_e4_cinic_",
-                "WideResNet-28-10":"robust_results12-07-21_04:09.42_base_wideresnet28_10",
-                "WideResNet-28-10.1":"robust_results12-07-21_04:19.27_base_wideresnet28_10",
-                "WideResNet-28-10.2":"robust_results12-07-21_04:21.39_base_wideresnet28_10",
-                "WideResNet-28-10.3":"robust_results12-07-21_04:23.48_base_wideresnet28_10",
-                "WideResNet-28-10.4":"robust_results12-07-21_04:26.08_base_wideresnet28_10",
+                #"WideResNet-28-10":"robust_results12-07-21_04:09.42_base_wideresnet28_10",
+                #"WideResNet-28-10.1":"robust_results12-07-21_04:19.27_base_wideresnet28_10",
+                #"WideResNet-28-10.2":"robust_results12-07-21_04:21.39_base_wideresnet28_10",
+                #"WideResNet-28-10.3":"robust_results12-07-21_04:23.48_base_wideresnet28_10",
+                #"WideResNet-28-10.4":"robust_results12-07-21_04:26.08_base_wideresnet28_10",
+                #"Ensemble-4 Synth WideResNet-28-10":"synth_ensemble_0_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.1":"synth_ensemble_1_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.2":"synth_ensemble_2_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.3":"synth_ensemble_3_wideresnet28_10_12_6_",
+                #"Ensemble-4 Synth WideResNet-28-10.4":"synth_ensemble_4_wideresnet28_10_12_6_",
+                "Native WideResNet-28-10":"robust_results12-13-21_20:45.11_base_wideresnet28_10",
+                "Native WideResNet-28-10.1":"robust_results12-14-21_00:49.36_base_wideresnet28_10",
+                "Native WideResNet-28-10.2":"robust_results12-14-21_04:53.58_base_wideresnet28_10",
+                "Native WideResNet-28-10.3":"robust_results12-14-21_08:58.12_base_wideresnet28_10",
+                "Native WideResNet-28-10.4":"robust_results12-14-21_13:02.36_base_wideresnet28_10",
+                "Ensemble-4 Synth Native WideResNet-28-10":"synth_ensemble_0_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.1":"synth_ensemble_1_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.2":"synth_ensemble_2_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.3":"synth_ensemble_3_base_wideresnet28_10_12_14_",
+                "Ensemble-4 Synth Native WideResNet-28-10.4":"synth_ensemble_4_base_wideresnet28_10_12_14_",
                     },
             }
+
+with open(os.path.join(here,"cifar10c_all_stubs.json"),"r") as f:
+    cifar10c_indices = json.load(f)
+
+all_dataindices.update(cifar10c_indices)
+            
 
 all_suffixes = {"cifar10.1":{
         "InD Labels":"ind_labels.npy",
@@ -309,8 +352,19 @@ all_suffixes = {"cifar10.1":{
         "OOD Labels":"ood_cinic_labels.npy",
         "OOD Probs": "ood_cinic_preds.npy",
         "meta":"_meta.json"
+        },
         }
-        }
+
+for corruption in ["fog","brightness","gaussian_noise","contrast"]:
+    for level in [1,5]:
+        ident = "cifar10_c_{}_{}".format(corruption,level)
+        all_suffixes[ident] = {
+            "InD Labels":"ind_labels.npy",
+            "InD Probs": "ind_preds.npy",
+            "OOD Labels":"ood_{}_labels.npy".format(ident),
+            "OOD Probs": "ood_{}_preds.npy".format(ident),
+            "meta":"_meta.json"
+                }
 
 bins = list(np.linspace(0,1,17)[1:-1])
 
@@ -399,11 +453,11 @@ def main(args,dataindex,suffixes):
         relax[1].set_title("OOD Calibration")
         relax[0].set_xlabel("Confidence")
         relax[1].set_ylabel("Accuracy")
-        relfig.savefig(os.path.join(imagesfolder,"reliability_diag_{}_{}.png".format(model,args.ood_dataset)))    
+        relfig.savefig(os.path.join(imagesfolder,"reliability","reliability_diag_{}_{}.png".format(model,args.ood_dataset)))    
         plt.close(relfig)
     ## Variance data: 
     varfig,varax = plt.subplots(figsize = (10,10))
-    joblib.dump(variancecalc,"ensembledata_{}".format(args.ood_dataset))
+    joblib.dump(variancecalc,os.path.join("..","results","aggregated_ensembleresults","ensembledata_{}".format(args.ood_dataset)))
     for modelclass,modeldata in variancecalc.items():
         varconffig,varconfax = plt.subplots(2,2,figsize=(20,20))
         if not modelclass.startswith("Ensemble"):
@@ -413,6 +467,11 @@ def main(args,dataindex,suffixes):
                 
                 varconfax[0,0].scatter(*modeldata["ind"].variance_confidence().T,c = markers[modelclass][:-1],marker=markers[modelclass][-1],label = modelclass)
                 varconfax[0,1].scatter(*modeldata["ood"].variance_confidence().T,c = markers[modelclass][:-1],marker=markers[modelclass][-1],label = modelclass)
+                e = 5 # ensemble size
+                for c in range(e+1):
+                    var = variance_c_perclass(c,e)
+                    varconfax[0,0].plot(c/(e),var,marker = "*",label = "max var: {} correct".format(c))
+                    varconfax[0,1].plot(c/(e),var,marker = "*")
                 varconfax[1,0].hist(modeldata["ind"].variance_confidence()[:,0],bins = 100, density = True, log = True)
                 varconfax[1,1].hist(modeldata["ood"].variance_confidence()[:,0],bins = 100, density = True, log = True)
             except IndexError:    
@@ -424,7 +483,7 @@ def main(args,dataindex,suffixes):
             varconfax[1,i].set_xlabel("Mean Confidence")
             varconfax[0,i].set_ylabel("Variance")
             varconfax[1,i].set_title("Sample Density per mean confidence: {} ({})".format(modelclass,d))
-        varconffig.savefig(os.path.join(imagesfolder,"variance_confidence_metrics_{}_{}.png".format(modelclass,args.ood_dataset)))    
+        varconffig.savefig(os.path.join(imagesfolder,"variance_confidence","variance_confidence_metrics_{}_{}.png".format(modelclass,args.ood_dataset)))    
         plt.close(varconffig)
     varax.legend()    
     varax.set_title("Ensemble Variance-ECE Ratio")
@@ -461,7 +520,7 @@ def main(args,dataindex,suffixes):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-od","--ood_dataset",help = "which ood dataset to analyze for",default = "cifar10.1",choices = ["cifar10.1","cinic10"])
+    parser.add_argument("-od","--ood_dataset",help = "which ood dataset to analyze for",default = "cifar10.1",choices = ["cifar10.1","cinic10","cifar10_c_fog_1","cifar10_c_fog_5","cifar10_c_brightness_1","cifar10_c_brightness_5","cifar10_c_gaussian_noise_1","cifar10_c_gaussian_noise_5","cifar10_c_contrast_1","cifar10_c_contrast_5"])
     args = parser.parse_args()
     dataindex = all_dataindices[args.ood_dataset]
     suffixes = all_suffixes[args.ood_dataset]

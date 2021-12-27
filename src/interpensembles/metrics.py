@@ -30,8 +30,6 @@ class BrierScoreData(object):
         deviance = prob-target_onehot
         return np.mean(np.sum(deviance**2,axis = 1))
 
-        
-
 class VarianceData(object):
     """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
 

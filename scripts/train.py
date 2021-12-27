@@ -11,7 +11,8 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 from interpensembles.data import CIFAR10Data,CIFAR10_1Data
 from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10InterEnsembleModule
-from cifar10_ood.data import CINIC10_Data
+
+from cifar10_ood.data import CINIC10_Data,CIFAR10_CData
 
 modules = {"base":CIFAR10Module,
         "ensemble":CIFAR10EnsembleModule,
@@ -67,8 +68,8 @@ def custom_eval(model,ind_data,ood_data,device,softmax = True):
 
 def main(args):
 
-    if bool(args.deterministic):
-        seed_everything(0)
+    if args.seed is not None:
+        seed_everything(args.seed)
     if torch.cuda.is_available():
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
@@ -122,6 +123,10 @@ def main(args):
         ood_data = CIFAR10_1Data(args,version =args.version)
     elif args.ood_dataset == "cinic10":    
         ood_data = CINIC10_Data(args)
+    elif args.ood_dataset == "cifar10_c":    
+        assert args.corruption, "for cifar10_c, corruption must be given."
+        assert args.level, "for cifar10_c, level must be given"
+        ood_data = CIFAR10_CData(args)
 
 
     if bool(args.pretrained):
@@ -155,6 +160,11 @@ def main(args):
     elif args.ood_dataset == "cinic10":    
         np.save(full_path+"ood_cinic_preds",preds_ood)
         np.save(full_path+"ood_cinic_labels",labels_ood)
+    elif args.ood_dataset == "cifar10_c":    
+        np.save(full_path+"ood_cifar10_c_{}_{}_preds".format(args.corruption,args.level),preds_ood)
+        np.save(full_path+"ood_cifar10_c_{}_{}_labels".format(args.corruption,args.level),labels_ood)
+    else:     
+        raise Exception("option for ood dataset not recognized.")
     ## write metadata
     metadata = vars(args)
     metadata["save_path"] = trainer.checkpoint_callback.dirpath
@@ -166,23 +176,27 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--ood_dataset",type = str,default = "cifar10_1",choices = ["cifar10_1","cinic10"])
     parser.add_argument("--data_dir", type=str, default="/home/ubuntu/data/cifar10")
+    parser.add_argument("--ood_dataset",type = str,default = "cifar10_1",choices = ["cifar10_1","cinic10","cifar10_c"])
+    parser.add_argument("--version",type = str,default = "v4",choices = ["v4","v6"]) ## for cifar10.1
+    parser.add_argument("--level",type = int,default = None) ## for cifar10_c
+    parser.add_argument("--corruption",type = str,default = None) ## for cifar10_c
     parser.add_argument("--deterministic",type = int, default = 0, choices = [0,1])
+    parser.add_argument("--seed",type = int, default =None)
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1],help = "train or evaluation mode. If evaluation, checkpoint must be provided")
-    parser.add_argument("--checkpoint",type= str,help = "Path to model checkpoint if evaluating")
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument(
         "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb"]
     )
+    parser.add_argument("--checkpoint",type= str,help = "Path to model checkpoint if evaluating")
     parser.add_argument("--softmax",type = int,default = 1,choices = [0,1])
+    parser.add_argument("--nb_models",type = int,default = 4)
+    parser.add_argument("--module", type = str,default = "base",choices = ["base","ensemble","interpensemble"])
 
     # TRAINER args
     parser.add_argument("--classifier", type=str, default="resnet18")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1])
     parser.add_argument("--pretrained-path",type = str, default = None)
-    parser.add_argument("--module", type = str,default = "base",choices = ["base","ensemble","interpensemble"])
-    parser.add_argument("--version",type = str,default = "v4",choices = ["v4","v6"])
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
     parser.add_argument("--batch_size", type=int, default=256)
@@ -193,7 +207,6 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
     parser.add_argument("--test_set",type = str,default = "CIFAR10",choices = ["CIFAR10","CIFAR10_1"])
-    parser.add_argument("--nb_models",type = int,default = 4)
     parser.add_argument("--lamb",type = float,default = 0.5)
     parser.add_argument("--scheduler",type = str,default = "cosine",choices = ["cosine","step"])
 
