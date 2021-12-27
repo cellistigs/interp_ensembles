@@ -10,19 +10,23 @@ echo "$now"
 
 # ------ set packahe directory ------
 PKGDIR="/data/Projects/linear_ensembles/interp_ensembles"
+PKGDIR="/home/ubuntu/interp_ensembles"
 
 # ------ set output directory ------
 OUTPUTDIR="/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/checkpoints"
+OUTPUTDIR="/home/ubuntu/interp_ensembles/results/imagenent/checkpoints"
 mkdir -p $OUTPUTDIR
 
 # ----- set dataset directories -----
 BASEDATA_DIR="/home/ekellbuch/pytorch_datasets"
+BASEDATA_DIR="/home/ubuntu/data"
 
 IMAGENET_DIR="$BASEDATA_DIR/imagenet"
 IMAGENETV2_TH="$BASEDATA_DIR/imagenetv2-a-44"
 IMAGENEV2_TOP="$BASEDATA_DIR/imagenetv2-c-12"
 IMAGENETV2_MF="$BASEDATA_DIR/imagenetv2-b-33"
 TINYIMAGENET_DIR="$BASEDATA_DIR/tiny-imagenet-200"
+TINYIMAGENET_DIR="$BASEDATA_DIR/tiny_imagenet"
 
 declare -A DATASETDIR=(
   ["imagenet"]=$IMAGENET_DIR
@@ -37,9 +41,9 @@ model='resnet50'
 gpu=0
 batch_size=256
 store_logits=1 # store outputs
-workers=1
+workers=8
 seed=0
-epochs=1
+epochs=5
 
 dataset_name="tinyimagenet"
 
@@ -52,7 +56,7 @@ save_checkpoint_fname="${OUTDIR_CPKT}/checkpoint.pth.tar"
 run_log="${OUTDIR_CPKT}/run_log.out"
 echo "Checkpoints will be stored in ${save_checkpoint_fname}"
 
-python train_imagenet.py ${dataset_dir} --arch=${model} \
+python $PKGDIR/scripts/train_imagenet.py ${dataset_dir} --arch=${model} \
   --workers=${workers} \
   --batch-size ${batch_size} \
   --epochs=${epochs} \
