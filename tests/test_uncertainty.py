@@ -11,6 +11,38 @@ def test_variance_c_perclass():
     assert np.isclose(uncertainty.variance_c_perclass(2,e),uncertainty.variance_c_perclass(e-2,e))
     assert np.isclose(uncertainty.variance_c_perclass(e-2,e),0.24)
 
+class Test_ConfidenceMax():
+    e = 5
+    k = 10
+
+    def test_init(self):
+        uncertainty.ConfidenceMax(self.k)
+
+    def test_get_maxpoints(self):        
+        cm = uncertainty.ConfidenceMax(self.k)
+        corr = cm.get_maxpoints(self.e)
+        assert corr[0,0] == 0
+        assert corr[-1,0] == 0
+        assert np.isclose(corr[1,0],0.24)
+        assert np.isclose(corr[2,0],0.16)
+
+class Test_LikelihoodMax():
+    e = 5
+    k = 10
+
+    def test_init(self):
+        uncertainty.LikelihoodMax()
+
+    def test_get_maxpoints(self):        
+        lm = uncertainty.LikelihoodMax()
+        corr = lm.get_maxpoints(self.e)
+        assert corr[0,0] == 0
+        assert corr[-1,0] == 0
+        assert np.isclose(corr[1,0],0.16)
+        assert np.isclose(corr[2,0],0.24)
+        assert np.isclose(corr[3,0],0.24)
+        assert np.isclose(corr[4,0],0.16)
+
 class Test_BrierScoreMax():    
     e = 5
     k = 10
