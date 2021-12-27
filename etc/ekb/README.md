@@ -21,3 +21,7 @@ Main steps
 [x] evaluate resnet 50 models trained on different seeds on imagenet_c : eval_scratch_imagenet_c.sh
 
 [x] plot metrics for each corruptions plot_metrics_imagenet.sh
+
+[x] add code train imagenet w pytorch lightning: train_imagenet_pl.py
+[x] add code call imagenet trainer in pl: train_imagenet_pl.sh
+[x] add code call imagenet eval in pl: eval_pretrained_imagenet_pl.sh
