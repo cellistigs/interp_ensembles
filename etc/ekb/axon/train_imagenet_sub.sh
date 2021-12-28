@@ -33,18 +33,21 @@ now=$(date +"%m_%d_%Y/%H_%M_%S")
 echo "$now"
 
 # Pick a model
-gpus=3
+gpus=4
 batch_size=256
-workers=5 # number of cpus
+workers=16 # number of cpus
 #auto_select_gpus=True #it doesn't appear to be working
 
-profiler='simple' # can't tell if this slows things down and by how much
+profiler="simple" # can't tell if this slows things down and by how much
 deterministic=0
 #log_every_n_steps=50 # tensorboard logging checkpoint is harcoded to at least 10
-max_epochs=5 #93
+max_epochs=90 #93
 #save_top_k=-1
 
-dataset_name="tinyimagenet"
+accelerator="ddp"
+find_unused_parameters=0
+
+dataset_name='imagenet'
 for seed in 0
 do
 #for model in "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
@@ -62,7 +65,9 @@ call_train "--data-path ${dataset_dir}  \
   --batch-size=${batch_size} \
   --workers=${workers} \
   --max_epochs=${max_epochs} \
-  --default_root_dir=${default_root_dir}"
+  --default_root_dir=${default_root_dir} \
+  --accelerator=${accelerator}"
+#  --find_unused_parameters=${find_unused_parameters}"
 
 done
 done

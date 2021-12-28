@@ -33,7 +33,7 @@ now=$(date +"%m_%d_%Y/%H_%M_%S")
 echo "$now"
 
 # Pick a model
-gpus=1
+gpus=3
 batch_size=256
 workers=5 # number of cpus
 #auto_select_gpus=True #it doesn't appear to be working

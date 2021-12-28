@@ -8,7 +8,7 @@
 #SBATCH -o slurm_ekb-%j.out
 #SBATCH -t 8-00:00:00
 #SBATCH --mem 32gb
-#SBATCH --gres=gpu:3
+#SBATCH --gres=gpu:4
 #SBATCH -c 5
 #SBATCH --mail-type=ALL            # Mail events (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --mail-user=ekb2154@columbia.edu         # Where to send mail (e.g. uni123@columbia.edu)
