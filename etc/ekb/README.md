@@ -25,3 +25,10 @@ Main steps
 [x] add code train imagenet w pytorch lightning: train_imagenet_pl.py
 [x] add code call imagenet trainer in pl: train_imagenet_pl.sh
 [x] add code call imagenet eval in pl: eval_pretrained_imagenet_pl.sh
+
+
+Remote server steps:
+[x] eval models on imagenet on remote server: axon/eval_pretrained_imagenet.sh
+[x] debug training code tiny-imagenet: train_imagenet_axon_debug.sh
+[x] slurm script to train model on in remote server: train_imagenet.sh
+[x] caller to slurm script to train model on (tiny)imagenet in remote server: train_imagenet_sub.sh
