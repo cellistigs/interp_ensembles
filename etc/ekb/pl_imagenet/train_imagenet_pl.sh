@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Evaluate pretrained models on imagenet
+# Train a model on tiny imagenet using pytorch lightning.
+# on local server (lion)
 
 
 
