@@ -4,7 +4,7 @@
 call_train() {
     echo "$1"
     sbatch -p ctn --qos=high-priority ./train_imagenet.sh "$1"
-    #python /home/ekb2154/data/Projects/linear_ensembles/interp_ensembles/scripts/train_imagenet_pl.py $1
+    #python /home/ekb2154/data/libraries/interp_ensembles/scripts/train_imagenet_pl.py $1
 }
 
 # ------ set outputdirectory ------

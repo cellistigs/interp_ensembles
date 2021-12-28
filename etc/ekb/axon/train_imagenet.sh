@@ -16,5 +16,5 @@
 
 
 echo "train_imagenet_pl.py $1"
-python  /home/ekb2154/data/Projects/linear_ensembles/interp_ensembles/scripts/train_imagenet_pl.py $1
+python  /home/ekb2154/data/libraries/interp_ensembles/scripts/train_imagenet_pl.py $1
 echo "Ran train_imagenet_pl.py $1"
