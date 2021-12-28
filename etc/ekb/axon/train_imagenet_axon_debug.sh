@@ -34,8 +34,8 @@ echo "$now"
 
 # Pick a model
 gpus=3
-batch_size=256
-workers=5 # number of cpus
+batch_size=224
+workers=16 # number of cpus
 #auto_select_gpus=True #it doesn't appear to be working
 
 profiler='simple' # can't tell if this slows things down and by how much
@@ -45,18 +45,23 @@ max_epochs=5 #93
 #save_top_k=-1
 
 dataset_name="tinyimagenet"
-for seed in 0 1 2 3
+#accelerator="ddp"
+
+find_unused_parameters=0
+
+for seed in 0  # 1 2 3
 do
-#for model in "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
+ #for model in "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
 for model in "alexnet" #"densenet121" "googlenet" "resnet18" "vgg11" "vgg13"
 
 do
+
 dataset_dir="${DATASETDIR[$dataset_name]}"
 echo "${dataset_name}:${dataset_dir}"
 
 default_root_dir="$OUTPUTDIR/${model}--${dataset_name}/${now}"
 #echo "Output will be stored in ${store_logits_fname}"
-python /home/ekb2154/data/libraries/interp_ensembles/scripts/train_imagenet_pl.py --data-path ${dataset_dir}  \
+python /home/ekb2154/data/libraries/interp_ensembles/scripts/train_imagenet_pl.py --data-path=${dataset_dir}  \
   --gpus=${gpus} \
   --arch=${model} \
   --seed=${seed} \
@@ -65,12 +70,7 @@ python /home/ekb2154/data/libraries/interp_ensembles/scripts/train_imagenet_pl.p
   --workers=${workers} \
   --max_epochs=${max_epochs} \
   --default_root_dir=${default_root_dir} \
-#  --save_top_k=${save_top_k} \
-#  --profiler=${profiler} \
-#  --auto_select_gpus=${auto_select_gpus} \
-#  --store_logits ${store_logits} \
-#  --store_logits_fname ${store_logits_fname} \
-#  --log_every_n_steps=${log_every_n_steps} \
-
+#  --accelerator=${accelerator} \
+#  --profiler=${profiler} \ 
 done
 done

@@ -48,7 +48,7 @@ accelerator="ddp"
 find_unused_parameters=0
 
 dataset_name='imagenet'
-for seed in 0
+for seed in 1 2 3 4
 do
 #for model in "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
 for model in "alexnet" #"densenet121" "googlenet" "resnet18" "vgg11" "vgg13"
@@ -66,8 +66,9 @@ call_train "--data-path ${dataset_dir}  \
   --workers=${workers} \
   --max_epochs=${max_epochs} \
   --default_root_dir=${default_root_dir} \
-  --accelerator=${accelerator}"
-#  --find_unused_parameters=${find_unused_parameters}"
+  --accelerator=${accelerator}
+  --profiler=${profiler} "
+#  --find_unused_parameters=${find_unused_parameters}
 
 done
 done
