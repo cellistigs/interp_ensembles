@@ -14,7 +14,7 @@ PKGDIR="/home/ubuntu/interp_ensembles"
 
 # ------ set output directory ------
 OUTPUTDIR="/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/checkpoints"
-OUTPUTDIR="/home/ubuntu/interp_ensembles/results/imagenent/checkpoints"
+OUTPUTDIR="/home/ubuntu/interp_ensembles/results/imagenet/checkpoints"
 mkdir -p $OUTPUTDIR
 
 # ----- set dataset directories -----
@@ -37,17 +37,17 @@ declare -A DATASETDIR=(
   )
 
 # Pick a model
-model='resnet50'
+model='resnet101'
 gpu=0
-batch_size=256
+batch_size=250
 store_logits=1 # store outputs
-workers=8
-seed=0
-epochs=5
+workers=16
+seed=1
+epochs=90
 
-dataset_name="tinyimagenet"
+dataset_name="imagenet"
 
-for model in "resnet18" # "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
+for model in "resnet101" #"resnet18" "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
 do
 dataset_dir="${DATASETDIR[$dataset_name]}"
 OUTDIR_CPKT="${OUTPUTDIR}/${model}--${dataset_name}--${now}"
