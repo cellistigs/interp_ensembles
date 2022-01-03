@@ -33,13 +33,14 @@ now=$(date +"%m_%d_%Y/%H_%M_%S")
 echo "$now"
 
 # Pick a model
-gpus=1
-batch_size=256
+gpus=4
+batch_size=250
 workers=16 # number of cpus
 #auto_select_gpus=True #it doesn't appear to be working
 
 profiler='simple' # can't tell if this slows things down and by how much
-deterministic=0
+deterministic=1
+accelerator='ddp' ## choose the ddp accelerator to allow for effective use of multiple workers. We also add functionality to train_imagenet_pl.py to optimize ddp accelerator. 
 #log_every_n_steps=50 # tensorboard logging checkpoint is harcoded to at least 10
 max_epochs=5 #93
 #save_top_k=-1
@@ -60,6 +61,7 @@ python /data/Projects/linear_ensembles/interp_ensembles/scripts/train_imagenet_p
   --gpus=${gpus} \
   --arch=${model} \
   --seed=${seed} \
+  --accelerator=${accelerator}
   --deterministic=${deterministic} \
   --batch-size=${batch_size} \
   --workers=${workers} \

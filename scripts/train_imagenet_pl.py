@@ -38,6 +38,7 @@ import torchvision.transforms as transforms
 import pytorch_lightning as pl
 #from pl_examples import cli_lightning_logo
 from pytorch_lightning.core import LightningModule
+from pytorch_lightning.plugins import ddp_plugin
 
 
 class ImageNetLightningModel(LightningModule):
@@ -214,10 +215,12 @@ def main(args: Namespace) -> None:
         # ourselves based on the total number of GPUs we have
         args.batch_size = int(args.batch_size / max(1, args.gpus))
         args.workers = int(args.workers / max(1, args.gpus))
+        args.plugins = [ddp_plugin.DDPPlugin(find_unused_parameters=False)]
 
     args.checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="val_acc1_epoch",
                                                             verbose=True, save_top_k=-1,
                                                             save_last=True)
+    
     model = ImageNetLightningModel(**vars(args))
 
     trainer = pl.Trainer.from_argparse_args(args)
