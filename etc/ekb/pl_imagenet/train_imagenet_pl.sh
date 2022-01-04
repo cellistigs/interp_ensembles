@@ -6,12 +6,14 @@
 
 
 # ------ set outputdirectory ------
-OUTPUTDIR="/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/checkpoints"
-OUTPUTDIR="/data/Projects/linear_ensembles/interp_ensembles/etc/ekb/pl_imagenet/lightning_logs"
+OUTPUTDIR="/home/ubuntu/interp_ensembles/results/imagenet/checkpoints"
+#OUTPUTDIR="/data/Projects/linear_ensembles/interp_ensembles/etc/ekb/pl_imagenet/lightning_logs"
 mkdir -p $OUTPUTDIR
 
 # ----- set dataset directories -----
-BASEDATA_DIR="/home/ekellbuch/pytorch_datasets"
+#BASEDATA_DIR="/home/ekellbuch/pytorch_datasets"
+BASEDATA_DIR="/home/ubuntu/data"
+
 
 IMAGENET_DIR="$BASEDATA_DIR/imagenet"
 IMAGENETV2_TH="$BASEDATA_DIR/imagenetv2-a-44"
@@ -35,21 +37,21 @@ echo "$now"
 # Pick a model
 gpus=4
 batch_size=250
-workers=16 # number of cpus
+workers=24 # number of cpus
 #auto_select_gpus=True #it doesn't appear to be working
 
 profiler='simple' # can't tell if this slows things down and by how much
 deterministic=1
 accelerator='ddp' ## choose the ddp accelerator to allow for effective use of multiple workers. We also add functionality to train_imagenet_pl.py to optimize ddp accelerator. 
 #log_every_n_steps=50 # tensorboard logging checkpoint is harcoded to at least 10
-max_epochs=5 #93
+max_epochs=90 #93
 #save_top_k=-1
 
-dataset_name="tinyimagenet"
-for seed in 0
+dataset_name="imagenet"
+for seed in 2
 do
 #for model in "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
-for model in "alexnet" #"densenet121" "googlenet" "resnet18" "vgg11" "vgg13"
+for model in "resnet101" #"densenet121" "googlenet" "resnet18" "vgg11" "vgg13"
 
 do
 dataset_dir="${DATASETDIR[$dataset_name]}"
@@ -57,16 +59,16 @@ echo "${dataset_name}:${dataset_dir}"
 
 default_root_dir="$OUTPUTDIR/${model}--${dataset_name}/${now}"
 #echo "Output will be stored in ${store_logits_fname}"
-python /data/Projects/linear_ensembles/interp_ensembles/scripts/train_imagenet_pl.py --data-path ${dataset_dir}  \
+python /home/ubuntu/interp_ensembles/scripts/train_imagenet_pl.py --data-path ${dataset_dir}  \
   --gpus=${gpus} \
   --arch=${model} \
   --seed=${seed} \
-  --accelerator=${accelerator}
   --deterministic=${deterministic} \
   --batch-size=${batch_size} \
   --workers=${workers} \
   --max_epochs=${max_epochs} \
   --default_root_dir=${default_root_dir} \
+  --accelerator=${accelerator}  
 #  --save_top_k=${save_top_k} \
 #  --profiler=${profiler} \
 #  --auto_select_gpus=${auto_select_gpus} \
