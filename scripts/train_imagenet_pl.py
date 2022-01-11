@@ -202,7 +202,6 @@ class ImageNetLightningModel(LightningModule):
             dest="weight_decay",
         )
         parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="use pre-trained model")
-        parser.add_argument("--checkpointpath",dest = "resume_from_checkpoint", default = None, help = "optional path to resume training from (*.ckpt).")
         return parent_parser
 
 
@@ -218,7 +217,7 @@ def main(args: Namespace) -> None:
         args.workers = int(args.workers / max(1, args.gpus))
         args.plugins = [ddp_plugin.DDPPlugin(find_unused_parameters=False)]
 
-    if args.checkpointpath is not None:
+    if args.resume_from_checkpoint is not None:
         args.checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="val_acc1_epoch",
                                                             dirpath=args.resume_from_checkpoint,
                                                             verbose=True, save_top_k=-1,
