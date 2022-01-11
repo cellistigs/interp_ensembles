@@ -219,7 +219,7 @@ def main(args: Namespace) -> None:
 
     if args.resume_from_checkpoint is not None:
         args.checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor="val_acc1_epoch",
-                                                            dirpath=args.resume_from_checkpoint,
+                                                            dirpath=os.path.dirname(args.resume_from_checkpoint),
                                                             verbose=True, save_top_k=-1,
                                                             save_last=True)
     else:    
