@@ -19,6 +19,7 @@ Main steps
 [x] download deep ensemble checkpoints from "https://github.com/SamsungLabs/pytorch-ensembles"
 [x] evaluate resnet 50 models trained on different seeds on imagenet : eval_scratch_imagenet.sh
 [x] evaluate resnet 50 models trained on different seeds on imagenet_c : eval_scratch_imagenet_c.sh
+[x] evaluate alexnet models trained on different seeds on imagenet using pytorch lightning: eval_scratch_imagenet_alexnet.sh
 
 [x] plot metrics for each corruptions plot_metrics_imagenet.sh
 
@@ -32,3 +33,6 @@ Remote server steps:
 [x] debug training code tiny-imagenet: train_imagenet_axon_debug.sh
 [x] slurm script to train model on in remote server: train_imagenet.sh
 [x] caller to slurm script to train model on (tiny)imagenet in remote server: train_imagenet_sub.sh
+
+Plotting code
+[] Plot metrics cifar10
