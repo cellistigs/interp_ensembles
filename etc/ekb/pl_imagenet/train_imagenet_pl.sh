@@ -37,7 +37,7 @@ echo "$now"
 # Pick a model
 gpus=4
 batch_size=250
-workers=24 # number of cpus
+workers=32 # number of cpus
 #auto_select_gpus=True #it doesn't appear to be working
 
 profiler='simple' # can't tell if this slows things down and by how much
@@ -48,7 +48,9 @@ max_epochs=90 #93
 #save_top_k=-1
 
 dataset_name="imagenet"
-for seed in 2
+resume_from_checkpoint="/home/ubuntu/interp_ensembles/results/imagenet/checkpoints/resnet101--imagenet/01_06_2022/15_05_06/lightning_logs/version_0/checkpoints/epoch=82-step=428777.ckpt"
+
+for seed in 0
 do
 #for model in "resnet50" "resnet101" "efficientnet_b0" "wide_resnet50_2" "wide_resnet101_2" "efficientnet_b1" "efficientnet_b2"
 for model in "resnet101" #"densenet121" "googlenet" "resnet18" "vgg11" "vgg13"
@@ -68,6 +70,7 @@ python /home/ubuntu/interp_ensembles/scripts/train_imagenet_pl.py --data-path ${
   --workers=${workers} \
   --max_epochs=${max_epochs} \
   --default_root_dir=${default_root_dir} \
+  --resume_from_checkpoint=${resume_from_checkpoint} \
   --accelerator=${accelerator}  
 #  --save_top_k=${save_top_k} \
 #  --profiler=${profiler} \
