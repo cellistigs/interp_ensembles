@@ -153,6 +153,8 @@ def main(alldata,data,metric = "Brier"):
     elif metric == "Confidence":   
         cm = ConfidenceMax(nb_classes)
         maxpoints_uncorr = cm.get_maxpoints(5)
+    else:     
+        raise Exception("Metric not given.")
     eps = 0.01
     xmin,xmax = np.min(maxpoints_uncorr[:,1]),np.max(maxpoints_uncorr[:,1]) + eps
     xmin = 0 
@@ -192,11 +194,11 @@ def main(alldata,data,metric = "Brier"):
                 else:    
                     witness,_ = compute_witnessfunc(normed,normed)
                 densities = {}
+                conds = []
 
                 for di,dataclass in enumerate(["ood","ind"]):
                     vd = Variance_Decomp(xmin,xmax,ymin,ymax,80,1e-12)
                     #f = vd.joint_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed[dataclass][0])**(-1/4))
-                    #f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed[dataclass][0])**(-1/4))
                     if metric != "Brier":
                         n_total = len(normed[dataclass][0])+len(normed_incorrect[dataclass][0])/2
                     else:    
@@ -204,16 +206,16 @@ def main(alldata,data,metric = "Brier"):
                     d =2 
                     bw = n_total**(-1./(d+4))
                     f = vd.joint_kde(normed[dataclass][0],normed[dataclass][1],bw_method = bw)
+                    f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed[dataclass][0])**(-1/4))
                     sample_positions = np.vstack([vd.xx.ravel(),vd.yy.ravel()])
                     print("evaluating correct witness func")
                     witness_eval = np.reshape(witness(sample_positions.T),vd.xx.shape)
-                    #f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1])
                     if metric != "Brier":    
                         f_incorrect = vd.joint_kde(normed_incorrect[dataclass][0],normed_incorrect[dataclass][1],bw_method = bw)
                         print("evaluating incorrect witness func")
                         witness_eval_incorrect = np.reshape(witness_incorrect(sample_positions.T),vd.xx.shape)
                     #f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1])
-                    #conds.append(f_cond)
+                    conds.append(f_cond)
 
                     #corr,p = spearmanr(a=normed[dataclass][0],b=normed[dataclass][1])
                     corr,p = pearsonr(normed[dataclass][0],normed[dataclass][1])
@@ -223,7 +225,7 @@ def main(alldata,data,metric = "Brier"):
                     #idline = np.linspace(0,xmax,100)
                     #ax[di,0].plot(idline,idline,"--",color = "black",label = "y=x")
                     axlognorm = ax[di,1].matshow(f,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
-                    #ax[di,2].matshow(f_cond,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
+                    ax[di,2].matshow(f_cond,cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],norm = SymLogNorm(linthresh = 1e-3,vmin = np.min(f),vmax = np.max(f)),aspect = "auto",origin = "lower")
                     
                     if metric != "Brier":    
                         ax[di,2].plot(normed_incorrect[dataclass][1],normed_incorrect[dataclass][0],"o",markersize = 0.5)
@@ -302,7 +304,7 @@ def main(alldata,data,metric = "Brier"):
                     ax[2,2].axis("off")
                     ax[2,4].axis("off")
                 #ax[0].set_xlim(0,1.5*np.mean(norm))
-                #ax[0,3].matshow(conds[0]-conds[1],cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],aspect = "auto",origin = "lower")
+                ax[0,3].matshow(conds[0]-conds[1],cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],aspect = "auto",origin = "lower")
                 #ax[0].set_ylim(0,1.5*np.mean(norm))
                 #ax[1].set_ylim(np.mean(norm)-0.025,np.mean(norm)+0.01)
                 #ax[1].set_xlim(0,0.0002)
@@ -319,8 +321,11 @@ def main(alldata,data,metric = "Brier"):
                 else:    
                     ax[0,0].set_title("scatter (ood)")
                     ax[0,1].set_title("joint kde (ood)")
+                    ax[0,2].set_title("conditional var kde (ood)")
                     ax[1,0].set_title("scatter (ind)")
                     ax[1,1].set_title("joint kde (ind)")
+                    ax[1,2].set_title("conditional var kde (ind)")
+                    ax[0,3].set_title("conditional var kde ood - conditional var kde ind")
                 #plt.tight_layout()
 
                 if metric == "Brier":
