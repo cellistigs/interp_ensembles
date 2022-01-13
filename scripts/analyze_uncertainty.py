@@ -206,7 +206,7 @@ def main(alldata,data,metric = "Brier"):
                     d =2 
                     bw = n_total**(-1./(d+4))
                     f = vd.joint_kde(normed[dataclass][0],normed[dataclass][1],bw_method = bw)
-                    f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed[dataclass][0])**(-1/4))
+                    f_cond = vd.conditional_variance_kde(normed[dataclass][0],normed[dataclass][1],bw_method = len(normed["ind"][0])**(-1/4))
                     sample_positions = np.vstack([vd.xx.ravel(),vd.yy.ravel()])
                     print("evaluating correct witness func")
                     witness_eval = np.reshape(witness(sample_positions.T),vd.xx.shape)
@@ -304,7 +304,8 @@ def main(alldata,data,metric = "Brier"):
                     ax[2,2].axis("off")
                     ax[2,4].axis("off")
                 #ax[0].set_xlim(0,1.5*np.mean(norm))
-                ax[0,3].matshow(conds[0]-conds[1],cmap = "RdBu_r",extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],aspect = "auto",origin = "lower")
+                ax[0,3].matshow(conds[0]-conds[1],extent = [ymin-eps,ymax+eps,xmin-eps,xmax+eps],aspect = "auto",origin = "lower",cmap = "RdBu_r",norm = SymLogNorm(linthresh = 1e-3,vmin = -np.max(conds[0]),vmax = np.max(conds[0])))
+                
                 #ax[0].set_ylim(0,1.5*np.mean(norm))
                 #ax[1].set_ylim(np.mean(norm)-0.025,np.mean(norm)+0.01)
                 #ax[1].set_xlim(0,0.0002)
