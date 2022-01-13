@@ -22,10 +22,14 @@ def main(args):
     all_ordereddata[args.oodname] = None ## create ood name. 
     for data in all_ordereddata:
         #1. Get the metric values for each dataset we care about. 
-        model1_metrics = get_metrics_outputs(args.model1,args.metric,data)
-        model2_metrics = get_metrics_outputs(args.model2,args.metric,data)
+        all_model1_metrics = [get_metrics_outputs(m1,args.metric,data) for m1 in args.model1]
+        model1_metrics = np.mean(np.array(all_model1_metrics),axis = 0)
+        all_model2_metrics = [get_metrics_outputs(m2,args.metric,data) for m2 in args.model2]
+        model2_metrics = np.mean(np.array(all_model2_metrics),axis = 0)
         if args.basemodel is not None:
-            basemodel_metrics = get_metrics_outputs(args.basemodel,args.metric,data)
+            all_basemodel_metrics = [get_metrics_outputs(bm,args.metric,data) for bm in args.basemodel]
+            basemodel_metrics = np.mean(np.array(all_basemodel_metrics),axis = 0)
+            basemodel_metrics[np.where(basemodel_metrics < args.thresh_score)] = np.nan
             title = "Change in {}".format(args.metric)
             model1_metrics = model1_metrics-basemodel_metrics
             model2_metrics = model2_metrics-basemodel_metrics
@@ -42,10 +46,13 @@ def main(args):
     fig,ax = plt.subplots(1,2,figsize = (10,5))
     orig_title = title
     for di,(data,datadict) in enumerate(all_ordereddata.items()):
-        means = np.mean(datadict,axis = 1)
+        means = np.nanmean(datadict,axis = 1)
+        datadict = datadict[:,~np.any(np.isnan(datadict),axis = 0)]
         z = gaussian_kde(datadict)(datadict)
         idx = z.argsort()
         ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],c=np.log2(z[idx]),label = data,s=1)
+        all_data = np.stack([datadict[0][idx],datadict[1][idx]],axis = 1)
+        print(sum(np.all(all_data<0,axis =1))/len(all_data))
         title = orig_title+": {} ".format(dataset[di])
         if args.basemodel is None:
             ax[di].axvline(means[0])
@@ -61,7 +68,7 @@ def main(args):
         ax[0].set_ylim(-2,2)
         ax[1].set_xlim(-2,2)
         ax[1].set_ylim(-2,2)
-    plt.savefig(os.path.join(ims,"compare_{}_{}_{}_{}.png".format(args.model1,args.model2,args.metric,args.basemodel)))    
+    plt.savefig(os.path.join(ims,"compare_{}_avg2_brier_avgbase.png".format(args.model1,args.model2,args.metric,args.basemodel)))    
 
 def get_metrics_outputs(stubname,metric,data): 
     """Given the name of a dataset stub that references a set of logits and a set of labels, will return the corresponding metric value for those logits and labels. 
@@ -116,11 +123,12 @@ def get_ordered_metricvals(ordering,following):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--model1","-m1")
-    parser.add_argument("--model2","-m2")
+    parser.add_argument("--model1","-m1",action = "append", help = "first model (or average of first model scores)")
+    parser.add_argument("--model2","-m2",action = "append", help = "second model (or average of second model scores)")
     parser.add_argument("--metric",choices = ["Likelihood","Brier_Score","Confidence"])
     parser.add_argument("--oodname")
-    parser.add_argument("--basemodel")
+    parser.add_argument("--basemodel","-bm",action = "append",help = "base model (or average of base model scores) to consider")
+    parser.add_argument("--thresh_score","-t",type = float,help = "threshold score at which to throw out a data point")
     args = parser.parse_args()
     
 
