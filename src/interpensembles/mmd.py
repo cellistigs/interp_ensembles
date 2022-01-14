@@ -8,6 +8,7 @@ Includes:
 
 """
 import numpy as np 
+from sklearn.metrics import pairwise
 
 class MMDKernel(): 
     """Base class of different kernel functions for MMD. 
@@ -77,6 +78,7 @@ class MMDModule():
         """The witness function can be estimated as the inner product of the feature map and the difference in mean embeddings. We can do finite sample estimates of this quantity: 
 
         """
+        raise NotImplementedError("This implementation is not commensurate with others in this class.")
         ## assuming correctly shaped inputs: 
         sample1_factor = lambda t: np.mean(self.kernel(data1,t),axis = 1)
         sample2_factor = lambda t: np.mean(self.kernel(data2,t),axis = 1)
@@ -94,10 +96,39 @@ class MMDModule():
 
         return witness
 
-    def compute_mmd2():
-        """TODO
+    def compute_mmd2_rbf(X,Y,gamma=None):
+        """Compute the unbiased statistic MMD^2 from data X,Y, each with shape (samples, dims). If gamma is not given, will be computed as 2* inverse squared  median distance between samples (approximating sigma in a gaussian rbf). 
+        Referencing https://github.com/djsutherland/mmd/blob/master/examples/mmd%20regression%20example.ipynb for much of this code. 
 
+        :param X: data array of shape (samples, dims)
+        :param Y: data array of shape (samples,dims)
+        :param gamma: parameter of rbf kernel.
         """
+        if gamma is None:
+            ## estimate gamma from data: 
+            print("estimating gamma from data...")
+            euc_dists = pairwise.euclidean_distances(np.vstack([X,Y]),squared = True) 
+            gamma = 1/(2*np.median(euc_dists[np.triu_indices_from(euc_dists,k=1)],overwrite_input=True))
+            print("setting gamma = {}".format(gamma))
+
+
+        m = len(X)
+        n = len(Y)
+        
+        ## Now calculate each component of mmd_u^2:
+
+        XX_entries = pairwise.rbf_kernel(X,gamma = gamma)
+        YY_entries = pairwise.rbf_kernel(Y,gamma = gamma)
+        XY_entries = pairwise.rbf_kernel(X,Y,gamma = gamma)
+        
+        ## Collapse:
+        x_contrib = 2*np.sum(XX_entries[np.triu_indices_from(XX_entries,k=1)])/(m*(m-1)) ## sum of non-diag elements is equal to lower diag * 2 for symmetric distance matrix. 
+        y_contrib = 2*np.sum(YY_entries[np.triu_indices_from(YY_entries,k=1)])/(n*(n-1))
+        xy_contrib = 2*np.sum(XY_entries)/(m*n)
+
+        mmd_2 = x_contrib + y_contrib -xy_contrib
+        return mmd_2
+
     
     def compute_threshold_distribution_free():
         """TODO
