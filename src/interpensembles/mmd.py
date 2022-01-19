@@ -129,6 +129,34 @@ class MMDModule():
         mmd_2 = x_contrib + y_contrib -xy_contrib
         return mmd_2
 
+    def compute_mmd_rbf(X,Y,gamma = None):
+        """Compute the biased statistic MMD_b from Gretton et al. 2012. Consider when Type II errors (false negatives) are of greater concern.  
+
+        """
+        if gamma is None:
+            ## estimate gamma from data: 
+            print("estimating gamma from data...")
+            euc_dists = pairwise.euclidean_distances(np.vstack([X,Y]),squared = True) 
+            gamma = 1/(2*np.median(euc_dists[np.triu_indices_from(euc_dists,k=1)],overwrite_input=True))
+            print("setting gamma = {}".format(gamma))
+
+
+        m = len(X)
+        n = len(Y)
+        
+        ## Now calculate each component of mmd_u^2:
+
+        XX_entries = pairwise.rbf_kernel(X,gamma = gamma)
+        YY_entries = pairwise.rbf_kernel(Y,gamma = gamma)
+        XY_entries = pairwise.rbf_kernel(X,Y,gamma = gamma)
+        
+        ## Collapse:
+        x_contrib = np.sum(XX_entries)/(m**2) ## sum of non-diag elements is equal to lower diag * 2 for symmetric distance matrix. 
+        y_contrib = np.sum(YY_entries)/(n**2)
+        xy_contrib = 2*np.sum(XY_entries)/(m*n)
+
+        mmd = np.sqrt(x_contrib + y_contrib -xy_contrib)
+        return mmd
     
     def compute_threshold_distribution_free():
         """TODO
