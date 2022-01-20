@@ -5,6 +5,7 @@ import re
 import json
 from scipy.special import softmax
 from scipy.stats import gaussian_kde,pearsonr
+from sklearn.metrics import r2_score
 import numpy as np
 import os
 from interpensembles.metrics import NLLData,BrierScoreData
@@ -58,6 +59,8 @@ def main(args):
         z = gaussian_kde(datadict)(datadict)
         #idx = z.argsort()
         idx = basedata[di].argsort()
+        import pdb; pdb.set_trace()
+        print("R^2: {}".format(r2_score(datadict[1][idx],datadict[0][idx])))
         ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
         #ax[di].scatter(datadict[0],datadict[1],marker = markers[di],cmap = "plasma",label = data,s=1)
         #all_data = np.stack([datadict[0][idx],datadict[1][idx]],axis = 1)
