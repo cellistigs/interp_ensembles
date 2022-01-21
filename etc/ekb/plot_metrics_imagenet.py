@@ -57,7 +57,7 @@ for model_idx, model in enumerate(models):
 
 #%% scratch models for ensemble
 model_type = 'resnet50'
-models_de1 = ["deepens1", "deepens2","deepens3","deepens4","deepens5"]
+models_de1 = ["deepens1", "deepens2", "deepens3", "deepens4", "deepens5"]
 nll_dpoints_de1 = np.zeros((len(models_de1), len(datasets)))
 bsm_dpoints_de1 = np.zeros((len(models_de1), len(datasets)))
 acc_dpoints_de1 = np.zeros((len(models_de1), len(datasets)))

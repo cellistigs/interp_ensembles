@@ -59,7 +59,7 @@ store_logits_fname="$OUTPUTDIR/${model}--${dataset_name}--${deepensn}.hdf5"
 echo "Output will be stored in ${store_logits_fname}"
 resume="${ENSEMBLE_BASEDIR}/${ENSEMBLEDIR1[$deepensn]}"
 echo "$resume"
-python /data/Projects/linear_ensembles/interp_ensembles/scripts/train_imagenet.py ${dataset_dir} --arch=${model} \
+python /data/Projects/linear_ensembles/interp_ensembles/scripts/pred_imagenet.py ${dataset_dir} --arch=${model} \
   --workers=${workers} \
   --resume=${resume} \
   --evaluate \
