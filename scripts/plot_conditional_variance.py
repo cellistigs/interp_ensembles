@@ -3,6 +3,7 @@
 ## Cell 0 
 import hydra
 from hydra import utils
+import json
 from statsmodels.stats.proportion import proportion_confint 
 import joblib
 import matplotlib.pyplot as plt
@@ -27,6 +28,7 @@ def main(cfg):
     :param ind_stubs: a list of in distribution stub names 
     :param ood_stubs: a list of out of distribution stub names
     :param ood_suffix: a list of suffixes to append for ood data 
+    :param gpu: if we should use gpu or not: 
     """
 
     ## Cell 1: formatting filenames 
@@ -90,8 +92,11 @@ def main(cfg):
     import gpytorch
 
     class GPModel(gpytorch.models.ExactGP):
-        def __init__(self, metrics, variances):
-            likelihood = gpytorch.likelihoods.GaussianLikelihood()
+        def __init__(self, metrics, variances,gpu = False):
+            if gpu:
+                likelihood = gpytorch.likelihoods.GaussianLikelihood().cuda()
+            else:    
+                likelihood = gpytorch.likelihoods.GaussianLikelihood()
             super().__init__(metrics, variances, likelihood)
             self.mean_module = gpytorch.means.ZeroMean()
             self.covar_module = gpytorch.kernels.RBFKernel()
@@ -108,13 +113,34 @@ def main(cfg):
         Given these, returns the conditional expectation evaluated on int(1-(1/M)*100)+1 points between 1/M and 1.  
 
         """
-        model = GPModel(ef2.double(),var.double()).double()
+        if cfg.gpu:
+            ef2 = ef2.cuda()
+            var = var.cuda()
+            model = GPModel(ef2.double(),var.double()).double()
+            model = model.cuda()
+            max_cholesky_size = 800
+        else:    
+            model = GPModel(ef2.double(),var.double()).double()
+            max_cholesky_size = 1e6
         model.eval()
         start_conf = 1. / num_classes
-        cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
+        if cfg.gpu:
+            cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1).cuda()
+        else:    
+            cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
-            with gpytorch.settings.max_cholesky_size(1e6):
+            with gpytorch.settings.max_cholesky_size(max_cholesky_size):
                 cond_expec = model(torch.tensor(cond_expec_xs).double()).mean
+                if cfg.gpu:
+                    cond_expec_final = cond_expec.cpu()
+                    cond_expec_xs_final = cond_expec_xs.cpu()
+                    del cond_expec
+                    del cond_expec_xs
+                    del model.likelihood
+                    del model
+                    del ef2
+                    del var
+                return cond_expec_final,cond_expec_xs_final
         
         return cond_expec,cond_expec_xs
 
@@ -173,14 +199,31 @@ def main(cfg):
         print("split {}".format(n))
         dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True)
 
+
         dprimes.append(dp)
         ces.append(ce1)
         ces.append(ce2)
         print(d_orig,"orig d")
         print(dprimes,"prime d")
 
+        del dp 
+        del ce1
+        del ce2
+        del cex
+
+        torch.cuda.empty_cache()
+        print(f"After emptying cache: {torch.cuda.memory_allocated()}")
+        print(f"After emptying cache: {torch.cuda.memory_cached()}")
+
     count = sum([dp> d_orig for dp in dprimes])
-    print(proportion_confint(count,N))
+    data = {"lower":None,"upper":None,"exact":None}
+    interval = proportion_confint(count,N)
+    data["lower"] =interval[0]
+    data["upper"] = interval[1]
+    data["exact"] = count/N
+    with open("signifdata.json","w") as f:
+        json.dump(data,f)
+
 
 
 
