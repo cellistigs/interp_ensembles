@@ -2,8 +2,10 @@
 
 ## Cell 0 
 import hydra
+import time
 from hydra import utils
 import json
+import gc 
 from statsmodels.stats.proportion import proportion_confint 
 import joblib
 import matplotlib.pyplot as plt
@@ -18,6 +20,33 @@ import torch
 import matplotlib as mpl
 
 plt.style.use(os.path.join(here,"../etc/config/geoff_stylesheet.mplstyle"))
+
+def refresh_cuda_memory():
+    """
+    Re-allocate all cuda memory to help alleviate fragmentation
+    """
+    # Run a full garbage collect first so any dangling tensors are released
+    gc.collect()
+
+    # Then move all tensors to the CPU
+    locations = {}
+    for obj in gc.get_objects():
+        if not isinstance(obj, torch.Tensor):
+            continue
+
+        locations[obj] = obj.device
+        obj.data = obj.data.cpu()
+        if isinstance(obj, torch.nn.Parameter) and obj.grad is not None:
+            obj.grad.data = obj.grad.cpu()
+
+    # Now empty the cache to flush the allocator
+    torch.cuda.empty_cache()
+
+    # Finally move the tensors back to their associated GPUs
+    for tensor, device in locations.items():
+        tensor.data = tensor.to(device)
+        if isinstance(tensor, torch.nn.Parameter) and tensor.grad is not None:
+            tensor.grad.data = tensor.grad.to(device)
 
 @hydra.main(config_path = "script_configs",config_name ="modeldata_test")
 def main(cfg):
@@ -51,17 +80,29 @@ def main(cfg):
 
     ## Cell 2: formatting data
 
-    ind_probs = torch.stack([
-        torch.tensor(np.load(ind_prob_path)).float()
-        for ind_prob_path in ind_prob_paths
-    ], dim=-2).softmax(dim=-1)
+    if cfg.ind_softmax is False:
+        ind_probs = torch.stack([
+            torch.tensor(np.load(ind_prob_path)).float()
+            for ind_prob_path in ind_prob_paths
+        ], dim=-2).softmax(dim=-1)
+    else:
+        ind_probs = torch.stack([
+            torch.tensor(np.load(ind_prob_path)).float()
+            for ind_prob_path in ind_prob_paths
+        ], dim=-2)    
     ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
     ind_indices =  torch.randperm(len(ind_probs))[:10000]
 
-    ood_probs = torch.stack([
-        torch.tensor(np.load(ood_prob_path)).float()
-        for ood_prob_path in ood_prob_paths
-    ], dim=-2).softmax(dim=-1)
+    if cfg.ood_softmax is False:
+        ood_probs = torch.stack([
+            torch.tensor(np.load(ood_prob_path)).float()
+            for ood_prob_path in ood_prob_paths
+        ], dim=-2).softmax(dim=-1)
+    else:    
+        ood_probs = torch.stack([
+            torch.tensor(np.load(ood_prob_path)).float()
+            for ood_prob_path in ood_prob_paths
+        ], dim=-2)
     ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     ood_indices =  torch.randperm(len(ood_probs))[:10000]
 
@@ -183,7 +224,7 @@ def main(cfg):
         return perm_s1,perm_s2
 
 
-    N = 100 
+    N = 2 
     nclasses = 10
     sample1 = (ind_ef2.double(), ind_var.double())
     sample2 = (ood_ef2.double(), ood_var.double())
@@ -191,6 +232,7 @@ def main(cfg):
     ## calculate original stat
     print("calculating orig stat")
     d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True)
+    dorig_val = d_orig.item()
     print("calculating shuffle stats")
 
     dprimes = []
@@ -203,19 +245,15 @@ def main(cfg):
         dprimes.append(dp)
         ces.append(ce1)
         ces.append(ce2)
-        print(d_orig,"orig d")
+        print(dorig_val,"orig d")
         print(dprimes,"prime d")
 
-        del dp 
-        del ce1
-        del ce2
-        del cex
-
-        torch.cuda.empty_cache()
+        if n % 10 == 0: 
+            refresh_cuda_memory()    
         print(f"After emptying cache: {torch.cuda.memory_allocated()}")
         print(f"After emptying cache: {torch.cuda.memory_cached()}")
 
-    count = sum([dp> d_orig for dp in dprimes])
+    count = sum([dp> dorig_val for dp in dprimes])
     data = {"lower":None,"upper":None,"exact":None}
     interval = proportion_confint(count,N)
     data["lower"] =interval[0]
@@ -223,6 +261,7 @@ def main(cfg):
     data["exact"] = count/N
     with open("signifdata.json","w") as f:
         json.dump(data,f)
+
 
 
 
