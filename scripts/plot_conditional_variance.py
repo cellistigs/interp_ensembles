@@ -181,7 +181,7 @@ def main(cfg):
                     del model
                     del ef2
                     del var
-                return cond_expec_final,cond_expec_xs_final
+                    return cond_expec_final,cond_expec_xs_final
         
         return cond_expec,cond_expec_xs
 
@@ -224,7 +224,7 @@ def main(cfg):
         return perm_s1,perm_s2
 
 
-    N = 100 
+    N = 2 
     nclasses = 10
     sample1 = (ind_ef2.double(), ind_var.double())
     sample2 = (ood_ef2.double(), ood_var.double())
