@@ -121,7 +121,7 @@ def main(cfg):
             max_cholesky_size = 800
         else:    
             model = GPModel(ef2.double(),var.double()).double()
-            max_cholesky_size = 1e6
+            max_cholesky_size = 800 
         model.eval()
         start_conf = 1. / num_classes
         if cfg.gpu:
@@ -140,7 +140,7 @@ def main(cfg):
                     del model
                     del ef2
                     del var
-                return cond_expec_final,cond_expec_xs_final
+                    return cond_expec_final,cond_expec_xs_final
         
         return cond_expec,cond_expec_xs
 
