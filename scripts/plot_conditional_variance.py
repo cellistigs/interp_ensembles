@@ -2,6 +2,7 @@
 
 ## Cell 0 
 import hydra
+import time
 from hydra import utils
 import json
 from statsmodels.stats.proportion import proportion_confint 
@@ -51,17 +52,29 @@ def main(cfg):
 
     ## Cell 2: formatting data
 
-    ind_probs = torch.stack([
-        torch.tensor(np.load(ind_prob_path)).float()
-        for ind_prob_path in ind_prob_paths
-    ], dim=-2).softmax(dim=-1)
+    if cfg.ind_softmax is False:
+        ind_probs = torch.stack([
+            torch.tensor(np.load(ind_prob_path)).float()
+            for ind_prob_path in ind_prob_paths
+        ], dim=-2).softmax(dim=-1)
+    else:
+        ind_probs = torch.stack([
+            torch.tensor(np.load(ind_prob_path)).float()
+            for ind_prob_path in ind_prob_paths
+        ], dim=-2)    
     ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
     ind_indices =  torch.randperm(len(ind_probs))[:10000]
 
-    ood_probs = torch.stack([
-        torch.tensor(np.load(ood_prob_path)).float()
-        for ood_prob_path in ood_prob_paths
-    ], dim=-2).softmax(dim=-1)
+    if cfg.ood_softmax is False:
+        ood_probs = torch.stack([
+            torch.tensor(np.load(ood_prob_path)).float()
+            for ood_prob_path in ood_prob_paths
+        ], dim=-2).softmax(dim=-1)
+    else:    
+        ood_probs = torch.stack([
+            torch.tensor(np.load(ood_prob_path)).float()
+            for ood_prob_path in ood_prob_paths
+        ], dim=-2)
     ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     ood_indices =  torch.randperm(len(ood_probs))[:10000]
 
