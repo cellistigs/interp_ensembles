@@ -21,6 +21,79 @@ import matplotlib as mpl
 
 plt.style.use(os.path.join(here,"../etc/config/geoff_stylesheet.mplstyle"))
 
+def Var(probs,labels):
+    """Calculates average and diversity decomposition for variance
+
+    :param probs: probabilities (softmax) with shape (sample,model,class)
+    :param labels: labels
+    """
+    avg = 1-probs.pow(2).sum(dim=-1).mean(dim=-1)
+    div = probs.var(dim=-2).sum(dim=-1)
+    return avg,div
+
+def JS(probs,labels):
+    """Calculates average and diversity decomposition for jensen-shannon. 
+
+    :param probs: probabilities (softmax) with shape (sample,model,class)
+    :param labels: labels
+    """
+    ensemble_probs = probs.mean(dim=-2)
+    ensemble_info = ensemble_probs*ensemble_probs.log()
+    ensemble_entropy = -ensemble_info.sum(dim = -1)
+
+    # Now get entropy for each individual model member. 
+    single_model_info = probs*probs.log()
+    avg_single_model_entropy = -single_model_info.sum(dim=-1).mean(dim = -1)
+    ## then, the average single model entropy is: 
+    avg = avg_single_model_entropy
+    div = ensemble_entropy - avg_single_model_entropy ## this is Jensen Shannon divergence
+    return avg,div
+
+def KL(probs,labels):
+    """Calculates average and diversity decomposition for kl divergence. 
+
+    :param probs: probabilities (softmax) with shape (sample,model,class)
+    :param labels: labels
+    """
+    ensemble_probs = probs.mean(dim=-2)
+    ensemble_like = ensemble_probs[range(ensemble_probs.shape[0]),labels]
+    ensemble_nll = -ensemble_like.log()
+
+    all_single = []
+    for si in range(probs.shape[1]):
+        single_model_like = probs[range(probs.shape[0]),si,labels]
+        single_model_nll = -single_model_like.log()
+        all_single.append(single_model_nll)
+    avg_single_model_nll = torch.stack(all_single,axis = 0).mean(0)
+    avg = avg_single_model_nll
+    div = -(ensemble_nll-avg_single_model_nll)
+    print(avg,div)
+    return avg,div
+
+div_funcs = {"Var":Var,"JS":JS,"KL":KL}
+
+div_names = {"ood_cinic_preds.npy":"CINIC-10 (OOD)",
+        "ood_preds.npy":"CIFAR10.1 (OOD)",
+        "ood_cifar10_c_fog_1_preds.npy":"CIFAR10-C Fog 1 (OOD)",
+        "ood_cifar10_c_fog_5_preds.npy":"CIFAR10-C Fog 5 (OOD)",
+        "ood_cifar10_c_brightness_1_preds.npy":"CIFAR10-C Brightness 1 (OOD)",
+        "ood_cifar10_c_brightness_5_preds.npy":"CIFAR10-C Brightness 5 (OOD)",
+        "ood_cifar10_c_gaussian_noise_1_preds.npy":"CIFAR10-C Gauss Noise 1 (OOD)",
+        "ood_cifar10_c_gaussian_noise_5_preds.npy":"CIFAR10-C Gauss Noise 5 (OOD)",
+        "ood_cifar10_c_contrast_1_preds.npy":"CIFAR10-C Contrast 1 (OOD)",
+        "ood_cifar10_c_contrast_5_preds.npy":"CIFAR10-C Contrast 5 (OOD)",
+        }
+
+quantity_names = {"Var":
+            {"avg":r"Avg. Uncertainty (1-$ E[ \Vert f \Vert^2 ]$)",
+            "div":"Variance"},
+        "JS":{
+            "avg":"Avg. Entropy",
+            "div":"JS Divergence"},
+        "KL":{
+            "avg":"Avg. NLL",
+            "div":"KL Divergence"}}
+
 def refresh_cuda_memory():
     """
     Re-allocate all cuda memory to help alleviate fragmentation
@@ -59,6 +132,11 @@ def main(cfg):
     :param ood_suffix: a list of suffixes to append for ood data 
     :param gpu: if we should use gpu or not: 
     """
+    ## formatting limits
+    num_classes = 10
+    kde_exp = -0.125 ## 1/4*nb_dims
+    xranges = {"Var":[0.,1.],"JS":[0,np.log(num_classes)],"KL":[0,11]}
+    xrange = xranges[cfg.uncertainty]
 
     ## Cell 1: formatting filenames 
     basedir = os.path.join(here,"../results/")
@@ -75,8 +153,6 @@ def main(cfg):
         if "base_wideresnet28_10ood_cinic_preds" in basename
     ]
     ood_prob_paths = [os.path.join(basedir,s_in+cfg.ood_suffix) for s_in in cfg.ood_stubs]
-    num_classes = 10
-    kde_exp = -0.125 ## 1/4*nb_dims
 
     ## Cell 2: formatting data
 
@@ -107,27 +183,38 @@ def main(cfg):
     ood_indices =  torch.randperm(len(ood_probs))[:10000]
 
     ## Cell 3: 
-    ind_ef2 = ind_probs[ind_indices].pow(2).sum(dim=-1).mean(dim=-1)
-    ood_ef2 = ood_probs[ood_indices].pow(2).sum(dim=-1).mean(dim=-1)
+    div_func = div_funcs[cfg.uncertainty]
+
+    ind_avg, ind_div = div_func(ind_probs[ind_indices],ind_labels[ind_indices])
+    ood_avg, ood_div = div_func(ood_probs[ood_indices],ood_labels[ood_indices])
+
+    min_avg = np.min((np.min(ind_avg.numpy()),np.min(ood_avg.numpy())))
+    max_avg = np.max((np.max(ind_avg.numpy()),np.max(ood_avg.numpy())))
+
+
+    #ind_avg = ind_probs[ind_indices].pow(2).sum(dim=-1).mean(dim=-1)
+    #ood_avg = ood_probs[ood_indices].pow(2).sum(dim=-1).mean(dim=-1)
 
     ## Cell 4: 
 
-    ind_var = ind_probs[ind_indices].var(dim=-2).sum(dim=-1)
-    ood_var = ood_probs[ood_indices].var(dim=-2).sum(dim=-1)
+    #ind_div = ind_probs[ind_indices].var(dim=-2).sum(dim=-1)
+    #ood_div = ood_probs[ood_indices].var(dim=-2).sum(dim=-1)
 
     ## Cell 5: 
 
-    ind_ef2_kde = gaussian_kde(ind_ef2, bw_method=len(ind_indices) ** (kde_exp))
-    ood_ef2_kde = gaussian_kde(ood_ef2, bw_method=len(ood_indices) ** (kde_exp))
+    ind_avg_kde = gaussian_kde(ind_avg, bw_method=len(ind_indices) ** (kde_exp))
+    ood_avg_kde = gaussian_kde(ood_avg, bw_method=len(ood_indices) ** (kde_exp))
 
     ## Cell 6: 
-    ind_joint_kde = gaussian_kde(np.stack([ind_ef2, ind_var]), bw_method=len(ind_indices) ** (kde_exp))
-    ood_joint_kde = gaussian_kde(np.stack([ood_ef2, ood_var]), bw_method=len(ood_indices) ** (kde_exp))
+    ind_joint_kde = gaussian_kde(np.stack([ind_avg, ind_div]), bw_method=len(ind_indices) ** (kde_exp))
+    ood_joint_kde = gaussian_kde(np.stack([ood_avg, ood_div]), bw_method=len(ood_indices) ** (kde_exp))
 
     ## Cell 7: 
-    xs = np.linspace(0., 1., 101)
+    xs = np.linspace(xrange[0],xrange[1], 101)
     x_grid, y_grid = np.meshgrid(xs, xs)
     joint = np.stack([x_grid.reshape(-1), y_grid.reshape(-1)])
+    ind_condition = np.logical_or(x_grid < ind_avg.min().numpy(),x_grid > ind_avg.max().numpy())
+    ood_condition = np.logical_or(x_grid < ood_avg.min().numpy(),x_grid > ood_avg.max().numpy())
 
     ## Cell 8: 
     import gpytorch
@@ -166,9 +253,9 @@ def main(cfg):
         model.eval()
         start_conf = 1. / num_classes
         if cfg.gpu:
-            cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1).cuda()
+            cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1).cuda()
         else:    
-            cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
+            cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
             with gpytorch.settings.max_cholesky_size(max_cholesky_size):
                 cond_expec = model(torch.tensor(cond_expec_xs).double()).mean
@@ -185,15 +272,15 @@ def main(cfg):
         
         return cond_expec,cond_expec_xs
 
-    def dstat(sample1,sample2,nclasses,return_ce = False):
-        """Takes a distance statistic between conditional expectation of two given samples.  
+    def dstat(sample1,sample2,nclasses,return_ce = False,xrange = xrange):
+        """Takes a distance statistic measuring how much greater the ind sample is than the ood sample.  
 
         :param sample1: a tuple containing conditional expectation and variance
         :param sample2: a tuple containing conditional expectation and variance
         """
         c1,cx = cond_expec(*sample1,nclasses)
         c2,cx = cond_expec(*sample2,nclasses)
-        avg_abs = np.mean(np.abs(c1-c2).numpy())
+        avg_abs = np.mean(c1.numpy()-c2.numpy())
         if return_ce is False:
             return 1/(1-(1/nclasses))*avg_abs
         else:
@@ -226,12 +313,12 @@ def main(cfg):
 
     N = 2 
     nclasses = 10
-    sample1 = (ind_ef2.double(), ind_var.double())
-    sample2 = (ood_ef2.double(), ood_var.double())
+    sample1 = (ind_avg.double(), ind_div.double())
+    sample2 = (ood_avg.double(), ood_div.double())
 
     ## calculate original stat
     print("calculating orig stat")
-    d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True)
+    d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True,xrange=xrange)
     dorig_val = d_orig.item()
     print("calculating shuffle stats")
 
@@ -239,7 +326,7 @@ def main(cfg):
     ces = []
     for n in range(N):
         print("split {}".format(n))
-        dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True)
+        dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True,xrange=xrange)
 
 
         dprimes.append(dp)
@@ -266,8 +353,8 @@ def main(cfg):
 
 
 
-    #ind_model = GPModel(ind_ef2.double(), ind_var.double()).double()
-    #ood_model = GPModel(ood_ef2.double(), ood_var.double()).double()
+    #ind_model = GPModel(ind_avg.double(), ind_div.double()).double()
+    #ood_model = GPModel(ood_avg.double(), ood_div.double()).double()
     #ind_model.eval()
     #ood_model.eval()
 
@@ -278,69 +365,75 @@ def main(cfg):
     #        ind_cond_expec = ind_model(torch.tensor(cond_expec_xs).double()).mean
     #        ood_cond_expec = ood_model(torch.tensor(cond_expec_xs).double()).mean
 
-    #        ind_preds_ind = ind_model(torch.tensor(ind_ef2.double())).mean
-    #        ood_preds_ood = ood_model(torch.tensor(ood_ef2.double())).mean
-    #        ind_preds_ood = ind_model(torch.tensor(ood_ef2.double())).mean
-    #        ood_preds_ind = ood_model(torch.tensor(ind_ef2.double())).mean
-    #        print("R^2 ind predicts ind: {}".format(r2_score(ind_var,ind_preds_ind)))
-    #        print("R^2 ood predicts ind: {}".format(r2_score(ind_var,ood_preds_ind)))
-    #        print("R^2 ood predicts ood: {}".format(r2_score(ood_var,ood_preds_ood)))
-    #        print("R^2 ind predicts ood: {}".format(r2_score(ood_var,ind_preds_ood)))
+    #        ind_preds_ind = ind_model(torch.tensor(ind_avg.double())).mean
+    #        ood_preds_ood = ood_model(torch.tensor(ood_avg.double())).mean
+    #        ind_preds_ood = ind_model(torch.tensor(ood_avg.double())).mean
+    #        ood_preds_ind = ood_model(torch.tensor(ind_avg.double())).mean
+    #        print("R^2 ind predicts ind: {}".format(r2_score(ind_div,ind_preds_ind)))
+    #        print("R^2 ood predicts ind: {}".format(r2_score(ind_div,ood_preds_ind)))
+    #        print("R^2 ood predicts ood: {}".format(r2_score(ood_div,ood_preds_ood)))
+    #        print("R^2 ind predicts ood: {}".format(r2_score(ood_div,ind_preds_ood)))
 
 
     ## Cell 9:        
+
+
     if cfg.plot:
         fig, (var_ax, ind_cond_ax, ood_cond_ax, cond_exp_ax) = plt.subplots(
             1, 4, figsize=(12, 3), sharex=True, sharey=False
         )
         levels = np.linspace(-3., 3., 51)
 
-        sns.kdeplot(ind_var, ax=var_ax)
-        sns.kdeplot(ood_var, ax=var_ax)
-        var_ax.set(xlabel="Var.", title="Marginal Var. Dist.\nComparison", ylim=(0., 15.))
+        sns.kdeplot(ind_div, ax=var_ax)
+        sns.kdeplot(ood_div, ax=var_ax)
+        var_ax.set(xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., 15.))
 
         ind_vals = ind_joint_kde(joint).reshape(x_grid.shape)
-        ind_vals = ind_vals / ind_ef2_kde(x_grid.ravel()).reshape(x_grid.shape)
-        ind_vals = np.where(x_grid < (1. / num_classes), 0., ind_vals)
+        ind_vals = ind_vals / ind_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
+        #ind_vals = np.where(x_grid < (1. / num_classes), 0., ind_vals)
+        ind_vals = np.where(ind_condition, 0.,ind_vals)
         f = ind_cond_ax.contourf(
             x_grid, y_grid, ind_vals.clip(0., 10.),
             cmap="Blues",
             levels=np.linspace(0., 10., 50),
         )
         ind_cond_ax.set(
-            xlim=(0., 1.), ylim=(0., 1.), xlabel=r"Avg. Conf. ($ E[ \Vert f \Vert^2 ]$)",
-            ylabel=r"Variance", title="Conditional Var. Dist.\nCIFAR10 (InD)"
+            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],xrange[1]), xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            ylabel=r"{}".format(cfg.uncertainty), title="Conditional {}. Dist.\nCIFAR10 (InD)".format(cfg.uncertainty)
         )
         fig.colorbar(f, ax=ind_cond_ax)
 
         ood_vals = ood_joint_kde(joint).reshape(x_grid.shape)
-        ood_vals = ood_vals / ood_ef2_kde(x_grid.ravel()).reshape(x_grid.shape)
-        ood_vals = np.where(x_grid < (1. / num_classes), 0., ood_vals)
+        ood_vals = ood_vals / ood_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
+        ood_vals = np.where(ood_condition, 0., ood_vals)
         f = ood_cond_ax.contourf(
             x_grid, y_grid, ood_vals.clip(0., 10.),
             cmap="Oranges",
             levels=np.linspace(0., 10., 50),
         )
         ood_cond_ax.set(
-            xlabel=r"Avg. Conf. ($ E[ \Vert f \Vert^2 ]$)",
-            title="Conditional Var. Dist.\n{}".format(cfg.ood_suffix),
+            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],xrange[1]),
+            xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,div_names[cfg.ood_suffix]),
             yticks=[]
         )
         fig.colorbar(f, ax=ood_cond_ax)
+        cond_expec_show = np.where(ind_cond_expec)
 
         [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
         cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="CIFAR10 (InD)")
-        cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="CINIC10 (OOD)")
+        cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
         cond_exp_ax.set(
-            ylim=(0., 1.),
-            ylabel=r"$E [ \textrm{Var} \mid \textrm{Conf} ]$",
-            xlabel=r"Avg. Conf. ($ E[ \Vert f \Vert^2 ]$)",
-            title="Conditionally Expected Var.\nComparison"
+            ylim=(xrange[0],xrange[1]),
+            #ylabel=r"$E [ \textrm{"+quantity_names[cfg.uncertainty]["div"]+r"} \mid \textrm{"+quantity_names[cfg.uncertainty]["avg"]+r"} ]$",
+            ylabel=r"$E [ \textrm{Diversity} \mid \textrm{Avg} ]$",
+            xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            title="Conditionally Expected \n{}: Comparison".format(quantity_names[cfg.uncertainty]["div"])
         )
         cond_exp_ax.legend(loc="best")
         fig.tight_layout()
 
-        plt.savefig("cond_expected_var.png")
+        plt.savefig("cond_expected_{}.png".format(cfg.uncertainty))
 
         #fig,ax = plt.subplots(figsize= (4,4))
         #r2_matrix = np.array([[ind_r2_ind,ood_r2_ind],[ind_r2_ood,ood_r2_ood]])
