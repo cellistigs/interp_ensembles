@@ -275,14 +275,14 @@ def main(cfg):
         return cond_expec,cond_expec_xs
 
     def dstat(sample1,sample2,nclasses,return_ce = False,xrange = xrange):
-        """Takes a distance statistic measuring how much greater the ind sample is than the ood sample.  
+        """Takes a distance statistic measuring how much greater the ood sample is than the ind sample.  
 
         :param sample1: a tuple containing conditional expectation and variance
         :param sample2: a tuple containing conditional expectation and variance
         """
         c1,cx = cond_expec(*sample1,nclasses)
         c2,cx = cond_expec(*sample2,nclasses)
-        avg_abs = np.mean(c1.numpy()-c2.numpy())
+        avg_abs = np.mean(c2.numpy()-c1.numpy())
         if return_ce is False:
             return 1/(1-(1/nclasses))*avg_abs
         else:
