@@ -47,6 +47,7 @@ def JS(probs,labels):
     ## then, the average single model entropy is: 
     avg = avg_single_model_entropy
     div = ensemble_entropy - avg_single_model_entropy ## this is Jensen Shannon divergence
+    
     return avg,div
 
 def KL(probs,labels):
