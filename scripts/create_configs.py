@@ -8,7 +8,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 resultsfolder = os.path.join(here,"../results")
 configsfolder = os.path.join(here,"script_configs/")
 
-template = {"plot":False,"ind_stubs":None,"ood_stubs":None,"ood_suffix":None,"gpu":True}
+template = {"plot":False,"ind_stubs":None,"ood_stubs":None,"ood_suffix":None,"gpu":False,"uncertainty":None}
 
 if __name__ == "__main__":
     modelpre_lists = {}
@@ -52,6 +52,13 @@ if __name__ == "__main__":
                         modeldict["ind"]=modelpre_lists["cifar10.1"][modelpre]["ind"]
                         modeldict["ind_softmax"] = modelpre_lists["cifar10.1"][modelpre]["ind_softmax"] 
         
+
+    try:
+        all_ood = os.path.join(configsfolder,"all_ood")
+        os.mkdir(all_ood)
+    except FileExistsError:    
+        pass
+
     for oodname,dataindex in all_dataindices.items():
         config_group = os.path.join(configsfolder,oodname)
         try:
@@ -63,17 +70,25 @@ if __name__ == "__main__":
             for k,val in template.items():
                 file[k] = template[k]
             file["ind_stubs"] = modeldict["ind"]    
+            if modelpre == "Native WideResNet-28-10":
+                file["ind_stubs"] = modelpre_lists["cifar10.1"]["WideResNet-28-10"]["ind"]
             file["ood_stubs"] = modeldict["ood"]    
             file["ind_softmax"] = modeldict["ind_softmax"]
             file["ood_softmax"] = modeldict["ood_softmax"]
             if oodname == "cifar10.1":
                 file["ood_suffix"] = "ood_preds.npy"
+            elif oodname == "cinic10":
+                file["ood_suffix"] = "ood_cinic_preds.npy"
             else:    
                 file["ood_suffix"] = "ood_{}_preds.npy".format(oodname)
 
-            name = "config_{modelpre}_{oodname}.yaml".format(modelpre=modelpre,oodname=oodname)
-            with open(os.path.join(config_group,name),"w") as f:
-                yaml.dump(file,f)
+            for uncertainty in ["Var","JS","KL"]:
+                file["uncertainty"] = uncertainty
+                name = "config_{modelpre}_{oodname}_{uncertainty}.yaml".format(modelpre=modelpre,oodname=oodname,uncertainty =uncertainty)
+                with open(os.path.join(config_group,name),"w") as f:
+                    yaml.dump(file,f)
+                with open(os.path.join(all_ood,name),"w") as f:
+                    yaml.dump(file,f)
 
 
 
