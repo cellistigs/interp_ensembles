@@ -121,7 +121,7 @@ def refresh_cuda_memory():
         if isinstance(tensor, torch.nn.Parameter) and tensor.grad is not None:
             tensor.grad.data = tensor.grad.to(device)
 
-@hydra.main(config_path = "script_configs",config_name ="modeldata_test")
+@hydra.main(config_path = "script_configs",config_name ="test")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
 
@@ -254,6 +254,7 @@ def main(cfg):
         start_conf = 1. / num_classes
         if cfg.gpu:
             cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1).cuda()
+            #cond_expec_xs = torch.linspace(0,1, int((1. - start_conf) * 100) + 1).cuda()
         else:    
             cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
@@ -311,7 +312,7 @@ def main(cfg):
         return perm_s1,perm_s2
 
 
-    N = 2 
+    N = 100 
     nclasses = 10
     sample1 = (ind_avg.double(), ind_div.double())
     sample2 = (ood_avg.double(), ood_div.double())
