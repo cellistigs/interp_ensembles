@@ -8,7 +8,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 resultsfolder = os.path.join(here,"../results")
 configsfolder = os.path.join(here,"script_configs/")
 
-template = {"plot":False,"ind_stubs":None,"ood_stubs":None,"ood_suffix":None,"gpu":False,"uncertainty":None}
+template = {"plot":False,"ind_stubs":None,"ood_stubs":None,"ood_suffix":None,"gpu":True,"uncertainty":None}
 
 if __name__ == "__main__":
     modelpre_lists = {}
