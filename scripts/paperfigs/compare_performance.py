@@ -1,11 +1,14 @@
-## custom version of code to generate paper figure. 
+## Paper figure version with hydra integration. 
+
 from argparse import ArgumentParser
+import hydra
 import joblib
 import matplotlib.pyplot as plt
 import re
 import json
 from scipy.special import softmax
 from scipy.stats import gaussian_kde,pearsonr
+from sklearn.metrics import r2_score
 import numpy as np
 import os
 from interpensembles.metrics import NLLData,BrierScoreData
@@ -15,6 +18,7 @@ plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
 results = os.path.join(here,"../../results/")
 ims = os.path.join(here,"../../images/performance_comp")
 
+@hydra.main(config_path = "compare_performance_configs",config_name ="test")
 def main(args):
     """Calculates the per-datapoint metrics for two different models, and plots them against each other. 
     Optionally, can include a base model which we use as a baseline- calculate increase or decrease in metric performance relative to this base model. 
@@ -35,11 +39,12 @@ def main(args):
         if args.basemodel is not None:
             all_basemodel_metrics = [get_metrics_outputs(bm,args.metric,data) for bm in args.basemodel]
             basemodel_metrics = np.mean(np.array(all_basemodel_metrics),axis = 0)
+            basemodel_single = all_basemodel_metrics[args.select]
             basedata.append(basemodel_metrics)
             #basemodel_metrics[np.where(basemodel_metrics < args.thresh_score)] = np.nan
-            title = "Change in NLL".format(args.metric)
-            model1_metrics = model1_metrics-basemodel_metrics
-            model2_metrics = model2_metrics-basemodel_metrics
+            title = "Change in {}".format(args.metricshowname)
+            model1_metrics = model1_metrics-basemodel_metrics ## this is ensemble minus average
+            model2_metrics = model2_metrics[:len(basemodel_single)]-basemodel_single#basemodel_metrics ## this is single minus single 
         else:    
             title = "{}".format(args.metric)
         #2. Sort them. 
@@ -48,20 +53,20 @@ def main(args):
         all_ordereddata[data] = ordered
     
     #3. plotting: 
-    dataset = ["InD","OOD"]
+    dataset = [args.indshowname,args.oodshowname]
     markers = ["o","x"] 
     colors = ["C0","C4"]
     fig,ax = plt.subplots(1,2,figsize = (10,5))
     orig_title = title
     for di,(data,datadict) in enumerate(all_ordereddata.items()):
-        ax[di].plot(np.linspace(-6,6),np.linspace(-6,6),color = "black",linestyle = "--",alpha = 0.2)
         means = np.nanmean(datadict,axis = 1)
         #datadict = datadict[:,~np.any(np.isnan(datadict),axis = 0)]
         z = gaussian_kde(datadict)(datadict)
         #idx = z.argsort()
+        ax[di].plot(np.linspace(-10,10),np.linspace(-10,10),alpha = 0.2,linestyle = "--")
         idx = basedata[di].argsort()
-        scat = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
-        fig.colorbar(scat,ax = ax[di])
+        scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
+        fig.colorbar(scatterval,ax = ax[di])
 
         #ax[di].scatter(datadict[0],datadict[1],marker = markers[di],cmap = "plasma",label = data,s=1)
         #all_data = np.stack([datadict[0][idx],datadict[1][idx]],axis = 1)
@@ -74,21 +79,21 @@ def main(args):
             corr,p = pearsonr(datadict[0],datadict[1])
             title = title+"\n Pearson's R: {:3.3} (p={:3.3})".format(corr,p) 
         ax[di].set_title(title)    
-    ax[0].set_xlabel(r"$ -\log[ \frac{1}{M}\sum_i p_i] + \log(p_i)$")
-    ax[0].set_ylabel(r"$ \frac{1}{M}\sum_i[ -\log(\Tilde{p}_i)] + \log(p_i)$")
+    ax[0].set_xlabel(args.model1showname)
+    ax[0].set_ylabel(args.model2showname)
     if args.metric == "BrierScore":
         ax[0].set_xlim(-2,2)
         ax[0].set_ylim(-2,2)
         ax[1].set_xlim(-2,2)
         ax[1].set_ylim(-2,2)
     if args.metric == "Likelihood":
-        ax[0].set_xlim(-6,6)
-        ax[0].set_ylim(-6,6)
-        ax[1].set_xlim(-6,6)
-        ax[1].set_ylim(-6,6)
+        ax[0].set_xlim(-7,7)
+        ax[0].set_ylim(-7,7)
+        ax[1].set_xlim(-7,7)
+        ax[1].set_ylim(-7,7)
     #plt.savefig(os.path.join(ims,r"compare_avg_avg2_brier_avgbase.png".format(args.model1,args.model2,args.metric,args.basemodel)))    
-    plt.savefig(os.path.join(ims,"performancecomp_fig.png"))
-    #joblib.dump(all_ordereddata,os.path.join(results,"aggregated_ensembleresults",args.dumpname))
+    plt.savefig("{}_diff_{}.png".format(args.dumpname,args.select))
+    joblib.dump(all_ordereddata,args.dumpname)
 
 
 def get_ensemble(stubnames,metric,data):
@@ -182,20 +187,19 @@ def get_ordered_metricvals(ordering,following):
     inds = np.argsort(ordering)
     ordered_1 = ordering[inds]
     ordered_2 = following[inds]
-    import pdb; pdb.set_trace()
     return np.stack([ordered_1,ordered_2],axis = 0)
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("--model1","-m1",action = "append", help = "first model (or average of first model scores)")
-    parser.add_argument("--model2","-m2",action = "append", help = "second model (or average of second model scores)")
-    parser.add_argument("--metric",choices = ["Likelihood","BrierScore","Confidence"])
-    parser.add_argument("--oodname")
-    parser.add_argument("--basemodel","-bm",action = "append",help = "base model (or average of base model scores) to consider")
-    parser.add_argument("--thresh_score","-t",type = float,help = "threshold score at which to throw out a data point")
-    parser.add_argument("--dumpname","-d",help = "name of file we want to save output to.")
-    ## default args for generating ensemble/single model comparison fig.
-    args = parser.parse_args(["--basemodel","robust_results11-15-21_02:46.11_base_resnet18", "--model1", "synth_ensemble_0_base_resnet18_11_15_", "--metric", "Likelihood", "--oodname", "ood_", "--thresh_score", "0.01", "--model2", "robust_results11-13-21_01:28.26_base_wideresnet18_4", "--model2", "robust_results11-13-21_03:38.44_base_wideresnet18_4", "--model2", "robust_results11-13-21_05:49.19_base_wideresnet18_4", "--model2", "robust_results11-13-21_07:59.30_base_wideresnet18_4","--dumpname", "ens_avg"])
+    #parser = ArgumentParser()
+    #parser.add_argument("--model1","-m1",action = "append", help = "first model (or average of first model scores)")
+    #parser.add_argument("--model2","-m2",action = "append", help = "second model (or average of second model scores)")
+    #parser.add_argument("--metric",choices = ["Likelihood","BrierScore","Confidence"])
+    #parser.add_argument("--oodname")
+    #parser.add_argument("--basemodel","-bm",action = "append",help = "base model (or average of base model scores) to consider")
+    #parser.add_argument("--thresh_score","-t",type = float,help = "threshold score at which to throw out a data point")
+    #parser.add_argument("--dumpname","-d",help = "name of file we want to save output to.")
+    #parser.add_argument("--select","-s",type = int,help= "which single model to compare ")
+    #args = parser.parse_args()
     
 
-    main(args)
+    main()

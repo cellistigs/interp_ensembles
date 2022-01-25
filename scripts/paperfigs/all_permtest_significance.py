@@ -1,13 +1,15 @@
 import os 
 import hydra
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 import yaml
 import json 
 import numpy as np
 from all_percentage import oodname_legend,oodnames,modelnames
 
 here = os.path.dirname(os.path.abspath(__file__))
-permdir = os.path.join(here,"../","permtest_01_24") 
+permdir = os.path.join(here,"../","permtest_01_25") 
+plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
 
 def process_config(path):
     """Given a config file, get the uncertainty, base model, and ood dataset corresponding to it.
@@ -41,7 +43,7 @@ def main():
 
     """
     alldata_dict = {}
-    for i in range(390):
+    for i in range(200):
         configpath = os.path.join(permdir,str(i),".hydra/config.yaml")
         signifpath = os.path.join(permdir,str(i),"signifdata.json")
         try:
@@ -74,21 +76,17 @@ def main():
                 except Exception:    
                     continue
         fig,ax = plt.subplots(figsize = (10,10))
-        ax.matshow(all_ps,vmin = 0,vmax = 1)        
+        ax.matshow(all_ps,vmin = 0,vmax = 1,cmap = plt.get_cmap("gist_heat"))        
         for mi,m in enumerate(modelnames):
             for oi,o in enumerate(oodnames):
                 text = ax.text(oi, mi, "{:3.3}".format(all_ps[mi, oi]),
-                               ha="center", va="center", color="w")
+                               ha="center", va="center", color="w",path_effects=[pe.withStroke(linewidth=0.3, foreground="black")])
         ax.set_yticks(range(len(modelnames)))
-        ax.set_yticklabels(modelnames,rotation = 30)
+        ax.set_yticklabels([mn.replace("_","\_") for mn in modelnames],rotation = 30)
         ax.set_xticks(range(len(oodnames)))
-        ax.set_xticklabels([oodname_legend[ood] for ood in oodnames],rotation = 30)
-        plt.savefig("pval_matrix_{}.png".format(div))        
+        ax.set_xticklabels([oodname_legend[ood].replace("_","\_") for ood in oodnames],rotation = 30)
+        plt.savefig("pval_matrix__01_25_{}.png".format(div))        
 
-
-
-
-    
 
 if __name__ == "__main__":
     main()
