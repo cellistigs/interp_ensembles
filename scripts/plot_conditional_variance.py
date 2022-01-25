@@ -11,6 +11,7 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import h5py
 from scipy.stats import gaussian_kde
 here = os.path.dirname(os.path.abspath(__file__))
 import seaborn as sns
@@ -73,7 +74,8 @@ def KL(probs,labels):
 
 div_funcs = {"Var":Var,"JS":JS,"KL":KL}
 
-div_names = {"ood_cinic_preds.npy":"CINIC-10 (OOD)",
+div_names = {"imagenetv2":"ImageNet V2 (OOD)",
+        "ood_cinic_preds.npy":"CINIC-10 (OOD)",
         "ood_preds.npy":"CIFAR10.1 (OOD)",
         "ood_cifar10_c_fog_1_preds.npy":"CIFAR10-C Fog 1 (OOD)",
         "ood_cifar10_c_fog_5_preds.npy":"CIFAR10-C Fog 5 (OOD)",
@@ -155,6 +157,21 @@ def main(cfg):
                 torch.tensor(np.load(ind_prob_path)).float()
                 for ind_prob_path in ind_prob_paths
             ], dim=-2)    
+        ## Cell 2: formatting data
+
+        ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
+
+        if cfg.ood_softmax is False:
+            ood_probs = torch.stack([
+                torch.tensor(np.load(ood_prob_path)).float()
+                for ood_prob_path in ood_prob_paths
+            ], dim=-2).softmax(dim=-1)
+        else:    
+            ood_probs = torch.stack([
+                torch.tensor(np.load(ood_prob_path)).float()
+                for ood_prob_path in ood_prob_paths
+            ], dim=-2)
+        ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     elif (cfg.ind_hdf5s is not None and cfg.ood_hdf5s is not None):    
         ind_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ind_hdf5s]
         ood_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ood_hdf5s]
@@ -162,39 +179,26 @@ def main(cfg):
         ind_probs = []
         for ind_prob in ind_prob_paths:
             with h5py.File(str(ind_prob), 'r') as f:
-                logits_out = f['logits'][()]
-                labels = f['targets'][()].astype('int')
+                ind_logits_out = f['logits'][()]
+                ind_labels = f['targets'][()].astype('int')
                 # calculate individual probs
-                ind_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+                ind_probs.append(np.exp(ind_logits_out) / np.sum(np.exp(ind_logits_out), 1, keepdims=True))
         ind_probs = torch.stack([
             torch.tensor(ip) for ip in ind_probs],dim = -2)        
+        ind_ind_labels = torch.tensor(ind_labels).long()
 
         ood_probs = []
         for ood_prob in ood_prob_paths:
             with h5py.File(str(ood_prob), 'r') as f:
-                logits_out = f['logits'][()]
-                labels = f['targets'][()].astype('int')
+                ood_logits_out = f['logits'][()]
+                ood_labels = f['targets'][()].astype('int')
                 # calculate oodividual probs
-                ood_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+                ood_probs.append(np.exp(ood_logits_out) / np.sum(np.exp(ood_logits_out), 1, keepdims=True))
         ood_probs = torch.stack([
             torch.tensor(ip) for ip in ood_probs],dim = -2)        
+        ood_ood_labels = torch.tensor(ood_labels).long()
 
-    ## Cell 2: formatting data
-
-    ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
     ind_indices =  torch.randperm(len(ind_probs))
-
-    if cfg.ood_softmax is False:
-        ood_probs = torch.stack([
-            torch.tensor(np.load(ood_prob_path)).float()
-            for ood_prob_path in ood_prob_paths
-        ], dim=-2).softmax(dim=-1)
-    else:    
-        ood_probs = torch.stack([
-            torch.tensor(np.load(ood_prob_path)).float()
-            for ood_prob_path in ood_prob_paths
-        ], dim=-2)
-    ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     ood_indices =  torch.randperm(len(ood_probs))
 
     ## Cell 3: 
@@ -354,6 +358,9 @@ def main(cfg):
     np.save("ind_cond_expec.npy",ind_cond_expec)
     np.save("ood_cond_expec.npy",ood_cond_expec)
     np.save("xaxis.npy",cond_expec_xs)
+    print("saving variance data")
+    np.save("ind_div.npy",ind_div)
+    np.save("ood_div.npy",ood_div)
     with open("increase_proportion.json","w") as f:
         json.dump({"increase_over_ind":inc_prop},f)
 
@@ -412,15 +419,16 @@ def main(cfg):
     ## Cell 9:        
 
 
+    varlims = {"Var":17.,"JS":5.}
     if cfg.plot:
         fig, (var_ax, ind_cond_ax, ood_cond_ax, cond_exp_ax) = plt.subplots(
-            1, 4, figsize=(12, 3), sharex=True, sharey=False
+            1, 4, figsize=(12, 3), sharex=False, sharey=False
         )
         levels = np.linspace(-3., 3., 51)
 
         sns.kdeplot(ind_div, ax=var_ax)
         sns.kdeplot(ood_div, ax=var_ax)
-        var_ax.set(xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., 15.))
+        var_ax.set(xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., varlims[cfg.uncertainty]))
 
         ind_vals = ind_joint_kde(joint).reshape(x_grid.shape)
         ind_vals = ind_vals / ind_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
@@ -432,8 +440,8 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ind_cond_ax.set(
-            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],xrange[1]), xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
-            ylabel=r"{}".format(cfg.uncertainty), title="Conditional {}. Dist.\nCIFAR10 (InD)".format(cfg.uncertainty)
+            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],1), xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            ylabel=r"{}".format(cfg.uncertainty), title="Conditional {}. Dist.\nImageNet (InD)".format(cfg.uncertainty)
         )
         fig.colorbar(f, ax=ind_cond_ax)
 
@@ -446,7 +454,7 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ood_cond_ax.set(
-            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],xrange[1]),
+            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],1),
             xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
             title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,div_names[cfg.ood_suffix]),
             yticks=[]
@@ -456,10 +464,10 @@ def main(cfg):
 
         if cfg.N > 0:
             [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
-        cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="CIFAR10 (InD)")
-        cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
+        cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="ImageNet (InD)")
+        cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]).replace("(OOD)","\n(OOD)"))
         cond_exp_ax.set(
-            ylim=(xrange[0],xrange[1]),
+            ylim=(xrange[0],1),
             #ylabel=r"$E [ \textrm{"+quantity_names[cfg.uncertainty]["div"]+r"} \mid \textrm{"+quantity_names[cfg.uncertainty]["avg"]+r"} ]$",
             ylabel=r"$E [ \textrm{Diversity} \mid \textrm{Avg} ]$",
             xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
