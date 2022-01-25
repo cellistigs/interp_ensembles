@@ -7,30 +7,16 @@ import json
 import numpy as np
 
 here = os.path.dirname(os.path.abspath(__file__))
+#plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
 plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
-permdir = os.path.join(here,"../../results","percent_increases_cifar_01_24") 
-oodname_legend = {"ood_preds.npy":"CIFAR10.1",
-        "ood_cinic_preds.npy":"CINIC10",
-        "ood_cifar10_c_gaussian_noise_1_preds.npy":"CIFAR10-C\n Gauss Noise 1",
-        "ood_cifar10_c_gaussian_noise_5_preds.npy":"CIFAR10-C\n Gauss Noise 5",
-        "ood_cifar10_c_brightness_1_preds.npy":"CIFAR10-C\n Brightness 1",
-        "ood_cifar10_c_brightness_5_preds.npy":"CIFAR10-C\n Brightness 5",
-        "ood_cifar10_c_contrast_1_preds.npy":"CIFAR10-C\n Contrast 1",
-        "ood_cifar10_c_contrast_5_preds.npy":"CIFAR10-C\n Contrast 5",
-        "ood_cifar10_c_fog_1_preds.npy":"CIFAR10-C\n Fog 1",
-        "ood_cifar10_c_fog_5_preds.npy":"CIFAR10-C\n Fog 5",
+permdir = os.path.join(here,"../../results","imagenet_percent_increases_01_24") 
+oodname_legend = {"imagenetv2":"ImageNet V2",
         }
 oodnames = list(oodname_legend.keys())
-modelnames = ["resnet18",
-        "wideresnet18",
-        "wideresnet18_4",
-        "wideresnet28_10",
-        "vgg11_bn",
-        "vgg19_bn",
-        "densenet121",
-        "densenet169",
-        "googlenet",
-        "inception_v3"]
+modelnames = ["alexnet",
+        "resnet50",
+        "resnet101",
+        ]
 
 
 def process_config(path):
@@ -42,12 +28,7 @@ def process_config(path):
 
     div = config["uncertainty"] 
     ood = config["ood_suffix"]
-    try:
-        modelname = config["ood_stubs"][0].split("base_")[-1]
-        if modelname == "cifar10_wrn28_s1_":
-            modelname = "wideresnet28_10" ## some ambiguity here. 
-    except Exception:    
-        modelname = config["ood_stubs"][0]
+    modelname = config["ood_hdf5s"][0].split("/")[-1].split("--")[0]
     return div,ood,modelname
 
 def process_signif(path):
@@ -65,7 +46,7 @@ def main():
 
     """
     alldata_dict = {}
-    for i in range(200):
+    for i in range(6):
         configpath = os.path.join(permdir,str(i),".hydra/config.yaml")
         proppath = os.path.join(permdir,str(i),"increase_proportion.json")
         try:
@@ -97,17 +78,18 @@ def main():
                     all_ps[modelindex[m],oodindex[o]] = divdata[m][o]
                 except Exception:    
                     continue
-        fig,ax = plt.subplots(figsize = (10,10))
+        fig,ax = plt.subplots(figsize = (4,4))
         ax.matshow(all_ps,vmin = -1,vmax = 1,cmap = plt.get_cmap("coolwarm"))        
         for mi,m in enumerate(modelnames):
             for oi,o in enumerate(oodnames):
                 text = ax.text(oi, mi, "{:3.3}%".format(100*all_ps[mi, oi]),
                                ha="center", va="center", color="w")
         ax.set_yticks(range(len(modelnames)))
-        ax.set_yticklabels([mn.replace("_","\_") for mn in modelnames],rotation = 30)
+        ax.set_yticklabels(["{}".format(mn) for mn in modelnames],rotation = 30)
         ax.set_xticks(range(len(oodnames)))
         ax.set_xticklabels([oodname_legend[ood] for ood in oodnames],rotation = 30)
-        plt.savefig("percentage_matrix_{}.png".format(div))        
+        plt.tight_layout()
+        plt.savefig("percentage_matrix_imagenet_{}.png".format(div))        
 
 
     
