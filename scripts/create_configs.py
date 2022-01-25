@@ -8,7 +8,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 resultsfolder = os.path.join(here,"../results")
 configsfolder = os.path.join(here,"script_configs/")
 
-template = {"plot":False,"ind_stubs":None,"ood_stubs":None,"ood_suffix":None,"gpu":False,"uncertainty":None}
+template = {"plot":False,"ind_stubs":None,"ood_stubs":None,"ood_suffix":None,"gpu":True,"uncertainty":None,"n_classes":10,"N":100}
 
 if __name__ == "__main__":
     modelpre_lists = {}
@@ -69,14 +69,23 @@ if __name__ == "__main__":
             file = {}
             for k,val in template.items():
                 file[k] = template[k]
-            if modelpre == "Native WideResNet-28-10":
+            if modelpre in ["WideResNet-28-10","Native WideResNet-28-10"]: ## we need to handle wrn edge case: write from Native into Wide, and use Wide for all models. 
+                ## if wideresnet, write in distribution from a separate case.  
                 file["ind_stubs"] = modelpre_lists["cifar10.1"]["Conv WideResNet-28-10"]["ind"]
                 file["ind_softmax"] = modelpre_lists["cifar10.1"]["Conv WideResNet-28-10"]["ind_softmax"]
+                if oodname == "cinic10": ## for cinic10, we need to write for standard WRN model too. 
+                    file["ood_stubs"] = modelpre_lists["cinic10"]["Native WideResNet-28-10"]["ood"]
+                    file["ood_softmax"] = modelpre_lists["cinic10"]["Native WideResNet-28-10"]["ood_softmax"]
+                else:    
+                    file["ood_stubs"] = modeldict["ood"]    
+                    file["ood_softmax"] = modeldict["ood_softmax"]
+
             else:
                 file["ind_stubs"] = modeldict["ind"]    
                 file["ind_softmax"] = modeldict["ind_softmax"]
-            file["ood_stubs"] = modeldict["ood"]    
-            file["ood_softmax"] = modeldict["ood_softmax"]
+                file["ood_stubs"] = modeldict["ood"]    
+                file["ood_softmax"] = modeldict["ood_softmax"]
+
             if oodname == "cifar10.1":
                 file["ood_suffix"] = "ood_preds.npy"
             elif oodname == "cinic10":
@@ -84,7 +93,7 @@ if __name__ == "__main__":
             else:    
                 file["ood_suffix"] = "ood_{}_preds.npy".format(oodname)
 
-            for uncertainty in ["Var","JS","KL"]:
+            for uncertainty in ["Var","JS"]:
                 file["uncertainty"] = uncertainty
                 name = "config_{modelpre}_{oodname}_{uncertainty}.yaml".format(modelpre=modelpre,oodname=oodname,uncertainty =uncertainty)
                 with open(os.path.join(config_group,name),"w") as f:

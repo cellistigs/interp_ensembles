@@ -47,6 +47,7 @@ def JS(probs,labels):
     ## then, the average single model entropy is: 
     avg = avg_single_model_entropy
     div = ensemble_entropy - avg_single_model_entropy ## this is Jensen Shannon divergence
+    
     return avg,div
 
 def KL(probs,labels):
@@ -121,7 +122,7 @@ def refresh_cuda_memory():
         if isinstance(tensor, torch.nn.Parameter) and tensor.grad is not None:
             tensor.grad.data = tensor.grad.to(device)
 
-@hydra.main(config_path = "script_configs",config_name ="modeldata_test")
+@hydra.main(config_path = "script_configs",config_name ="test")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
 
@@ -140,32 +141,47 @@ def main(cfg):
 
     ## Cell 1: formatting filenames 
     basedir = os.path.join(here,"../results/")
-    ind_prob_paths = [
-        os.path.join(basedir, basename)
-        for basename in os.listdir(basedir)
-        if "base_wideresnet28_10ind_preds" in basename
-    ]
-    ind_prob_paths = [os.path.join(basedir,s_in+"ind_preds.npy") for s_in in cfg.ind_stubs]
-    # basedir = "../models/cinic_wrn28_10/"
-    ood_prob_paths = [
-        os.path.join(basedir, basename)
-        for basename in os.listdir(basedir)
-        if "base_wideresnet28_10ood_cinic_preds" in basename
-    ]
-    ood_prob_paths = [os.path.join(basedir,s_in+cfg.ood_suffix) for s_in in cfg.ood_stubs]
+
+
+    if (cfg.ind_stubs is not None and cfg.ood_stubs is not None):
+        ind_prob_paths = [os.path.join(basedir,s_in+"ind_preds.npy") for s_in in cfg.ind_stubs]
+        ood_prob_paths = [os.path.join(basedir,s_in+cfg.ood_suffix) for s_in in cfg.ood_stubs]
+        if cfg.ind_softmax is False:
+            ind_probs = torch.stack([
+                torch.tensor(np.load(ind_prob_path)).float()
+                for ind_prob_path in ind_prob_paths
+            ], dim=-2).softmax(dim=-1)
+        else:
+            ind_probs = torch.stack([
+                torch.tensor(np.load(ind_prob_path)).float()
+                for ind_prob_path in ind_prob_paths
+            ], dim=-2)    
+    elif (cfg.ind_hdf5s is not None and cfg.ood_hdf5s is not None):    
+        ind_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ind_hdf5s]
+        ood_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ood_hdf5s]
+
+        ind_probs = []
+        for ind_prob in ind_prob_paths:
+            with h5py.File(str(ind_prob), 'r') as f:
+                logits_out = f['logits'][()]
+                labels = f['targets'][()].astype('int')
+                # calculate individual probs
+                ind_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+        ind_probs = torch.stack([
+            torch.tensor(ip) for ip in ind_probs],dim = -2)        
+
+        ood_probs = []
+        for ood_prob in ood_prob_paths:
+            with h5py.File(str(ood_prob), 'r') as f:
+                logits_out = f['logits'][()]
+                labels = f['targets'][()].astype('int')
+                # calculate oodividual probs
+                ood_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+        ood_probs = torch.stack([
+            torch.tensor(ip) for ip in ood_probs],dim = -2)        
 
     ## Cell 2: formatting data
 
-    if cfg.ind_softmax is False:
-        ind_probs = torch.stack([
-            torch.tensor(np.load(ind_prob_path)).float()
-            for ind_prob_path in ind_prob_paths
-        ], dim=-2).softmax(dim=-1)
-    else:
-        ind_probs = torch.stack([
-            torch.tensor(np.load(ind_prob_path)).float()
-            for ind_prob_path in ind_prob_paths
-        ], dim=-2)    
     ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
     ind_indices =  torch.randperm(len(ind_probs))[:10000]
 
@@ -254,6 +270,7 @@ def main(cfg):
         start_conf = 1. / num_classes
         if cfg.gpu:
             cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1).cuda()
+            #cond_expec_xs = torch.linspace(0,1, int((1. - start_conf) * 100) + 1).cuda()
         else:    
             cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
