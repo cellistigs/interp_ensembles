@@ -180,7 +180,7 @@ def main(cfg):
             for ood_prob_path in ood_prob_paths
         ], dim=-2)
     ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
-    ood_indices =  torch.randperm(len(ood_probs))[:10000]
+    ood_indices =  torch.randperm(len(ood_probs))[:20000]
 
     ## Cell 3: 
     div_func = div_funcs[cfg.uncertainty]
@@ -311,7 +311,7 @@ def main(cfg):
         return perm_s1,perm_s2
 
 
-    N = 2 
+    N = 5 
     nclasses = 10
     sample1 = (ind_avg.double(), ind_div.double())
     sample2 = (ood_avg.double(), ood_div.double())
@@ -380,13 +380,13 @@ def main(cfg):
 
     if cfg.plot:
         fig, (var_ax, ind_cond_ax, ood_cond_ax, cond_exp_ax) = plt.subplots(
-            1, 4, figsize=(12, 3), sharex=True, sharey=False
+            1, 4, figsize=(12, 3), sharex=False, sharey=False
         )
         levels = np.linspace(-3., 3., 51)
 
         sns.kdeplot(ind_div, ax=var_ax)
         sns.kdeplot(ood_div, ax=var_ax)
-        var_ax.set(xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., 15.))
+        var_ax.set(xlim=(0.,1.),xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., 15.))
 
         ind_vals = ind_joint_kde(joint).reshape(x_grid.shape)
         ind_vals = ind_vals / ind_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
@@ -424,6 +424,7 @@ def main(cfg):
         cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="CIFAR10 (InD)")
         cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
         cond_exp_ax.set(
+            xlim=(xrange[0],xrange[1]),
             ylim=(xrange[0],xrange[1]),
             #ylabel=r"$E [ \textrm{"+quantity_names[cfg.uncertainty]["div"]+r"} \mid \textrm{"+quantity_names[cfg.uncertainty]["avg"]+r"} ]$",
             ylabel=r"$E [ \textrm{Diversity} \mid \textrm{Avg} ]$",
