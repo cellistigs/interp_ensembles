@@ -155,10 +155,29 @@ def main(cfg):
                 torch.tensor(np.load(ind_prob_path)).float()
                 for ind_prob_path in ind_prob_paths
             ], dim=-2)    
-    elif (cfg.ind_hdf5 is not None and cfg.ood_hdf5 is not None):    
-        pass
-        #ind_probs = 
-        #ood_probs = 
+    elif (cfg.ind_hdf5s is not None and cfg.ood_hdf5s is not None):    
+        ind_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ind_hdf5s]
+        ood_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ood_hdf5s]
+
+        ind_probs = []
+        for ind_prob in ind_prob_paths:
+            with h5py.File(str(ind_prob), 'r') as f:
+                logits_out = f['logits'][()]
+                labels = f['targets'][()].astype('int')
+                # calculate individual probs
+                ind_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+        ind_probs = torch.stack([
+            torch.tensor(ip) for ip in ind_probs],dim = -2)        
+
+        ood_probs = []
+        for ood_prob in ood_prob_paths:
+            with h5py.File(str(ood_prob), 'r') as f:
+                logits_out = f['logits'][()]
+                labels = f['targets'][()].astype('int')
+                # calculate oodividual probs
+                ood_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+        ood_probs = torch.stack([
+            torch.tensor(ip) for ip in ood_probs],dim = -2)        
 
     ## Cell 2: formatting data
 
