@@ -32,14 +32,16 @@ def main(args):
         #model1_metrics = get_ensemble(args.model1,args.metric,data)
         all_model2_metrics = [get_metrics_outputs(m2,args.metric,data) for m2 in args.model2]
         model2_metrics = np.mean(np.array(all_model2_metrics),axis = 0)
+        import pdb; pdb.set_trace()
         if args.basemodel is not None:
             all_basemodel_metrics = [get_metrics_outputs(bm,args.metric,data) for bm in args.basemodel]
             basemodel_metrics = np.mean(np.array(all_basemodel_metrics),axis = 0)
+            basemodel_single = all_basemodel_metrics[args.select]
             basedata.append(basemodel_metrics)
             #basemodel_metrics[np.where(basemodel_metrics < args.thresh_score)] = np.nan
             title = "Change in {}".format(args.metric)
-            model1_metrics = model1_metrics-basemodel_metrics
-            model2_metrics = model2_metrics-basemodel_metrics
+            model1_metrics = model1_metrics-basemodel_metrics ## this is ensemble minus average
+            model2_metrics = model2_metrics-basemodel_single#basemodel_metrics ## this is single minus single 
         else:    
             title = "{}".format(args.metric)
         #2. Sort them. 
@@ -59,8 +61,7 @@ def main(args):
         z = gaussian_kde(datadict)(datadict)
         #idx = z.argsort()
         idx = basedata[di].argsort()
-        import pdb; pdb.set_trace()
-        print("R^2: {}".format(r2_score(datadict[1][idx],datadict[0][idx])))
+        print("R^3: {}".format(r2_score(datadict[1][idx],datadict[0][idx])))
         ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
         #ax[di].scatter(datadict[0],datadict[1],marker = markers[di],cmap = "plasma",label = data,s=1)
         #all_data = np.stack([datadict[0][idx],datadict[1][idx]],axis = 1)
@@ -86,7 +87,7 @@ def main(args):
         ax[1].set_xlim(-6,6)
         ax[1].set_ylim(-6,6)
     #plt.savefig(os.path.join(ims,r"compare_avg_avg2_brier_avgbase.png".format(args.model1,args.model2,args.metric,args.basemodel)))    
-    plt.savefig(os.path.join(ims,"format.png"))
+    plt.savefig(os.path.join(ims,"var_vs_single_diff_{}.png".format(args.select)))
     joblib.dump(all_ordereddata,os.path.join(results,"aggregated_ensembleresults",args.dumpname))
 
 
@@ -193,6 +194,7 @@ if __name__ == "__main__":
     parser.add_argument("--basemodel","-bm",action = "append",help = "base model (or average of base model scores) to consider")
     parser.add_argument("--thresh_score","-t",type = float,help = "threshold score at which to throw out a data point")
     parser.add_argument("--dumpname","-d",help = "name of file we want to save output to.")
+    parser.add_argument("--select","-s",type = int,help= "which single model to compare ")
     args = parser.parse_args()
     
 

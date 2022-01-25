@@ -69,11 +69,13 @@ if __name__ == "__main__":
             file = {}
             for k,val in template.items():
                 file[k] = template[k]
-            file["ind_stubs"] = modeldict["ind"]    
             if modelpre == "Native WideResNet-28-10":
-                file["ind_stubs"] = modelpre_lists["cifar10.1"]["WideResNet-28-10"]["ind"]
+                file["ind_stubs"] = modelpre_lists["cifar10.1"]["Conv WideResNet-28-10"]["ind"]
+                file["ind_softmax"] = modelpre_lists["cifar10.1"]["Conv WideResNet-28-10"]["ind_softmax"]
+            else:
+                file["ind_stubs"] = modeldict["ind"]    
+                file["ind_softmax"] = modeldict["ind_softmax"]
             file["ood_stubs"] = modeldict["ood"]    
-            file["ind_softmax"] = modeldict["ind_softmax"]
             file["ood_softmax"] = modeldict["ood_softmax"]
             if oodname == "cifar10.1":
                 file["ood_suffix"] = "ood_preds.npy"
