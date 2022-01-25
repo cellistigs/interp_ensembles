@@ -140,32 +140,28 @@ def main(cfg):
 
     ## Cell 1: formatting filenames 
     basedir = os.path.join(here,"../results/")
-    ind_prob_paths = [
-        os.path.join(basedir, basename)
-        for basename in os.listdir(basedir)
-        if "base_wideresnet28_10ind_preds" in basename
-    ]
-    ind_prob_paths = [os.path.join(basedir,s_in+"ind_preds.npy") for s_in in cfg.ind_stubs]
-    # basedir = "../models/cinic_wrn28_10/"
-    ood_prob_paths = [
-        os.path.join(basedir, basename)
-        for basename in os.listdir(basedir)
-        if "base_wideresnet28_10ood_cinic_preds" in basename
-    ]
-    ood_prob_paths = [os.path.join(basedir,s_in+cfg.ood_suffix) for s_in in cfg.ood_stubs]
+
+
+    if (cfg.ind_stubs is not None and cfg.ood_stubs is not None):
+        ind_prob_paths = [os.path.join(basedir,s_in+"ind_preds.npy") for s_in in cfg.ind_stubs]
+        ood_prob_paths = [os.path.join(basedir,s_in+cfg.ood_suffix) for s_in in cfg.ood_stubs]
+        if cfg.ind_softmax is False:
+            ind_probs = torch.stack([
+                torch.tensor(np.load(ind_prob_path)).float()
+                for ind_prob_path in ind_prob_paths
+            ], dim=-2).softmax(dim=-1)
+        else:
+            ind_probs = torch.stack([
+                torch.tensor(np.load(ind_prob_path)).float()
+                for ind_prob_path in ind_prob_paths
+            ], dim=-2)    
+    elif (cfg.ind_hdf5 is not None and cfg.ood_hdf5 is not None):    
+        pass
+        #ind_probs = 
+        #ood_probs = 
 
     ## Cell 2: formatting data
 
-    if cfg.ind_softmax is False:
-        ind_probs = torch.stack([
-            torch.tensor(np.load(ind_prob_path)).float()
-            for ind_prob_path in ind_prob_paths
-        ], dim=-2).softmax(dim=-1)
-    else:
-        ind_probs = torch.stack([
-            torch.tensor(np.load(ind_prob_path)).float()
-            for ind_prob_path in ind_prob_paths
-        ], dim=-2)    
     ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
     ind_indices =  torch.randperm(len(ind_probs))[:10000]
 
