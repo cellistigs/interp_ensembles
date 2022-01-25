@@ -122,7 +122,7 @@ def refresh_cuda_memory():
         if isinstance(tensor, torch.nn.Parameter) and tensor.grad is not None:
             tensor.grad.data = tensor.grad.to(device)
 
-@hydra.main(config_path = "script_configs",config_name ="test")
+@hydra.main(config_path = "script_configs",config_name ="testcinicgaussian")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
 
@@ -134,9 +134,8 @@ def main(cfg):
     :param gpu: if we should use gpu or not: 
     """
     ## formatting limits
-    num_classes = 10
     kde_exp = -0.125 ## 1/4*nb_dims
-    xranges = {"Var":[0.,1.],"JS":[0,np.log(num_classes)],"KL":[0,11]}
+    xranges = {"Var":[0.,1.],"JS":[0,np.log(cfg.nclasses)],"KL":[0,11]}
     xrange = xranges[cfg.uncertainty]
 
     ## Cell 1: formatting filenames 
@@ -168,7 +167,7 @@ def main(cfg):
             for ind_prob_path in ind_prob_paths
         ], dim=-2)    
     ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
-    ind_indices =  torch.randperm(len(ind_probs))[:10000]
+    ind_indices =  torch.randperm(len(ind_probs))
 
     if cfg.ood_softmax is False:
         ood_probs = torch.stack([
@@ -181,7 +180,7 @@ def main(cfg):
             for ood_prob_path in ood_prob_paths
         ], dim=-2)
     ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
-    ood_indices =  torch.randperm(len(ood_probs))[:10000]
+    ood_indices =  torch.randperm(len(ood_probs))
 
     ## Cell 3: 
     div_func = div_funcs[cfg.uncertainty]
@@ -223,12 +222,22 @@ def main(cfg):
     class GPModel(gpytorch.models.ExactGP):
         def __init__(self, metrics, variances,gpu = False):
             if gpu:
+                ## multigpu settings
+                output_device = torch.device('cuda:0')
+                n_devices = torch.cuda.device_count()
                 likelihood = gpytorch.likelihoods.GaussianLikelihood().cuda()
             else:    
                 likelihood = gpytorch.likelihoods.GaussianLikelihood()
             super().__init__(metrics, variances, likelihood)
             self.mean_module = gpytorch.means.ZeroMean()
-            self.covar_module = gpytorch.kernels.RBFKernel()
+            if gpu:
+                base_covar_module = gpytorch.kernels.RBFKernel()
+                self.covar_module = gpytorch.kernels.MultiDeviceKernel(
+                base_covar_module, device_ids=range(n_devices),
+                output_device=output_device
+            )
+            else:    
+                self.covar_module = gpytorch.kernels.RBFKernel()
             self.covar_module.initialize(lengthscale=(len(variances) ** (kde_exp)))
             self.likelihood.initialize(noise=1e-4)
 
@@ -237,7 +246,7 @@ def main(cfg):
             covar = self.covar_module(x)
             return gpytorch.distributions.MultivariateNormal(mean, covar)
 
-    def cond_expec(ef2,var,num_classes):
+    def cond_expec(ef2,var,nclasses):
         """Takes in two 1-d arrays representing expected norm squared (confidence) and variance. 
         Given these, returns the conditional expectation evaluated on int(1-(1/M)*100)+1 points between 1/M and 1.  
 
@@ -252,7 +261,7 @@ def main(cfg):
             model = GPModel(ef2.double(),var.double()).double()
             max_cholesky_size = 800 
         model.eval()
-        start_conf = 1. / num_classes
+        start_conf = 1. / nclasses
         if cfg.gpu:
             cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1).cuda()
             #cond_expec_xs = torch.linspace(0,1, int((1. - start_conf) * 100) + 1).cuda()
@@ -260,17 +269,18 @@ def main(cfg):
             cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
             with gpytorch.settings.max_cholesky_size(max_cholesky_size):
-                cond_expec = model(torch.tensor(cond_expec_xs).double()).mean
-                if cfg.gpu:
-                    cond_expec_final = cond_expec.cpu()
-                    cond_expec_xs_final = cond_expec_xs.cpu()
-                    del cond_expec
-                    del cond_expec_xs
-                    del model.likelihood
-                    del model
-                    del ef2
-                    del var
-                    return cond_expec_final,cond_expec_xs_final
+                with gpytorch.beta_features.checkpoint_kernel(10000):
+                    cond_expec = model(torch.tensor(cond_expec_xs).double()).mean
+                    if cfg.gpu:
+                        cond_expec_final = cond_expec.cpu()
+                        cond_expec_xs_final = cond_expec_xs.cpu()
+                        del cond_expec
+                        del cond_expec_xs
+                        del model.likelihood
+                        del model
+                        del ef2
+                        del var
+                        return cond_expec_final,cond_expec_xs_final
         
         return cond_expec,cond_expec_xs
 
@@ -283,10 +293,13 @@ def main(cfg):
         c1,cx = cond_expec(*sample1,nclasses)
         c2,cx = cond_expec(*sample2,nclasses)
         avg_abs = np.mean(c2.numpy()-c1.numpy())
+        ood_increase_prop = np.sum(c2.numpy()-c1.numpy())/np.sum(c1.numpy())
+
+        print("prop increase: {}".format(ood_increase_prop))
         if return_ce is False:
-            return 1/(1-(1/nclasses))*avg_abs
+            return avg_abs
         else:
-            return 1/(1-(1/nclasses))*avg_abs,c1,c2,cx
+            return avg_abs,c1,c2,cx,ood_increase_prop
 
     def shuffle(sample1,sample2):
         """Given two tuples each containing paired data, aggregates them, permutes them, and then splits them once again into two samples of the same size as the original data. 
@@ -313,46 +326,50 @@ def main(cfg):
         return perm_s1,perm_s2
 
 
-    N = 100 
-    nclasses = 10
+    N = cfg.N #100 
+    nclasses = cfg.nclasses #10
     sample1 = (ind_avg.double(), ind_div.double())
     sample2 = (ood_avg.double(), ood_div.double())
 
     ## calculate original stat
     print("calculating orig stat")
-    d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True,xrange=xrange)
+    d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs,inc_prop = dstat(sample1,sample2,cfg.nclasses,return_ce = True,xrange=xrange)
     dorig_val = d_orig.item()
-    print("calculating shuffle stats")
+    print("saving conditional expectation")
+    np.save("ind_cond_expec.npy",ind_cond_expec)
+    np.save("ood_cond_expec.npy",ood_cond_expec)
+    np.save("xaxis.npy",cond_expec_xs)
+    with open("increase_proportion.json","w") as f:
+        json.dump({"increase_over_ind":inc_prop},f)
 
     dprimes = []
     ces = []
-    for n in range(N):
-        print("split {}".format(n))
-        dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True,xrange=xrange)
+    print("calculating shuffle stats")
+    if N > 0:
+        for n in range(N):
+            print("split {}".format(n))
+            dp,ce1,ce2,cex,inc_prop = dstat(*shuffle(sample1,sample2),cfg.nclasses,return_ce = True,xrange=xrange)
 
 
-        dprimes.append(dp)
-        ces.append(ce1)
-        ces.append(ce2)
-        print(dorig_val,"orig d")
-        print(dprimes,"prime d")
+            dprimes.append(dp)
+            ces.append(ce1)
+            ces.append(ce2)
+            print(dorig_val,"orig d")
+            print(dprimes,"prime d")
 
-        if n % 10 == 0: 
-            refresh_cuda_memory()    
-        print(f"After emptying cache: {torch.cuda.memory_allocated()}")
-        print(f"After emptying cache: {torch.cuda.memory_cached()}")
+            if n % 10 == 0: 
+                refresh_cuda_memory()    
+            print(f"After emptying cache: {torch.cuda.memory_allocated()}")
+            print(f"After emptying cache: {torch.cuda.memory_cached()}")
 
-    count = sum([dp> dorig_val for dp in dprimes])
-    data = {"lower":None,"upper":None,"exact":None}
-    interval = proportion_confint(count,N)
-    data["lower"] =interval[0]
-    data["upper"] = interval[1]
-    data["exact"] = count/N
-    with open("signifdata.json","w") as f:
-        json.dump(data,f)
-
-
-
+        count = sum([dp> dorig_val for dp in dprimes])
+        data = {"lower":None,"upper":None,"exact":None}
+        interval = proportion_confint(count,N)
+        data["lower"] =interval[0]
+        data["upper"] = interval[1]
+        data["exact"] = count/N
+        with open("signifdata.json","w") as f:
+            json.dump(data,f)
 
 
     #ind_model = GPModel(ind_avg.double(), ind_div.double()).double()
@@ -422,7 +439,8 @@ def main(cfg):
         fig.colorbar(f, ax=ood_cond_ax)
         cond_expec_show = np.where(ind_cond_expec)
 
-        [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
+        if cfg.N > 0:
+            [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
         cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="CIFAR10 (InD)")
         cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
         cond_exp_ax.set(
