@@ -34,5 +34,6 @@ Remote server steps:
 [x] slurm script to train model on in remote server: train_imagenet.sh
 [x] caller to slurm script to train model on (tiny)imagenet in remote server: train_imagenet_sub.sh
 
-Plotting code
-[] Plot metrics cifar10
+Plotting code:
+Follow plot/store_.sh to make pandas df which are used for plotting. Then run:
+[] plot/plot_metrics.py to make linear trend figs.
