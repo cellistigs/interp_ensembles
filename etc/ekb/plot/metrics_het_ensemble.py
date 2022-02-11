@@ -32,6 +32,7 @@ def preprocess_heterogeneous_ensemble(metrics_file,
                                     ood_file=None,
                                     num_bins=15,
                                     ensemble_size=4,
+                                    binning=2,
                                     ):
 
     # TODO: accept separate ind and ood files
@@ -54,7 +55,12 @@ def preprocess_heterogeneous_ensemble(metrics_file,
 
     err_values = ind_models['Top 1\% Err'].values
     # Split models in 10% err rate performance groups
-    err_bins = np.linspace(0, err_values.max() + 0.01, 11)
+    if binning ==2:
+        err_bins = np.linspace(0, 1, 6)
+    else:
+        # for het_ensemble_2 now use smaller bins
+        err_bins = np.linspace(0, err_values.max() + 0.01, 11)
+
     model_cl_assignment = np.digitize(err_values, err_bins)
     model_classes, num_models_p_class = np.unique(model_cl_assignment, return_counts=True)
 
@@ -102,9 +108,12 @@ def preprocess_heterogeneous_ensemble(metrics_file,
                                                                   num_bins=num_bins)
 
                 dist = data_type
-
-                ensemble_id = 'ensemble_' + str(heter_id) + '--' + str(egroup_idx)
-                model_name = 'ensemble_' + str(heter_id)
+                if binning==2:
+                    ensemble_id = 'ensemble2_' + str(heter_id) + '--' + str(egroup_idx)
+                    model_name = 'ensemble2_' + str(heter_id)
+                else:
+                    ensemble_id = 'ensemble_' + str(heter_id) + '--' + str(egroup_idx)
+                    model_name = 'ensemble_' + str(heter_id)
                 ensemble_results.append([ensemble_id, short_prefix, dataset, model_name, egroup_idx, typ, dist, nll, top1err, brier, ece, resce])
 
             heter_id+=1

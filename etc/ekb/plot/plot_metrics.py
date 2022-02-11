@@ -72,8 +72,9 @@ def z_score_difference(beta1, beta2, se_1, se_2):
 
 #%%
 
-def main(run_dataset):
+def main(run_dataset,ensemble_type='ensemble_homog'):
     #%%
+    print('Running {} {}'.format(run_dataset, ensemble_type))
     #run_dataset='cinic10'
     datasets = {}
     datasets['OOD'] = run_dataset
@@ -82,15 +83,16 @@ def main(run_dataset):
     savefigdir = '/data/Projects/linear_ensembles/interp_ensembles/images/'
     resultsdir = '/data/Projects/linear_ensembles/interp_ensembles/results/metrics'
 
-    savefigname = os.path.join(savefigdir, run_dataset + '_metrics.pdf')
-    savetabname1 = os.path.join(savefigdir, run_dataset + '_r2metrics.tex')
-    savetabname2 = os.path.join(savefigdir, run_dataset + '_diffmetrics.tex')
+    savefigname = os.path.join(savefigdir, run_dataset + '_metrics_{}.pdf'.format(ensemble_type))
+    savetabname1 = os.path.join(savefigdir, run_dataset + '_r2metrics_{}.tex'.format(ensemble_type))
+    savetabname2 = os.path.join(savefigdir, run_dataset + '_diffmetrics_{}.tex'.format(ensemble_type))
 
     allfiles = os.listdir(resultsdir)
     #resultfiles = [file_ for file_ in allfiles if (run_dataset in file_) or (datasets['InD']+'_' in file_)]
     resultfiles = [file_ for file_ in allfiles if (run_dataset in file_) ]
     # Filter out heterogeneous ensembles
-    resultfiles = [file_ for file_ in resultfiles if not('het_ensemble' in file_) ]
+    if ensemble_type == 'ensemble_homog':
+        resultfiles = [file_ for file_ in resultfiles if not('het_ensemble' in file_) ]
 
     print(resultfiles)
     # filter out heter
@@ -101,16 +103,39 @@ def main(run_dataset):
         results_ = pd.read_csv(os.path.join(resultsdir, r_))
         results = results.append(results_)
 
+    # drop row where error  80%
+    # import pdb; pdb.set_trace()
+    # filter out model's which didn't achieve min performance
+    #import pdb; pdb.set_trace()
+    results = results[results['Top 1\% Err'] < 0.8]
+
+    metrics = ["0-1 Error", "NLL", "Brier", "rESCE"]
+    results = results.rename(columns={"Top 1\% Err": '0-1 Error'})
+
+    #import pdb; pdb.set_trace()
     results = clean_df(results)
     results = results.dropna()
+
+    #metrics = ["Top 1\% Err", "NLL", "Brier", "rESCE"]
     plot_results = results.reset_index().set_index("ID")
+
+    if ensemble_type == 'ensemble_all':
+        plot_results = plot_results.replace('Het. Ensemble', 'Ensemble')
+
     # Plot metrics
-    metrics = ["Top 1\% Err", "NLL", "Brier", "rESCE"]
+
+
     #metrics = ["Top 1\% Err", "NLL", "Brier", "ECE", "rESCE"]
     #model_types=['Single Model', 'Ensemble', 'Het. Ensemble']
-    model_types=['Single Model', 'Ensemble']
 
-    colors =['yellowgreen', 'tomato']
+    if ensemble_type == 'ensemble_heter':
+        model_types=['Single Model', 'Ensemble', 'Het. Ensemble']
+    else:
+        model_types=['Single Model', 'Ensemble']
+
+    #colors =['yellowgreen', 'tomato']
+    colors = ['yellowgreen', 'tomato', 'dodgerblue']
+
     #colors=['deepskyblue', 'hotpink']
     #palette = "Set2"
     g = sns.FacetGrid(
@@ -141,13 +166,17 @@ def main(run_dataset):
 
         y_pred_total, params_total, sd_b_total, ts_b_total, p_values_total = linear_fit(x_total, y_total)
 
-        g.axes[0, m_idx].plot(x_total, y_pred_total, linewidth=1, c='k',alpha=0.5, label="x=y")
-
         r2_val_all = r2_score(y_total, y_pred_total)
+
+        if r2_val_all > 0.1:
+            g.axes[0, m_idx].plot(x_total, y_pred_total, linewidth=1, c='k',alpha=0.5, label="x=y")
+
 
         current_results = [metric_type, 'All', params_total[0], sd_b_total[0], ts_b_total[0], p_values_total[0], r2_val_all, len(y_total)]
 
         all_scores.append(current_results)
+
+        # fix metric
 
         for t_idx, model_type in enumerate(model_types):
             # Fit to each model type
@@ -158,7 +187,8 @@ def main(run_dataset):
             y_pred, params, sd_b, ts_b, p_values = linear_fit(x, y)
             r2_val = r2_score(y, y_pred)
 
-            g.axes[0, m_idx].plot(x, y_pred, linewidth=1, c=colors[t_idx], alpha=0.5)
+            if r2_val_all > 0.1:
+                g.axes[0, m_idx].plot(x, y_pred, linewidth=1, c=colors[t_idx], alpha=0.5)
 
             current_results = [metric_type, model_type, params[0], sd_b[0], ts_b[0],p_values[0], r2_val, len(y)]
             all_scores.append(current_results)
