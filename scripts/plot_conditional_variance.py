@@ -75,7 +75,7 @@ def KL(probs,labels):
 div_funcs = {"Var":Var,"JS":JS,"KL":KL}
 
 div_names = {"imagenetv2":"ImageNet V2 (OOD)",
-        "ood_cinic_preds.npy":"CINIC-10 (OOD)",
+        "ood_cinic_preds.npy":"CINIC10 (OOD)",
         "ood_preds.npy":"CIFAR10.1 (OOD)",
         "ood_cifar10_c_fog_1_preds.npy":"CIFAR10-C Fog 1 (OOD)",
         "ood_cifar10_c_fog_5_preds.npy":"CIFAR10-C Fog 5 (OOD)",
@@ -88,8 +88,10 @@ div_names = {"imagenetv2":"ImageNet V2 (OOD)",
         }
 
 quantity_names = {"Var":
-            {"avg":r"Avg. Uncertainty (1-$ E[ \Vert f \Vert^2 ]$)",
-            "div":"Variance"},
+            {"avg":r"$ E[ U(f(x)) ]$",
+            "div":"Variance",
+            "div_quant":r"$\mathrm{Var}[f(x)]$"
+            },
         "JS":{
             "avg":"Avg. Entropy",
             "div":"JS Divergence"},
@@ -125,7 +127,8 @@ def refresh_cuda_memory():
             tensor.grad.data = tensor.grad.to(device)
 
 # @hydra.main(config_path = "script_configs",config_name ="testcinicgaussian") from remote
-@hydra.main(config_path = "script_configs",config_name ="modeldata_test.yaml")
+#@hydra.main(config_path = "script_configs",config_name ="modeldata_test.yaml")
+@hydra.main(config_path = "script_configs/cifar10.1",config_name ="config_Conv WideResNet-28-10_cifar10.1_Var.yaml")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
 
@@ -138,8 +141,8 @@ def main(cfg):
     """
     ## formatting limits
     kde_exp = -0.125 ## 1/4*nb_dims
-    xranges = {"Var":[0.,1.],"JS":[0,np.log(cfg.nclasses)],"KL":[0,11]}
-    xrange = xranges[cfg.uncertainty]
+    #xranges = {"Var":[0.,1.],"JS":[0,np.log(cfg.nclasses)],"KL":[0,11]}
+    #xrange = xranges[cfg.uncertainty]
 
     ## Cell 1: formatting filenames 
     basedir = os.path.join(here,"../results/")
@@ -245,7 +248,7 @@ def main(cfg):
     ood_joint_kde = gaussian_kde(np.stack([ood_avg, ood_div]), bw_method=len(ood_indices) ** (kde_exp))
 
     ## Cell 7: 
-    xs = np.linspace(xrange[0],xrange[1], 101)
+    xs = np.linspace(cfg.xrange_cond[0],cfg.xrange_cond[1], 101)
     x_grid, y_grid = np.meshgrid(xs, xs)
     joint = np.stack([x_grid.reshape(-1), y_grid.reshape(-1)])
     ind_condition = np.logical_or(x_grid < ind_avg.min().numpy(),x_grid > ind_avg.max().numpy())
@@ -367,7 +370,7 @@ def main(cfg):
 
         ## calculate original stat
         print("calculating orig stat")
-        d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,cfg.nclasses,return_ce = True,xrange=xrange)
+        d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,cfg.nclasses,return_ce = True,xrange=cfg.xrange_cond_expec)
         dorig_val = d_orig.item()
         print("calculating shuffle stats")
 
@@ -375,7 +378,7 @@ def main(cfg):
         ces = []
         for n in range(N):
             print("split {}".format(n))
-            dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),cfg.nclasses,return_ce = True,xrange=xrange)
+            dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),cfg.nclasses,return_ce = True,xrange=cfg.xrange_cond_expec)
 
 
             dprimes.append(dp)
@@ -409,7 +412,8 @@ def main(cfg):
         ood_model.eval()
 
         start_conf = 1. / cfg.nclasses
-        cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
+        #cond_expec_xs = torch.linspace(cfg.xrange_cond_expec[0], cfg.xrange_cond_expec[1], int((1. - start_conf) * 100) + 1)
+        cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
             with gpytorch.settings.max_cholesky_size(1e6):
                 ind_cond_expec = ind_model(torch.tensor(cond_expec_xs).double()).mean
@@ -436,7 +440,7 @@ def main(cfg):
 
         sns.kdeplot(ind_div, ax=var_ax)
         sns.kdeplot(ood_div, ax=var_ax)
-        var_ax.set(xlim = (0.,0.1),xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(10., varlims[cfg.uncertainty]))
+        var_ax.set(xlabel="Diversity: "+quantity_names[cfg.uncertainty]["div_quant"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., cfg.varlim),xlim = (0,0.5))
 
         ind_vals = ind_joint_kde(joint).reshape(x_grid.shape)
         ind_vals = ind_vals / ind_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
@@ -448,8 +452,8 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ind_cond_ax.set(
-            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],1), xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
-            ylabel=r"{}".format(cfg.uncertainty), title="Conditional {}. Dist.\nImageNet (InD)".format(cfg.uncertainty)
+            xlim=(cfg.xrange_cond[0],cfg.xrange_cond[1]), ylim=(cfg.xrange_cond[0],1), xlabel="Avg. Uncertainty: "+r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            ylabel=r"{}".format(quantity_names[cfg.uncertainty]["div_quant"]), title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,cfg.ind_name)
         )
         fig.colorbar(f, ax=ind_cond_ax)
 
@@ -462,22 +466,24 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ood_cond_ax.set(
-            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],1),
-            xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            xlim=(cfg.xrange_cond[0],cfg.xrange_cond[1]), ylim=(cfg.xrange_cond[0],1),
+            xlabel="Avg. Uncertainty: "+r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            #title=cfg.cond_title+"\n{}".format(div_names[cfg.ood_suffix]),
             title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,div_names[cfg.ood_suffix]),
-            yticks=[]
+            ylabel=r"{}".format(quantity_names[cfg.uncertainty]["div_quant"]),
         )
         fig.colorbar(f, ax=ood_cond_ax)
         cond_expec_show = np.where(ind_cond_expec)
 
         if cfg.signiftest is True:
             [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
-        cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="CIFAR10 (InD)")
+        cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label=cfg.ind_name)
         cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
         cond_exp_ax.set(
-            xlim=(xrange[0],xrange[1]),
-            ylim=(xrange[0],xrange[1]),
-            ylabel=r"$E [ \textrm{Diversity} \mid \textrm{Avg} ]$",
+            xlim=(cfg.xrange_cond_expec[0],cfg.xrange_cond_expec[1]),
+            ylim=(cfg.xrange_cond_expec[0],cfg.xrange_cond_expec[1]),
+            #ylabel=r"$E [ \textrm{Var}[f(x)] \mid $"+quantity_names[cfg.uncertainty]["avg"]+ r"$ ]$",
+            ylabel=r"$E [\, \textrm{Var} \mid E[U] \, ]$",
             xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
             title="Conditionally Expected \n{}: Comparison".format(quantity_names[cfg.uncertainty]["div"])
         )

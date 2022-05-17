@@ -3,6 +3,7 @@ gpu: true
 ind_softmax: false
 ind_stubs: null
 ood_stubs: null
+ind_name: "ImageNet (InD)"  
 ind_hdf5s:
   - imagenet/logits/alexnet--imagenet--deepens1.hdf5 
   - imagenet/logits/alexnet--imagenet--deepens2.hdf5 
@@ -19,4 +20,12 @@ nclasses: 1000
 ood_softmax: false
 ood_suffix: imagenetv2 
 plot: true
+signiftest: false  
+xrange_cond_expec: ## xrange over which to plot conditional expectation.   
+- 0. 
+- 0.999 ## plot only to where this is defined.   
+xrange_cond: ## xrange over which to plot conditional distribution.   
+- 0. 
+- 1. ## plot only to where this is defined.   
+varlim: 17 ## y range over which t o plot marginal variance.  
 uncertainty: Var 
