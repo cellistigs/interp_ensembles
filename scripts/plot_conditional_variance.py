@@ -11,6 +11,7 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import h5py
 from scipy.stats import gaussian_kde
 here = os.path.dirname(os.path.abspath(__file__))
 import seaborn as sns
@@ -73,7 +74,8 @@ def KL(probs,labels):
 
 div_funcs = {"Var":Var,"JS":JS,"KL":KL}
 
-div_names = {"ood_cinic_preds.npy":"CINIC-10 (OOD)",
+div_names = {"imagenetv2":"ImageNet V2 (OOD)",
+        "ood_cinic_preds.npy":"CINIC-10 (OOD)",
         "ood_preds.npy":"CIFAR10.1 (OOD)",
         "ood_cifar10_c_fog_1_preds.npy":"CIFAR10-C Fog 1 (OOD)",
         "ood_cifar10_c_fog_5_preds.npy":"CIFAR10-C Fog 5 (OOD)",
@@ -122,6 +124,7 @@ def refresh_cuda_memory():
         if isinstance(tensor, torch.nn.Parameter) and tensor.grad is not None:
             tensor.grad.data = tensor.grad.to(device)
 
+# @hydra.main(config_path = "script_configs",config_name ="testcinicgaussian") from remote
 @hydra.main(config_path = "script_configs",config_name ="modeldata_test.yaml")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
@@ -134,9 +137,8 @@ def main(cfg):
     :param gpu: if we should use gpu or not: 
     """
     ## formatting limits
-    num_classes = 10
     kde_exp = -0.125 ## 1/4*nb_dims
-    xranges = {"Var":[0.,1.],"JS":[0,np.log(num_classes)],"KL":[0,11]}
+    xranges = {"Var":[0.,1.],"JS":[0,np.log(cfg.nclasses)],"KL":[0,11]}
     xrange = xranges[cfg.uncertainty]
 
     ## Cell 1: formatting filenames 
@@ -156,6 +158,21 @@ def main(cfg):
                 torch.tensor(np.load(ind_prob_path)).float()
                 for ind_prob_path in ind_prob_paths
             ], dim=-2)    
+        ## Cell 2: formatting data
+
+        ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
+
+        if cfg.ood_softmax is False:
+            ood_probs = torch.stack([
+                torch.tensor(np.load(ood_prob_path)).float()
+                for ood_prob_path in ood_prob_paths
+            ], dim=-2).softmax(dim=-1)
+        else:    
+            ood_probs = torch.stack([
+                torch.tensor(np.load(ood_prob_path)).float()
+                for ood_prob_path in ood_prob_paths
+            ], dim=-2)
+        ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     elif (cfg.ind_hdf5s is not None and cfg.ood_hdf5s is not None):    
         ind_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ind_hdf5s]
         ood_prob_paths = [os.path.join(basedir,s_in) for s_in in cfg.ood_hdf5s]
@@ -163,22 +180,24 @@ def main(cfg):
         ind_probs = []
         for ind_prob in ind_prob_paths:
             with h5py.File(str(ind_prob), 'r') as f:
-                logits_out = f['logits'][()]
-                labels = f['targets'][()].astype('int')
+                ind_logits_out = f['logits'][()]
+                ind_labels = f['targets'][()].astype('int')
                 # calculate individual probs
-                ind_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+                ind_probs.append(np.exp(ind_logits_out) / np.sum(np.exp(ind_logits_out), 1, keepdims=True))
         ind_probs = torch.stack([
             torch.tensor(ip) for ip in ind_probs],dim = -2)        
+        ind_ind_labels = torch.tensor(ind_labels).long()
 
         ood_probs = []
         for ood_prob in ood_prob_paths:
             with h5py.File(str(ood_prob), 'r') as f:
-                logits_out = f['logits'][()]
-                labels = f['targets'][()].astype('int')
+                ood_logits_out = f['logits'][()]
+                ood_labels = f['targets'][()].astype('int')
                 # calculate oodividual probs
-                ood_probs.append(np.exp(logits_out) / np.sum(np.exp(logits_out), 1, keepdims=True))
+                ood_probs.append(np.exp(ood_logits_out) / np.sum(np.exp(ood_logits_out), 1, keepdims=True))
         ood_probs = torch.stack([
             torch.tensor(ip) for ip in ood_probs],dim = -2)        
+        ood_ood_labels = torch.tensor(ood_labels).long()
 
     ## Cell 2: formatting data
 
@@ -238,12 +257,22 @@ def main(cfg):
     class GPModel(gpytorch.models.ExactGP):
         def __init__(self, metrics, variances,gpu = False):
             if gpu:
+                ## multigpu settings
+                output_device = torch.device('cuda:0')
+                n_devices = torch.cuda.device_count()
                 likelihood = gpytorch.likelihoods.GaussianLikelihood().cuda()
             else:    
                 likelihood = gpytorch.likelihoods.GaussianLikelihood()
             super().__init__(metrics, variances, likelihood)
             self.mean_module = gpytorch.means.ZeroMean()
-            self.covar_module = gpytorch.kernels.RBFKernel()
+            if gpu:
+                base_covar_module = gpytorch.kernels.RBFKernel()
+                self.covar_module = gpytorch.kernels.MultiDeviceKernel(
+                base_covar_module, device_ids=range(n_devices),
+                output_device=output_device
+            )
+            else:    
+                self.covar_module = gpytorch.kernels.RBFKernel()
             self.covar_module.initialize(lengthscale=(len(variances) ** (kde_exp)))
             self.likelihood.initialize(noise=1e-4)
 
@@ -298,13 +327,13 @@ def main(cfg):
             :param sample1: a tuple containing conditional expectation and variance
             :param sample2: a tuple containing conditional expectation and variance
             """
-            c1,cx = cond_expec(*sample1,nclasses)
-            c2,cx = cond_expec(*sample2,nclasses)
+            c1,cx = cond_expec(*sample1,cfg.nclasses)
+            c2,cx = cond_expec(*sample2,cfg.nclasses)
             avg_abs = np.mean(c2.numpy()-c1.numpy())
             if return_ce is False:
-                return 1/(1-(1/nclasses))*avg_abs
+                return 1/(1-(1/cfg.nclasses))*avg_abs
             else:
-                return 1/(1-(1/nclasses))*avg_abs,c1,c2,cx
+                return 1/(1-(1/cfg.nclasses))*avg_abs,c1,c2,cx
 
         def shuffle(sample1,sample2):
             """Given two tuples each containing paired data, aggregates them, permutes them, and then splits them once again into two samples of the same size as the original data. 
@@ -332,13 +361,13 @@ def main(cfg):
 
 
         N = 5 
-        nclasses = 10
+        cfg.nclasses = 10
         sample1 = (ind_avg.double(), ind_div.double())
         sample2 = (ood_avg.double(), ood_div.double())
 
         ## calculate original stat
         print("calculating orig stat")
-        d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True,xrange=xrange)
+        d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,cfg.nclasses,return_ce = True,xrange=xrange)
         dorig_val = d_orig.item()
         print("calculating shuffle stats")
 
@@ -346,7 +375,7 @@ def main(cfg):
         ces = []
         for n in range(N):
             print("split {}".format(n))
-            dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True,xrange=xrange)
+            dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),cfg.nclasses,return_ce = True,xrange=xrange)
 
 
             dprimes.append(dp)
@@ -379,7 +408,7 @@ def main(cfg):
         ind_model.eval()
         ood_model.eval()
 
-        start_conf = 1. / num_classes
+        start_conf = 1. / cfg.nclasses
         cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
             with gpytorch.settings.max_cholesky_size(1e6):
@@ -395,10 +424,10 @@ def main(cfg):
                 print("R^2 ood predicts ood: {}".format(r2_score(ood_div,ood_preds_ood)))
                 print("R^2 ind predicts ood: {}".format(r2_score(ood_div,ind_preds_ood)))
 
-
     ## Cell 9:        
 
 
+    varlims = {"Var":17.,"JS":5.}
     if cfg.plot:
         fig, (var_ax, ind_cond_ax, ood_cond_ax, cond_exp_ax) = plt.subplots(
             1, 4, figsize=(12, 3), sharex=False, sharey=False
@@ -407,7 +436,7 @@ def main(cfg):
 
         sns.kdeplot(ind_div, ax=var_ax)
         sns.kdeplot(ood_div, ax=var_ax)
-        var_ax.set(xlim=(0.,1.),xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., 15.))
+        var_ax.set(xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., varlims[cfg.uncertainty]))
 
         ind_vals = ind_joint_kde(joint).reshape(x_grid.shape)
         ind_vals = ind_vals / ind_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
@@ -419,8 +448,8 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ind_cond_ax.set(
-            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],xrange[1]), xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
-            ylabel=r"{}".format(cfg.uncertainty), title="Conditional {}. Dist.\nCIFAR10 (InD)".format(cfg.uncertainty)
+            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],1), xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            ylabel=r"{}".format(cfg.uncertainty), title="Conditional {}. Dist.\nImageNet (InD)".format(cfg.uncertainty)
         )
         fig.colorbar(f, ax=ind_cond_ax)
 
@@ -433,7 +462,7 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ood_cond_ax.set(
-            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],xrange[1]),
+            xlim=(xrange[0],xrange[1]), ylim=(xrange[0],1),
             xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
             title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,div_names[cfg.ood_suffix]),
             yticks=[]
@@ -448,7 +477,6 @@ def main(cfg):
         cond_exp_ax.set(
             xlim=(xrange[0],xrange[1]),
             ylim=(xrange[0],xrange[1]),
-            #ylabel=r"$E [ \textrm{"+quantity_names[cfg.uncertainty]["div"]+r"} \mid \textrm{"+quantity_names[cfg.uncertainty]["avg"]+r"} ]$",
             ylabel=r"$E [ \textrm{Diversity} \mid \textrm{Avg} ]$",
             xlabel=r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
             title="Conditionally Expected \n{}: Comparison".format(quantity_names[cfg.uncertainty]["div"])
