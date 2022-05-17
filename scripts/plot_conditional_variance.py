@@ -122,7 +122,7 @@ def refresh_cuda_memory():
         if isinstance(tensor, torch.nn.Parameter) and tensor.grad is not None:
             tensor.grad.data = tensor.grad.to(device)
 
-@hydra.main(config_path = "script_configs",config_name ="test")
+@hydra.main(config_path = "script_configs",config_name ="modeldata_test.yaml")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
 
@@ -231,7 +231,7 @@ def main(cfg):
     joint = np.stack([x_grid.reshape(-1), y_grid.reshape(-1)])
     ind_condition = np.logical_or(x_grid < ind_avg.min().numpy(),x_grid > ind_avg.max().numpy())
     ood_condition = np.logical_or(x_grid < ood_avg.min().numpy(),x_grid > ood_avg.max().numpy())
-
+    
     ## Cell 8: 
     import gpytorch
 
@@ -252,144 +252,148 @@ def main(cfg):
             covar = self.covar_module(x)
             return gpytorch.distributions.MultivariateNormal(mean, covar)
 
-    def cond_expec(ef2,var,num_classes):
-        """Takes in two 1-d arrays representing expected norm squared (confidence) and variance. 
-        Given these, returns the conditional expectation evaluated on int(1-(1/M)*100)+1 points between 1/M and 1.  
+    if cfg.signiftest is True:
 
-        """
-        if cfg.gpu:
-            ef2 = ef2.cuda()
-            var = var.cuda()
-            model = GPModel(ef2.double(),var.double()).double()
-            model = model.cuda()
-            max_cholesky_size = 800
-        else:    
-            model = GPModel(ef2.double(),var.double()).double()
-            max_cholesky_size = 800 
-        model.eval()
+
+        def cond_expec(ef2,var,num_classes):
+            """Takes in two 1-d arrays representing expected norm squared (confidence) and variance. 
+            Given these, returns the conditional expectation evaluated on int(1-(1/M)*100)+1 points between 1/M and 1.  
+
+            """
+            if cfg.gpu:
+                ef2 = ef2.cuda()
+                var = var.cuda()
+                model = GPModel(ef2.double(),var.double()).double()
+                model = model.cuda()
+                max_cholesky_size = 800
+            else:    
+                model = GPModel(ef2.double(),var.double()).double()
+                max_cholesky_size = 800 
+            model.eval()
+            start_conf = 1. / num_classes
+            if cfg.gpu:
+                cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1).cuda()
+                #cond_expec_xs = torch.linspace(0,1, int((1. - start_conf) * 100) + 1).cuda()
+            else:    
+                cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
+            with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
+                with gpytorch.settings.max_cholesky_size(max_cholesky_size):
+                    cond_expec = model(torch.tensor(cond_expec_xs).double()).mean
+                    if cfg.gpu:
+                        cond_expec_final = cond_expec.cpu()
+                        cond_expec_xs_final = cond_expec_xs.cpu()
+                        del cond_expec
+                        del cond_expec_xs
+                        del model.likelihood
+                        del model
+                        del ef2
+                        del var
+                        return cond_expec_final,cond_expec_xs_final
+            
+            return cond_expec,cond_expec_xs
+
+        def dstat(sample1,sample2,nclasses,return_ce = False,xrange = xrange):
+            """Takes a distance statistic measuring how much greater the ood sample is than the ind sample.  
+
+            :param sample1: a tuple containing conditional expectation and variance
+            :param sample2: a tuple containing conditional expectation and variance
+            """
+            c1,cx = cond_expec(*sample1,nclasses)
+            c2,cx = cond_expec(*sample2,nclasses)
+            avg_abs = np.mean(c2.numpy()-c1.numpy())
+            if return_ce is False:
+                return 1/(1-(1/nclasses))*avg_abs
+            else:
+                return 1/(1-(1/nclasses))*avg_abs,c1,c2,cx
+
+        def shuffle(sample1,sample2):
+            """Given two tuples each containing paired data, aggregates them, permutes them, and then splits them once again into two samples of the same size as the original data. 
+
+            :param sample1: a tuple containing conditional expectation and variance
+            :param sample2: a tuple containing conditional expectation and variance
+            """
+            ## create numpy arrays for easy manipulation:
+            s1_stacked = np.stack(sample1,axis = 1)
+            s2_stacked = np.stack(sample2,axis = 1)
+            ## get the shape of each: 
+            s1_shape = np.shape(s1_stacked)
+            s2_shape = np.shape(s2_stacked)
+            assert s1_shape[1] == 2
+            assert s2_shape[1] == 2
+            ## we will split based on this shape:
+            n1 = s1_shape[0]
+            n2 = s2_shape[0]
+            ## now concatenate:
+            agg_sample = np.concatenate([s1_stacked,s2_stacked],axis = 0)
+            perm_sample = np.random.permutation(agg_sample)
+            perm_s1 = (torch.tensor(perm_sample[:n1,0]),torch.tensor(perm_sample[:n1,1]))
+            perm_s2 = (torch.tensor(perm_sample[n1:,0]),torch.tensor(perm_sample[n1:,1]))
+            return perm_s1,perm_s2
+
+
+        N = 5 
+        nclasses = 10
+        sample1 = (ind_avg.double(), ind_div.double())
+        sample2 = (ood_avg.double(), ood_div.double())
+
+        ## calculate original stat
+        print("calculating orig stat")
+        d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True,xrange=xrange)
+        dorig_val = d_orig.item()
+        print("calculating shuffle stats")
+
+        dprimes = []
+        ces = []
+        for n in range(N):
+            print("split {}".format(n))
+            dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True,xrange=xrange)
+
+
+            dprimes.append(dp)
+            ces.append(ce1)
+            ces.append(ce2)
+            print(dorig_val,"orig d")
+            print(dprimes,"prime d")
+
+            if n % 10 == 0: 
+                refresh_cuda_memory()    
+            print(f"After emptying cache: {torch.cuda.memory_allocated()}")
+            print(f"After emptying cache: {torch.cuda.memory_cached()}")
+
+        count = sum([dp> dorig_val for dp in dprimes])
+        data = {"lower":None,"upper":None,"exact":None}
+        interval = proportion_confint(count,N)
+        data["lower"] =interval[0]
+        data["upper"] = interval[1]
+        data["exact"] = count/N
+        with open("signifdata.json","w") as f:
+            json.dump(data,f)
+
+
+
+
+
+    if cfg.signiftest is False:
+        ind_model = GPModel(ind_avg.double(), ind_div.double()).double()
+        ood_model = GPModel(ood_avg.double(), ood_div.double()).double()
+        ind_model.eval()
+        ood_model.eval()
+
         start_conf = 1. / num_classes
-        if cfg.gpu:
-            cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1).cuda()
-            #cond_expec_xs = torch.linspace(0,1, int((1. - start_conf) * 100) + 1).cuda()
-        else:    
-            cond_expec_xs = torch.linspace(min_avg,max_avg, int((1. - start_conf) * 100) + 1)
+        cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
         with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
-            with gpytorch.settings.max_cholesky_size(max_cholesky_size):
-                cond_expec = model(torch.tensor(cond_expec_xs).double()).mean
-                if cfg.gpu:
-                    cond_expec_final = cond_expec.cpu()
-                    cond_expec_xs_final = cond_expec_xs.cpu()
-                    del cond_expec
-                    del cond_expec_xs
-                    del model.likelihood
-                    del model
-                    del ef2
-                    del var
-                    return cond_expec_final,cond_expec_xs_final
-        
-        return cond_expec,cond_expec_xs
+            with gpytorch.settings.max_cholesky_size(1e6):
+                ind_cond_expec = ind_model(torch.tensor(cond_expec_xs).double()).mean
+                ood_cond_expec = ood_model(torch.tensor(cond_expec_xs).double()).mean
 
-    def dstat(sample1,sample2,nclasses,return_ce = False,xrange = xrange):
-        """Takes a distance statistic measuring how much greater the ood sample is than the ind sample.  
-
-        :param sample1: a tuple containing conditional expectation and variance
-        :param sample2: a tuple containing conditional expectation and variance
-        """
-        c1,cx = cond_expec(*sample1,nclasses)
-        c2,cx = cond_expec(*sample2,nclasses)
-        avg_abs = np.mean(c2.numpy()-c1.numpy())
-        if return_ce is False:
-            return 1/(1-(1/nclasses))*avg_abs
-        else:
-            return 1/(1-(1/nclasses))*avg_abs,c1,c2,cx
-
-    def shuffle(sample1,sample2):
-        """Given two tuples each containing paired data, aggregates them, permutes them, and then splits them once again into two samples of the same size as the original data. 
-
-        :param sample1: a tuple containing conditional expectation and variance
-        :param sample2: a tuple containing conditional expectation and variance
-        """
-        ## create numpy arrays for easy manipulation:
-        s1_stacked = np.stack(sample1,axis = 1)
-        s2_stacked = np.stack(sample2,axis = 1)
-        ## get the shape of each: 
-        s1_shape = np.shape(s1_stacked)
-        s2_shape = np.shape(s2_stacked)
-        assert s1_shape[1] == 2
-        assert s2_shape[1] == 2
-        ## we will split based on this shape:
-        n1 = s1_shape[0]
-        n2 = s2_shape[0]
-        ## now concatenate:
-        agg_sample = np.concatenate([s1_stacked,s2_stacked],axis = 0)
-        perm_sample = np.random.permutation(agg_sample)
-        perm_s1 = (torch.tensor(perm_sample[:n1,0]),torch.tensor(perm_sample[:n1,1]))
-        perm_s2 = (torch.tensor(perm_sample[n1:,0]),torch.tensor(perm_sample[n1:,1]))
-        return perm_s1,perm_s2
-
-
-    N = 5 
-    nclasses = 10
-    sample1 = (ind_avg.double(), ind_div.double())
-    sample2 = (ood_avg.double(), ood_div.double())
-
-    ## calculate original stat
-    print("calculating orig stat")
-    d_orig,ind_cond_expec,ood_cond_expec,cond_expec_xs = dstat(sample1,sample2,nclasses,return_ce = True,xrange=xrange)
-    dorig_val = d_orig.item()
-    print("calculating shuffle stats")
-
-    dprimes = []
-    ces = []
-    for n in range(N):
-        print("split {}".format(n))
-        dp,ce1,ce2,cex = dstat(*shuffle(sample1,sample2),nclasses,return_ce = True,xrange=xrange)
-
-
-        dprimes.append(dp)
-        ces.append(ce1)
-        ces.append(ce2)
-        print(dorig_val,"orig d")
-        print(dprimes,"prime d")
-
-        if n % 10 == 0: 
-            refresh_cuda_memory()    
-        print(f"After emptying cache: {torch.cuda.memory_allocated()}")
-        print(f"After emptying cache: {torch.cuda.memory_cached()}")
-
-    count = sum([dp> dorig_val for dp in dprimes])
-    data = {"lower":None,"upper":None,"exact":None}
-    interval = proportion_confint(count,N)
-    data["lower"] =interval[0]
-    data["upper"] = interval[1]
-    data["exact"] = count/N
-    with open("signifdata.json","w") as f:
-        json.dump(data,f)
-
-
-
-
-
-    #ind_model = GPModel(ind_avg.double(), ind_div.double()).double()
-    #ood_model = GPModel(ood_avg.double(), ood_div.double()).double()
-    #ind_model.eval()
-    #ood_model.eval()
-
-    #start_conf = 1. / num_classes
-    #cond_expec_xs = torch.linspace(start_conf, 1., int((1. - start_conf) * 100) + 1)
-    #with torch.no_grad(), gpytorch.settings.skip_posterior_variances():
-    #    with gpytorch.settings.max_cholesky_size(1e6):
-    #        ind_cond_expec = ind_model(torch.tensor(cond_expec_xs).double()).mean
-    #        ood_cond_expec = ood_model(torch.tensor(cond_expec_xs).double()).mean
-
-    #        ind_preds_ind = ind_model(torch.tensor(ind_avg.double())).mean
-    #        ood_preds_ood = ood_model(torch.tensor(ood_avg.double())).mean
-    #        ind_preds_ood = ind_model(torch.tensor(ood_avg.double())).mean
-    #        ood_preds_ind = ood_model(torch.tensor(ind_avg.double())).mean
-    #        print("R^2 ind predicts ind: {}".format(r2_score(ind_div,ind_preds_ind)))
-    #        print("R^2 ood predicts ind: {}".format(r2_score(ind_div,ood_preds_ind)))
-    #        print("R^2 ood predicts ood: {}".format(r2_score(ood_div,ood_preds_ood)))
-    #        print("R^2 ind predicts ood: {}".format(r2_score(ood_div,ind_preds_ood)))
+                ind_preds_ind = ind_model(torch.tensor(ind_avg.double())).mean
+                ood_preds_ood = ood_model(torch.tensor(ood_avg.double())).mean
+                ind_preds_ood = ind_model(torch.tensor(ood_avg.double())).mean
+                ood_preds_ind = ood_model(torch.tensor(ind_avg.double())).mean
+                print("R^2 ind predicts ind: {}".format(r2_score(ind_div,ind_preds_ind)))
+                print("R^2 ood predicts ind: {}".format(r2_score(ind_div,ood_preds_ind)))
+                print("R^2 ood predicts ood: {}".format(r2_score(ood_div,ood_preds_ood)))
+                print("R^2 ind predicts ood: {}".format(r2_score(ood_div,ind_preds_ood)))
 
 
     ## Cell 9:        
@@ -437,7 +441,8 @@ def main(cfg):
         fig.colorbar(f, ax=ood_cond_ax)
         cond_expec_show = np.where(ind_cond_expec)
 
-        [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
+        if cfg.signiftest is True:
+            [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
         cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label="CIFAR10 (InD)")
         cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
         cond_exp_ax.set(
