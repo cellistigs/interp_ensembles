@@ -1,0 +1,22 @@
+N: 0
+gpu: true
+ind_softmax: false
+ind_stubs: null
+ood_stubs: null
+ind_hdf5s:
+  - imagenet/logits/alexnet--imagenet--deepens1.hdf5 
+  - imagenet/logits/alexnet--imagenet--deepens2.hdf5 
+  - imagenet/logits/alexnet--imagenet--deepens3.hdf5 
+  - imagenet/logits/alexnet--imagenet--deepens4.hdf5
+  - imagenet/logits/alexnet--imagenet--deepens5.hdf5
+ood_hdf5s:    
+  - imagenet/logits/alexnet--imagenetv2mf--deepens1.hdf5 
+  - imagenet/logits/alexnet--imagenetv2mf--deepens2.hdf5 
+  - imagenet/logits/alexnet--imagenetv2mf--deepens3.hdf5 
+  - imagenet/logits/alexnet--imagenetv2mf--deepens4.hdf5
+  - imagenet/logits/alexnet--imagenetv2mf--deepens5.hdf5
+nclasses: 1000
+ood_softmax: false
+ood_suffix: imagenetv2 
+plot: true
+uncertainty: JS
