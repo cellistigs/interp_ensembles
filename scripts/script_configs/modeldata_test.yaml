@@ -1,0 +1,21 @@
+plot: False
+ind_stubs:
+  - robust_results11-15-21_22:29.03_base_vgg19_bn
+  - robust_results11-15-21_22:49.10_base_vgg19_bn  
+  - robust_results11-15-21_23:09.19_base_vgg19_bn  
+  - robust_results11-15-21_23:29.30_base_vgg19_bn  
+  - robust_results11-15-21_23:49.39_base_vgg19_bn  
+ood_stubs:    
+  - robust_results12-02-21_05:36.12_base_vgg19_bn
+  - robust_results12-02-21_05:36.35_base_vgg19_bn  
+  - robust_results12-02-21_05:36.57_base_vgg19_bn  
+  - robust_results12-02-21_05:37.20_base_vgg19_bn  
+  - robust_results12-02-21_05:37.43_base_vgg19_bn  
+ood_suffix: ood_cinic_preds.npy   
+ind_softmax: False
+ood_softmax: False
+comp_model_ind: robust_results12-07-21_04:09.42_base_wideresnet28_10
+comp_model_ood: robust_results12-07-21_04:09.42_base_wideresnet28_10
+gpu: True
+
+
