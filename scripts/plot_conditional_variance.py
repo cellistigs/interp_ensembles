@@ -428,7 +428,7 @@ def main(cfg):
 
         sns.kdeplot(ind_div, ax=var_ax)
         sns.kdeplot(ood_div, ax=var_ax)
-        var_ax.set(xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(0., varlims[cfg.uncertainty]))
+        var_ax.set(xlim = (0.,0.1),xlabel=quantity_names[cfg.uncertainty]["div"], title="Marginal {} Dist.\nComparison".format(cfg.uncertainty), ylim=(10., varlims[cfg.uncertainty]))
 
         ind_vals = ind_joint_kde(joint).reshape(x_grid.shape)
         ind_vals = ind_vals / ind_avg_kde(x_grid.ravel()).reshape(x_grid.shape)
@@ -476,7 +476,7 @@ def main(cfg):
         cond_exp_ax.legend(loc="best")
         fig.tight_layout()
 
-        plt.savefig("cond_expected_{}.png".format(cfg.uncertainty))
+        plt.savefig("cond_expected_{}.pdf".format(cfg.uncertainty))
 
         #fig,ax = plt.subplots(figsize= (4,4))
         #r2_matrix = np.array([[ind_r2_ind,ood_r2_ind],[ind_r2_ood,ood_r2_ood]])
