@@ -29,6 +29,7 @@ def main(args):
     all_ordereddata = {"ind_":None}
     basedata = []
     all_ordereddata[args.oodname] = None ## create ood name. 
+    maxlen = 10000
     for data in all_ordereddata:
         #1. Get the metric values for each dataset we care about. 
         all_model1_metrics = [get_metrics_outputs(m1,args.metric,data) for m1 in args.model1]
@@ -40,11 +41,12 @@ def main(args):
             all_basemodel_metrics = [get_metrics_outputs(bm,args.metric,data) for bm in args.basemodel]
             basemodel_metrics = np.mean(np.array(all_basemodel_metrics),axis = 0)
             basemodel_single = all_basemodel_metrics[args.select]
-            basedata.append(basemodel_metrics)
+            basedata.append(basemodel_metrics[:maxlen])
             #basemodel_metrics[np.where(basemodel_metrics < args.thresh_score)] = np.nan
             title = "Change in {}".format(args.metricshowname)
-            model1_metrics = model1_metrics-basemodel_metrics ## this is ensemble minus average
-            model2_metrics = model2_metrics[:len(basemodel_single)]-basemodel_single#basemodel_metrics ## this is single minus single 
+            model1_metrics = model1_metrics[:maxlen]-basemodel_metrics[:maxlen] ## this is ensemble minus average
+            model2_metrics = model2_metrics[:maxlen]-basemodel_single[:maxlen]#basemodel_metrics ## this is single minus single 
+            #model2_metrics = model2_metrics[:len(basemodel_single)]-basemodel_single#basemodel_metrics ## this is single minus single 
         else:    
             title = "{}".format(args.metric)
         #2. Sort them. 
@@ -56,9 +58,10 @@ def main(args):
     dataset = [args.indshowname,args.oodshowname]
     markers = ["o","x"] 
     colors = ["C0","C4"]
-    fig,ax = plt.subplots(1,2,figsize = (12,5))
+    fig,ax = plt.subplots(1,2,figsize = (14,5))
     orig_title = title
     for di,(data,datadict) in enumerate(all_ordereddata.items()):
+        print("plotting")
         means = np.nanmean(datadict,axis = 1)
         #datadict = datadict[:,~np.any(np.isnan(datadict),axis = 0)]
         z = gaussian_kde(datadict)(datadict)
@@ -81,6 +84,8 @@ def main(args):
         ax[di].set_title(title)    
     ax[0].set_xlabel(args.model1showname)
     ax[0].set_ylabel(args.model2showname)
+    ax[1].set_xlabel(args.model1showname)
+    ax[1].set_ylabel(args.model2showname)
     if args.metric == "BrierScore":
         ax[0].set_xlim(-2,2)
         ax[0].set_ylim(-2,2)
