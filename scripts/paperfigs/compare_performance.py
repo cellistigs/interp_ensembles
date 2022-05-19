@@ -18,7 +18,7 @@ plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
 results = os.path.join(here,"../../results/")
 ims = os.path.join(here,"../../images/performance_comp")
 
-@hydra.main(config_path = "compare_performance_configs",config_name ="test")
+@hydra.main(config_path = "compare_performance_configs/cinic10_bs",config_name ="config")
 def main(args):
     """Calculates the per-datapoint metrics for two different models, and plots them against each other. 
     Optionally, can include a base model which we use as a baseline- calculate increase or decrease in metric performance relative to this base model. 
@@ -56,7 +56,7 @@ def main(args):
     dataset = [args.indshowname,args.oodshowname]
     markers = ["o","x"] 
     colors = ["C0","C4"]
-    fig,ax = plt.subplots(1,2,figsize = (10,5))
+    fig,ax = plt.subplots(1,2,figsize = (12,5))
     orig_title = title
     for di,(data,datadict) in enumerate(all_ordereddata.items()):
         means = np.nanmean(datadict,axis = 1)
@@ -65,7 +65,7 @@ def main(args):
         #idx = z.argsort()
         ax[di].plot(np.linspace(-10,10),np.linspace(-10,10),alpha = 0.2,linestyle = "--")
         idx = basedata[di].argsort()
-        scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
+        scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma_r",c=basedata[di][idx],label = data,s=1)
         fig.colorbar(scatterval,ax = ax[di])
 
         #ax[di].scatter(datadict[0],datadict[1],marker = markers[di],cmap = "plasma",label = data,s=1)
@@ -92,7 +92,7 @@ def main(args):
         ax[1].set_xlim(-7,7)
         ax[1].set_ylim(-7,7)
     #plt.savefig(os.path.join(ims,r"compare_avg_avg2_brier_avgbase.png".format(args.model1,args.model2,args.metric,args.basemodel)))    
-    plt.savefig("{}_diff_{}.png".format(args.dumpname,args.select))
+    plt.savefig("{}_diff_{}.pdf".format(args.dumpname,args.select))
     joblib.dump(all_ordereddata,args.dumpname)
 
 
