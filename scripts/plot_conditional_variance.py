@@ -20,7 +20,7 @@ import torch
 
 import matplotlib as mpl
 
-plt.style.use(os.path.join(here,"../etc/config/geoff_stylesheet.mplstyle"))
+plt.style.use(os.path.join(here,"../etc/config/stylesheet.mplstyle"))
 
 def Var(probs,labels):
     """Calculates average and diversity decomposition for variance
@@ -128,7 +128,7 @@ def refresh_cuda_memory():
 
 # @hydra.main(config_path = "script_configs",config_name ="testcinicgaussian") from remote
 #@hydra.main(config_path = "script_configs",config_name ="modeldata_test.yaml")
-@hydra.main(config_path = "script_configs/cifar10.1",config_name ="config_Conv WideResNet-28-10_cifar10.1_Var.yaml")
+@hydra.main(config_path = "script_configs",config_name ="modeldata_test.yaml")
 def main(cfg):
     """Function to create ensembles from groups of logits on the fly, and compare their conditional variances. 
 

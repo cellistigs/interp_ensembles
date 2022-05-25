@@ -14,11 +14,11 @@ import os
 from interpensembles.metrics import NLLData,BrierScoreData
 
 here = os.path.dirname(os.path.abspath(__file__))
-plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
+plt.style.use(os.path.join(here,"../../etc/config/stylesheet.mplstyle"))
 results = os.path.join(here,"../../results/")
 ims = os.path.join(here,"../../images/performance_comp")
 
-@hydra.main(config_path = "compare_performance_configs/cinic10_bs",config_name ="config")
+@hydra.main(config_path = "compare_performance_configs",config_name ="test")
 def main(args):
     """Calculates the per-datapoint metrics for two different models, and plots them against each other. 
     Optionally, can include a base model which we use as a baseline- calculate increase or decrease in metric performance relative to this base model. 
