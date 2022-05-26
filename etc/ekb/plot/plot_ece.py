@@ -126,7 +126,7 @@ def main(ensemble_type='ensemble_homog'):
     m_sizes={
         'Single Model': 25,
         'Ensemble' : 50,
-        'Het. Ensemble':50,
+        'Het. Ensemble': 50,
     }
     if ensemble_type == 'ensemble_heter':
         hue_order=['Single Model', 'Ensemble', 'Het. Ensemble']

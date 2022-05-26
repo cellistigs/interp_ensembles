@@ -90,9 +90,10 @@ def main(run_dataset,ensemble_type='ensemble_homog'):
     allfiles = os.listdir(resultsdir)
     #resultfiles = [file_ for file_ in allfiles if (run_dataset in file_) or (datasets['InD']+'_' in file_)]
     resultfiles = [file_ for file_ in allfiles if (run_dataset in file_) ]
-    # Filter out heterogeneous ensembles
+    # Filter out heterogeneous and implicit ensembles
     if ensemble_type == 'ensemble_homog':
         resultfiles = [file_ for file_ in resultfiles if not('het_ensemble' in file_) ]
+        resultfiles = [file_ for file_ in resultfiles if not('implicit_ensemble' in file_) ]
 
     print(resultfiles)
     # filter out heter
@@ -127,14 +128,15 @@ def main(run_dataset,ensemble_type='ensemble_homog'):
 
     #metrics = ["Top 1\% Err", "NLL", "Brier", "ECE", "rESCE"]
     #model_types=['Single Model', 'Ensemble', 'Het. Ensemble']
-
-    if ensemble_type == 'ensemble_heter':
+    if ensemble_type == 'ensemble_implicit':
+        model_types=['Single Model', 'Ensemble', 'Het. Ensemble', 'Implicit Ensemble']
+    elif ensemble_type == 'ensemble_heter':
         model_types=['Single Model', 'Ensemble', 'Het. Ensemble']
     else:
         model_types=['Single Model', 'Ensemble']
 
     #colors =['yellowgreen', 'tomato']
-    colors = ['yellowgreen', 'tomato', 'dodgerblue']
+    colors = ['yellowgreen', 'tomato', 'dodgerblue', 'violet']
 
     #colors=['deepskyblue', 'hotpink']
     #palette = "Set2"
@@ -188,7 +190,10 @@ def main(run_dataset,ensemble_type='ensemble_homog'):
             r2_val = r2_score(y, y_pred)
 
             if r2_val_all > 0.1:
-                g.axes[0, m_idx].plot(x, y_pred, linewidth=1, c=colors[t_idx], alpha=0.5)
+                if model_type == 'Implicit Ensemble':
+                    pass
+                else:
+                    g.axes[0, m_idx].plot(x, y_pred, linewidth=1, c=colors[t_idx], alpha=0.5)
 
             current_results = [metric_type, model_type, params[0], sd_b[0], ts_b[0],p_values[0], r2_val, len(y)]
             all_scores.append(current_results)
@@ -236,67 +241,4 @@ def main(run_dataset,ensemble_type='ensemble_homog'):
 if __name__ == "__main__":
     fire.Fire(main)
 
-
-#%%
-"""
-def clean_df(results):
-    # assert only one dataset
-    # drop data name and filename
-    data_names_dict = results.groupby('Distribution').apply(lambda x: x['Dataset'].unique())
-    #assert data_names_dict['InD'].size == 1
-    #assert data_names_dict['OOD'].size == 1
-
-    results = results.drop(columns=["Dataset"])
-    results = results.drop(columns=["Filename"])
-    #results = results.drop(columns=["Model Name"])
-    results = results.drop(columns=["Model Seed"])
-    results["ID"] = pd.Categorical(results["ID"])
-    results["Type"] = pd.Categorical(results["Type"])
-    results["Model Name"] = pd.Categorical(results["Model Name"])
-    results["Distribution"] = pd.Categorical(results["Distribution"])
-    results.set_index(["ID", "Model Name", "Type",  "Distribution"], inplace=True)
-    #results.set_index(["ID", "Type",  "Distribution"], inplace=True)
-    results.columns.name = "Metric"
-    results = results.unstack("Distribution").stack("Metric")
-    return results
-
-# check for Taiga
-
-
-for model_name in [0]:#['resnet50','alexnet','resnet101']:
-    results = pd.read_csv('/data/Projects/linear_ensembles/interp_ensembles/results/metrics/imagenetv2mf_metrics.csv')
-    data2 = pd.read_csv(
-        '/data/Projects/linear_ensembles/interp_ensembles/results/metrics/imagenetv2mf_ensemble_metrics.csv')
-    results = results.append(data2)
-
-    # filter results only for alexne
-    #results = results[results['Model Name']==model_name]
-
-    results = clean_df(results)
-    results = results.dropna()
-    plot_results = results.reset_index().set_index("ID")
-
-    metrics = ["Top 1\% Err", "NLL", "Brier", "ECE", "rESCE"]
-    # model_types=['Single Model', 'Ensemble', 'Het. Ensemble']
-    model_types = ['Single Model', 'Ensemble']
-
-    g = sns.FacetGrid(
-        data=plot_results, col="Metric", hue="Type",
-        hue_order=model_types,
-        despine=False, legend_out=False,
-        aspect=1, height=4.,
-        sharey='col',
-        sharex='col',
-        col_order=metrics,
-        row='Model Name'
-    )
-    g.map_dataframe(sns.scatterplot, x="InD", y="OOD")
-    #g.set(xlim=(0, 0.7), ylim=(0, 0.7))
-    # g = g.map(plt.scatter, "Metric.Top 1% Err", "Metric.Top 1% Err")
-    #g.set_xlabels("InD {}".format(model_name))
-    #g.set_ylabels("OOD {}".format(model_name))
-    g.add_legend()
-    plt.tight_layout()
-    plt.show()
-"""
 #%%
