@@ -9,3 +9,5 @@ scikit-learn
 seaborn
 gpytorch
 hydra-core
+statsmodels
+h5py
