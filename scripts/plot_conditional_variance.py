@@ -406,8 +406,8 @@ def main(cfg):
 
 
     if cfg.signiftest is False:
-        ind_model = GPModel(ind_avg.double(), ind_div.double()).double()
-        ood_model = GPModel(ood_avg.double(), ood_div.double()).double()
+        ind_model = GPModel(ind_avg.double(), ind_div.double(),cfg.gpu).double()
+        ood_model = GPModel(ood_avg.double(), ood_div.double(),cfg.gpu).double()
         ind_model.eval()
         ood_model.eval()
 
