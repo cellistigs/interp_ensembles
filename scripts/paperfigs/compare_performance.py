@@ -158,7 +158,9 @@ def get_metrics_outputs(stubname,metric,data):
         labels_onehot[np.arange(len(labels)),labels] = 1
         return np.sum((preds-labels_onehot)**2,axis = 1)
     NLL = lambda preds,labels: -np.log(preds[np.arange(len(labels)),labels])
-    func = {"Likelihood":NLL,"BrierScore":BrierScore,"Confidence":Confidence}
+    ## also compute accuracy (outputs scalar)
+    Acc = lambda preds, labels: np.sum(np.argmax(preds,axis =1) ==labels)/len(labels)
+    func = {"Likelihood":NLL,"BrierScore":BrierScore,"Confidence":Confidence,"Accuracy":Acc}
 
     ## get name of data and target: 
     dataname = stubname+"{}preds.npy".format(data)
@@ -179,6 +181,7 @@ def get_metrics_outputs(stubname,metric,data):
     if bool(metadata.get("softmax",True)) is False:    
         print("applying softmax to: {}".format(stubname))
         data = softmax(data,axis = 1)
+    print("Accuracy for {}: ".format(stubname)+ str(func["Accuracy"](data,labels)))
     return func[metric](data,labels)
 
 def get_ordered_metricvals(ordering,following):    
