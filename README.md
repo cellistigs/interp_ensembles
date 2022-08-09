@@ -1,4 +1,4 @@
-# Project with Geoff on investigating the effectiveness of ensembles compared to bigger models. 
+# Project with Kelly and Geoff on investigating the effectiveness of ensembles compared to bigger models. 
 
 We all love deep ensembles because they are great for out of distribution detection and covering a diverse set of solutions. However, these benefits, that are supposedly selectively targeted by ensembles (due to diversity among ensemble members, independent errors, etc) are also usually accompanied by an increase in performance on in-distribution data. Do we actually do better in a qualitatively different way when we ensemble, as opposed to when we just properly train a much larger model? 
 
