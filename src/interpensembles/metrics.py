@@ -20,7 +20,7 @@ class BrierScoreData(object):
         return np.mean(deviance**2)
 
     def brierscore_multi(self,prob,target):
-        """The "original" brier score definition that accounts for other classes explicitly. Note the range of this test is 0-K, where k is the number of classes. 
+        """The "original" brier score definition that accounts for other classes explicitly. Note the range of this test is 0-2. 
         :param prob: array of probabilities per class. 
         :param target: list/array of true targets. 
 

@@ -1,0 +1,19 @@
+"model1":
+  - synth_ensemble_0_base_vgg11_bn_e4_cinic_ 
+"model2":   
+  - robust_results12-02-21_05:42.05_base_wideresnet18_4
+  - robust_results12-02-21_05:42.50_base_wideresnet18_4  
+  - robust_results12-02-21_05:43.35_base_wideresnet18_4  
+  - robust_results12-02-21_05:44.20_base_wideresnet18_4
+"basemodel":   
+  - robust_results12-02-21_05:34.26_base_vgg11_bn
+"metric": Likelihood 
+"metricshowname": Likelihood 
+"oodname": ood_cinic_ 
+"thresh_score": 0.01    
+"dumpname": avg_ens  
+"select": 0  
+"indshowname": "CIFAR10"  
+"oodshowname": "CINIC10"  
+"model1showname": "Ensemble VGG-11 - Single VGG-11"
+"model2showname": "Avg. WideResNet 18-4 - Single VGG-11"  
