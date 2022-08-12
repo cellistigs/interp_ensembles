@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 import matplotlib.pyplot as plt
 
-@hydra.main(config_path = "script_configs/biasvar",config_name = "cifar10")
+@hydra.main(config_path = "script_configs/biasvar",config_name = "default")
 def main(args):
     all_biasvar = []
     for modelname,model in args.models.items():
@@ -17,11 +17,14 @@ def main(args):
         all_biasvar.append([bias,var])
     
     biasvar_array = np.array(all_biasvar)
-    plt.scatter(biasvar_array[:,1],biasvar_array[:,0])
-    plt.plot(np.linspace(0,0.1,100),np.linspace(0,0.1,100))
-    plt.title(args.title)
-    plt.xlabel("variance")
-    plt.ylabel("bias")
+
+    fig,ax = plt.subplots()
+    ax.scatter(biasvar_array[:,1],biasvar_array[:,0])
+    ax.plot(np.linspace(0,args.line_extent,100),np.linspace(0,args.line_extent,100))
+    ax.set_title(args.title)
+    ax.set_xlabel("variance")
+    ax.set_ylabel("bias")
+    fig.savefig("{}_biasvar.pdf".format(args.title))
     plt.show()
 
     
