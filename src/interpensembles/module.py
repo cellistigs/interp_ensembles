@@ -1,6 +1,9 @@
 import pytorch_lightning as pl
 import torch
-from pytorch_lightning.metrics import Accuracy
+try:
+    from pytorch_lightning.metrics import Accuracy
+except ModuleNotFoundError:    
+    from torchmetrics import Accuracy
 
 from .cifar10_models.densenet import densenet121, densenet161, densenet169
 from .cifar10_models.googlenet import googlenet
@@ -9,6 +12,9 @@ from .cifar10_models.mobilenetv2 import mobilenet_v2
 from .cifar10_models.resnet import resnet18, resnet34, resnet50, wideresnet18, wideresnet18_4, widesubresnet18,wideresnet18_4_grouplinear
 from .cifar10_models.wideresnet_28 import wideresnet28_10
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
+from .cifar10_models.efficientnet import efficientnet_b0, efficientnet_b1, efficientnet_b2
+from .cifar10_models.pyramidnet import pyramidnet272
+from .cifar10_models.shake_shake import shake_resnet26_2x96d
 from .schduler import WarmupCosineLR
 
 all_classifiers = {
@@ -29,6 +35,11 @@ all_classifiers = {
     "mobilenet_v2": mobilenet_v2,
     "googlenet": googlenet,
     "inception_v3": inception_v3,
+    "efficientnet_b0": efficientnet_b0,
+    "efficientnet_b1": efficientnet_b1,
+    "efficientnet_b2": efficientnet_b2,
+    "pyramidnet_272": pyramidnet272,
+    "shake_resnet26_2x96d": shake_resnet26_2x96d
 }
 
 
@@ -38,7 +49,7 @@ class CIFAR10_Models(pl.LightningModule):
     """
     def __init__(self,hparams):
         super().__init__()
-        self.hparams = hparams
+        self.hparams.update(hparams)
     def forward(x):    
         raise NotImplementedError
     def training_step():

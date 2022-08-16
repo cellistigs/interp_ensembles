@@ -21,3 +21,5 @@ tests/test_mats/*
 *.swp
 scripts/outputs/*
 scripts/paperfigs/outputs/*
+scripts/multirun/*
+scripts/.ipynb_checkpoints/*
