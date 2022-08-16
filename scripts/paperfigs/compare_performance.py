@@ -14,11 +14,11 @@ import os
 from interpensembles.metrics import NLLData,BrierScoreData
 
 here = os.path.dirname(os.path.abspath(__file__))
-plt.style.use(os.path.join(here,"../../etc/config/geoff_stylesheet.mplstyle"))
+plt.style.use(os.path.join(here,"../../etc/config/stylesheet.mplstyle"))
 results = os.path.join(here,"../../results/")
 ims = os.path.join(here,"../../images/performance_comp")
 
-@hydra.main(config_path = "compare_performance_configs/",config_name ="test")
+@hydra.main(config_path = "compare_performance_configs",config_name ="test")
 def main(args):
     """Calculates the per-datapoint metrics for two different models, and plots them against each other. 
     Optionally, can include a base model which we use as a baseline- calculate increase or decrease in metric performance relative to this base model. 
@@ -69,6 +69,7 @@ def main(args):
         ax[di].plot(np.linspace(-10,10),np.linspace(-10,10),alpha = 0.2,linestyle = "--")
         idx = basedata[di].argsort()
         scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
+        #scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "winter",c=basedata[di][idx],label = data,s=1)
         fig.colorbar(scatterval,ax = ax[di])
 
         #ax[di].scatter(datadict[0],datadict[1],marker = markers[di],cmap = "plasma",label = data,s=1)
@@ -158,8 +159,9 @@ def get_metrics_outputs(stubname,metric,data):
         labels_onehot[np.arange(len(labels)),labels] = 1
         return np.sum((preds-labels_onehot)**2,axis = 1)
     NLL = lambda preds,labels: -np.log(preds[np.arange(len(labels)),labels])
+    ## also compute accuracy (outputs scalar)
     Acc = lambda preds, labels: np.sum(np.argmax(preds,axis =1) ==labels)/len(labels)
-    func = {"Likelihood":NLL,"BrierScore":BrierScore,"Confidence":Confidence}
+    func = {"Likelihood":NLL,"BrierScore":BrierScore,"Confidence":Confidence,"Accuracy":Acc}
 
     ## get name of data and target: 
     dataname = stubname+"{}preds.npy".format(data)
