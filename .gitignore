@@ -7,7 +7,6 @@ images/*
 */*/__pycache__/*
 */*/*/__pycache__/*
 src/PyTorch_CIFAR10/*
-src/PyTorch_CIFAR10/cifar10_models/*
 src/interpensembles/cifar-10-batches-py/*
 src/interpensembles/cifar-10-python.tar.gz
 src/interpensembles.egg-info/*
