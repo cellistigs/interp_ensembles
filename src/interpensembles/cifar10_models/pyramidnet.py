@@ -30,12 +30,12 @@ class ShakeDropFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, training=True, p_drop=0.5, alpha_range=[-1, 1]):
         if training:
-            #PL edits gate = torch.cuda.FloatTensor([0]).bernoulli_(1 - p_drop)
-            gate = torch.Tensor([0]).bernoulli_(1 - p_drop)
+            gate = torch.cuda.FloatTensor([0]).bernoulli_(1 - p_drop)
+            #gate = torch.Tensor([0]).bernoulli_(1 - p_drop)
             ctx.save_for_backward(gate)
             if gate.item() == 0:
-                #PL edits alpha = torch.cuda.FloatTensor(x.size(0)).uniform_(*alpha_range)
-                alpha = torch.Tensor(x.size(0)).uniform_(*alpha_range)
+                alpha = torch.cuda.FloatTensor(x.size(0)).uniform_(*alpha_range)
+                #alpha = torch.Tensor(x.size(0)).uniform_(*alpha_range)
                 alpha = alpha.view(alpha.size(0), 1, 1, 1).expand_as(x)
                 return alpha * x
             else:
@@ -47,8 +47,8 @@ class ShakeDropFunction(torch.autograd.Function):
     def backward(ctx, grad_output):
         gate = ctx.saved_tensors[0]
         if gate.item() == 0:
-            # PL edits beta = torch.cuda.FloatTensor(grad_output.size(0)).uniform_(0, 1)
-            beta = torch.Tensor(grad_output.size(0)).uniform_(0, 1)
+            beta = torch.cuda.FloatTensor(grad_output.size(0)).uniform_(0, 1)
+            #beta = torch.Tensor(grad_output.size(0)).uniform_(0, 1)
             beta = beta.view(beta.size(0), 1, 1, 1).expand_as(grad_output)
             # beta = beta.reshape(beta.size(0), 1, 1, 1).expand_as(grad_output)
             beta = Variable(beta)
@@ -115,13 +115,13 @@ class BasicBlock(nn.Module):
         if residual_channel != shortcut_channel:
             padding = torch.autograd.Variable(
                 # w/ pytorch lightning, shouldn't need this.    
-                #torch.cuda.FloatTensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
-                #                           featuremap_size[1]).fill_(0))
-                torch.Tensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
-                                            featuremap_size[1]).fill_(0))
-            out += torch.cat((shortcut, padding), 1)
+                torch.cuda.FloatTensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
+                                           featuremap_size[1]).fill_(0))
+                #torch.Tensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
+                #                            featuremap_size[1]).fill_(0))
+            out = out+ torch.cat((shortcut, padding), 1)
         else:
-            out += shortcut
+            out = out+shortcut
 
         return out
 
@@ -174,11 +174,10 @@ class Bottleneck(nn.Module):
 
         if residual_channel != shortcut_channel:
             padding = torch.autograd.Variable(
-                # w/ pytorch lightning, shouldn't need this.    
-                #torch.cuda.FloatTensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
-                #                           featuremap_size[1]).fill_(0))
-                torch.Tensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
-                                            featuremap_size[1]).fill_(0))
+                torch.cuda.FloatTensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
+                                           featuremap_size[1]).fill_(0))
+                #torch.Tensor(batch_size, residual_channel - shortcut_channel, featuremap_size[0],
+                #                            featuremap_size[1]).fill_(0))
 
             # for summary parameters and FLOPs
             #padding = torch.autograd.Variable(
@@ -363,6 +362,10 @@ def pyramidnet164(bottleneck=True, **kwargs):
 def pyramidnet272(bottleneck=True, **kwargs):
     """PyramidNet272 for CIFAR and SVHN"""
     return PyramidNet(bottleneck=bottleneck, depth=272, alpha=200, **kwargs)
+
+def pyramidnet110(bottleneck=False,**kwargs):
+    """PyramindNet (No bottlenecks)"""
+    return PyramidNet(bottleneck=bottleneck, depth=110, alpha=270, **kwargs)
 
 
 if __name__ == "__main__":

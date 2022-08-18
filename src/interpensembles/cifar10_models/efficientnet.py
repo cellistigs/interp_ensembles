@@ -378,6 +378,9 @@ class efficientnet_b2(EfficientNet):
     def __init__(self,**kwargs):
         super().__init__(arch="b2",**kwargs)
 
+class efficientnet_b3(EfficientNet):
+    def __init__(self,**kwargs):
+        super().__init__(arch="b3",**kwargs)
 if __name__ == "__main__":
     '''
     import os
