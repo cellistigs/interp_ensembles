@@ -39,7 +39,7 @@ class BrierScoreData(object):
         target_onehot = np.zeros(prob.shape)
         target_onehot[np.arange(len(target)),target] = 1 ## onehot encoding. 
         deviance = prob-target_onehot
-        return np.linalg.norm(deviance,axis = 1)
+        return np.sum(deviance**2,axis = 1)
 
 class VarianceData(object):
     """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
