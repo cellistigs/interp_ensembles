@@ -7,6 +7,7 @@ corruption: null
 deterministic: 0
 seed: null  
 test_phase: 0   
+random_eval: 0
 dev: 0  
 logger: "tensorboard"  
 checkpoint: null  
@@ -15,7 +16,7 @@ nb_models: 4
 module: base  
 
 # Trainer arguments 
-classifier: efficientnet_b0  
+classifier: efficientnet_b3  
 gamma: 1 ## weight of dkl argument. 
 embedding_dim: 25 ## attention embedding
 start_attention: 10 ## epoch on which to start attentio
@@ -24,10 +25,11 @@ pretrained-path: null ## path to pretrained model
 precision: 32  
 batch_size: 256  
 max_epochs: 100  
+warmup_epochs: 30  
 num_workers: 8  
 gpu_id: "0"  
-learning_rate: 1e-1 # 1e-2 
-weight_decay: 1e-4 # 1e-2 
+learning_rate: 1e-1 
+weight_decay: 1e-4 
 test_set: "CIFAR10"  
 lamb: 0.5  
 scheduler: cosine  
