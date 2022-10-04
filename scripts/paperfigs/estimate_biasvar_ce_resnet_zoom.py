@@ -99,7 +99,7 @@ def main(args):
     ax.set_xlim([0,0.1])
     ax.set_box_aspect(1)
     ax.set_xlabel("CE Jensen gap (pred. diversity)")
-    ax.set_ylabel("Avg. single model performance (CE)")
+    ax.set_ylabel("Avg. single model loss (CE)")
     #fig.colorbar(sc,ax = ax)
     ax2 = fig.add_axes([0.85, 0.1, 0.03, 0.8])
     ## cmap stuff 

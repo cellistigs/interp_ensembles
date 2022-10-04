@@ -107,7 +107,9 @@ def get_arrays_toplot(models):
 
 @hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_miller")
 def main(args):
+    all_biasvar_arrays = []
     biasvar_array,biasvarperf_array = get_arrays_toplot(args.models)
+    all_biasvar_arrays.append(biasvar_array)
 
     fig,ax = plt.subplots(figsize=(9,8))
     for seed in range(10):
@@ -117,6 +119,8 @@ def main(args):
                     "heterogeneous",alpha =0.5)
         else:    
             ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=10,alpha = 0.5)
+        all_biasvar_arrays.append(biasvar_array_permed)    
+
     defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
     #plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
     if args.get("colormap",False) is True: ## plot assuming scatters are ordered
@@ -125,6 +129,12 @@ def main(args):
     else:    
         ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=20,label = "homogeneous")
     #ax.plot(np.linspace(0,0.5,100),np.linspace(0,0.5,100),label="perfect ensemble")
+    all_diversity = np.concatenate(all_biasvar_arrays,axis = 0)    
+    nans = np.unique(np.where(~np.isfinite(all_diversity))[0])
+    diversity_finite = np.delete(all_diversity,nans,0)
+    z = np.polyfit(diversity_finite[:,1],diversity_finite[:,0],1)
+    p = np.poly1d(z)
+    ax.plot(diversity_finite[:,1],p(diversity_finite[:,1]),color = "black",label = "linear fit")
     line = np.linspace(0,100,100)
     #for i in range(19):
     #    ax.plot(line,line+i*0.05-0.45,alpha = 0.1,color = "black")

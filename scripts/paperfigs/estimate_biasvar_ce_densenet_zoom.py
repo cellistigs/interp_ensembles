@@ -135,7 +135,7 @@ def main(args):
     #ax.set_yscale('log')
     #ax.set_xscale('log')
     ax.set_xlabel("CE Jensen gap (pred. diversity)")
-    ax.set_ylabel("Avg. single model performance (CE)")
+    ax.set_ylabel("Avg. single model loss (CE)")
     #plt.legend()
     ax.set_ylim([0.35,0.45])
     ax.set_xlim([0,0.1])

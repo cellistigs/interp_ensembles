@@ -133,7 +133,7 @@ def main(args):
     ax.set_xlim([0,0.3])
     ax.set_ylim([0.1,0.4])
     ax.set_xlabel("CE Jensen gap (pred. diversity)")
-    ax.set_ylabel("Avg. single model performance (CE)")
+    ax.set_ylabel("Avg. single model loss (CE)")
     plt.legend()
     fig.savefig("{}_biasvar_ce.pdf".format(args.title))
     plt.show()
