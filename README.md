@@ -32,7 +32,7 @@ pip install -e ./src
 
 
 ## Figures 1 and 2 setup:
-To regenerate Figures 1 and 2, please use the repo linked as "compare_performance" in the manuscript.
+To regenerate Figures 1 and 2, please use the "compare_performance" branch of this repository.
 
 ### Retrieving data
 In order to replicate figures, you will need to load the datasets given at [this zenodo link](https://doi.org/10.5281/zenodo.6582653). Please add upload the contents into the "results" directory of this repo. 
@@ -62,7 +62,7 @@ python compare_performance.py "+cinic10_bs@=config.yaml"
 ```
 
 ## Figure 4 setup:
-To regenerate Figure 4, please use the repo linked as "imagenet_pl" in the manuscript
+To regenerate Figure 4, please navigate to the "imagenet_pl" branch. 
 
 ### Retrieving data
 Please see the instructions in `etc/ekb/README.md` on how to download and prepare data. 
