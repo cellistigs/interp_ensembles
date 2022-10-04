@@ -1,6 +1,6 @@
 # Reconsidering Deep Ensembles 
 
-This repository contains code for the manuscript "Reconsidering Deep Ensembles". Here we provide information for how to regenerate figures 1, 2 and 4 of the corresponding paper. 
+This repository contains code for the manuscript "Deep Ensemble Work, But Are They Necessary?". Here we provide information for how to regenerate figures 1, 2 and 4 of the corresponding paper. 
 
 ## Installation 
 We highly recommend usage of a GPU backed machine in order to reproduce the figures here. CPU only based usage is not tested.  
