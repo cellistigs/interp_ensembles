@@ -97,6 +97,17 @@ class EnsembleModel(object):
         bsd = BrierScoreData()
         return bsd.brierscore_multi(self.probs(), self.labels())
 
+    def get_variance_vec(self):
+        """Get variance across ensemble members. Estimate sample variance across the dataset with unbiased estimate, not biased.  
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
+        var = np.var(array_probs,axis = 0,ddof = 1)
+        return np.sum(var,axis = -1)
+
     def get_variance(self):
         """Get variance across ensemble members. Estimate sample variance across the dataset with unbiased estimate, not biased.  
         """
@@ -120,6 +131,52 @@ class EnsembleModel(object):
         model_bs = np.array([bsd.brierscore_multi_vec(m["preds"],m["labels"]) for m in self.models.values()])
         return np.mean(np.mean(model_bs,axis = 0))
 
+    def get_avg_nll(self):
+        """estimate the average NLL across the ensemble. 
+
+        """
+        all_nll = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            targets = modeldata["labels"]
+            all_nll.append(-np.log(probs[np.arange(len(targets)),targets]))
+
+        array_nll = np.stack(all_nll,axis = 0) # (models,samples)
+        return np.mean(np.mean(array_nll,axis = 0))
+
+    def get_nll_div(self):    
+        """estimate diversity between ensembles members corresponding to the jensen gap between ensemble and single
+        model nll
+
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            targets = modeldata["labels"]
+            all_probs.append(probs[np.arange(len(targets)),targets])
+            
+
+        array_probs = np.stack(all_probs,axis = 0) # (models,samples)
+        norm_term = np.log(np.mean(array_probs,axis = 0))
+        diversity = np.mean(-np.mean(np.log(array_probs),axis = 0)+norm_term)
+        return diversity 
+
+    def get_pairwise_corr(self):
+        """Get pairwise correlation between ensemble members:
+
+        """
+        all_probs = []
+        M = len(self.models)
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            targets = modeldata["labels"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
+        array_pred_labels = np.argmax(array_probs,axis = -1) # (models,samples)
+        compare = array_pred_labels[:,None,:] == array_pred_labels # (models,models,samples)
+        means = np.mean(compare.astype(int),axis = -1) ## (models,models)
+        mean_means = np.sum(np.tril(means,k=-1))/((M*(M-1))/2) ## (average across all pairs)
+        return 1-mean_means
 
 class Model(object):
     def __init__(self,  modelprefix, data):

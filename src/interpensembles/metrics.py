@@ -149,6 +149,19 @@ class NLLData(object):
             nll= nll/len(logprobs)
         return nll
 
+    def nll_vec(self,prob,target):
+        """NLL contribution for each individual datapoint. 
+
+        """
+        probs = prob[np.arange(len(target)),target]
+        logprobs = np.log(probs)
+        return logprobs
+
+    def nll_diversity(self,prob,target):    
+        """Sample estimate based calculation of NLL 
+
+        """
+
 class CalibrationData(object):
     """Initializes an object to bin predictions that are fed to it in batches.  
 
