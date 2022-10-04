@@ -1,0 +1,16 @@
+model1:
+- synth_ensemble_0_base_resnet18_11_15_
+model2:
+- synth_ensemble_0_vgg11_bn_11_16_
+metric: Likelihood
+oodname: ood_
+basemodel:
+- robust_results11-15-21_02:46.11_base_resnet18
+thresh_score: 0.01
+dumpname: ens_ens
+select: 0
+metricshowname: Likelihood
+indshowname: CIFAR10
+oodshowname: CIFAR10.1
+model1showname: Ensemble ResNet 18 - Single ResNet 18
+model2showname: Ensemble VGG-11 - Single ResNet 18

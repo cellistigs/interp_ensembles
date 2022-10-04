@@ -1,0 +1,31 @@
+gpu: false
+nclasses: 10  
+ind_softmax: false
+ind_stubs:
+- robust_results12-07-21_21:54.17_base_wideresnet28_10
+- robust_results12-07-21_21:55.20_base_wideresnet28_10
+- robust_results12-07-21_21:56.19_base_wideresnet28_10
+- robust_results12-07-21_21:57.14_base_wideresnet28_10
+- robust_results12-07-21_21:58.22_base_wideresnet28_10
+ood_softmax: false
+ood_stubs:
+- robust_results12-13-21_20:45.11_base_wideresnet28_10
+- robust_results12-14-21_00:49.36_base_wideresnet28_10
+- robust_results12-14-21_04:53.58_base_wideresnet28_10
+- robust_results12-14-21_08:58.12_base_wideresnet28_10
+- robust_results12-14-21_13:02.36_base_wideresnet28_10
+ood_suffix: ood_cinic_preds.npy
+ind_name: "CIFAR10 (InD)"  
+## Run significance tests?
+signiftest: false  
+## Plot?    
+plot: True
+###  Plotting params: 
+xrange_cond_expec: ## xrange over which to plot conditional expectation.   
+- 0. 
+- 0.9 ## plot only to where this is defined.   
+xrange_cond: ## xrange over which to plot conditional distribution.   
+- 0. 
+- 1. ## plot only to where this is defined.   
+varlim: 10 ## y range over which t o plot marginal variance.  
+uncertainty: Var
