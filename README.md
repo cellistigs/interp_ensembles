@@ -1,4 +1,4 @@
-# Reconsidering Deep Ensembles 
+# Deep Ensembles Work, But Are They Necessary? 
 
 This repository contains code for the manuscript "Deep Ensemble Work, But Are They Necessary?". Here we provide information for how to regenerate figures 1, 2 and 4 of the corresponding paper. The code for training models draws significantly from [this](https://github.com/huyvnphan/PyTorch_CIFAR10) pre-existing repository. 
 
