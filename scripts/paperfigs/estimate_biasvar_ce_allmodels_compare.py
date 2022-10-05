@@ -5,7 +5,7 @@ import numpy as np
 from interpensembles.predictions import EnsembleModel 
 
 import os 
-here = os.path.abspath(os.path.dirname(__file__))
+here = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -33,8 +33,8 @@ def get_heterogeneous_biasvar(models,seed = 0):
     """
 
     """
-    all_biasvar = []
-    all_biasvarperf = []
+    all_divvar = []
+    all_divvarperf = []
     all_models = []
     for arch,modelinfo in models.items():
         for mi,modelpath in enumerate(modelinfo.modelnames):  
@@ -60,14 +60,16 @@ def get_heterogeneous_biasvar(models,seed = 0):
         [ens.register(os.path.join(here,m["modelpath"]),i,None,os.path.join(here,m["labelpath"]),logits= m["logits"],npz_flag = m["npz_flag"]) for i,m in enumerate(chunk)]
         all_ensembles.append(ens)
         permed = permed[ensemble_size:]
-        bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
-        print("Permuted {}: Bias: {}, Variance: {}, Performance: {}".format(name,bias,var,perf))
-        all_biasvar.append([bias,var])
-        all_biasvarperf.append([perf,bias/var])
+        #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
+        pairwise_div = ens.get_pairwise_corr()
+        bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
+        print("Permuted {}: div: {}, Variance: {}, Performance: {}".format(name,pairwise_div,var,perf))
+        all_divvar.append([pairwise_div,var])
+        all_divvarperf.append([perf,bias/var])
     
-    biasvar_array = np.array(all_biasvar)
-    biasvarperf_array = np.array(all_biasvarperf)
-    return biasvar_array,biasvarperf_array
+    divvar_array = np.array(all_divvar)
+    divvarperf_array = np.array(all_divvarperf)
+    return divvar_array,divvarperf_array
 
 # get bias, variance, and performance to plot
 def get_arrays_toplot(models):
@@ -75,8 +77,8 @@ def get_arrays_toplot(models):
     Takes as argument a dictionary of models: keys giving model names, values are dictionaries with paths to individual entries. 
     :param models: names of individual models. 
     """
-    all_biasvar = []
-    all_biasvarperf = []
+    all_divvar = []
+    all_divvarperf = []
     for modelname,model in models.items():
         ens = EnsembleModel(modelname,"ind")
         kwargs = {}
@@ -91,42 +93,61 @@ def get_arrays_toplot(models):
  
         print(model.modelnames,model.labelpaths)
         [ens.register(os.path.join(here,m),i,None,os.path.join(here,l),**kwargs) for i,(m,l) in  enumerate(zip(model.modelnames,model.labelpaths))]
-        bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
-        print("{}: Bias: {}, Variance: {}, Performance: {}".format(modelname,bias,var,perf))
-        all_biasvar.append([bias,var])
-        all_biasvarperf.append([perf,bias/var])
+        #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
+        pairwise_div = ens.get_pairwise_corr()
+        bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
+        print("{}: pairwise_div: {}, Variance: {}, Performance: {}".format(modelname,pairwise_div,var,perf))
+        all_divvar.append([pairwise_div,var])
+        all_divvarperf.append([perf,bias/var])
     
-    biasvar_array = np.array(all_biasvar)
-    biasvarperf_array = np.array(all_biasvarperf)
-    return biasvar_array,biasvarperf_array
+    divvar_array = np.array(all_divvar)
+    divvarperf_array = np.array(all_divvarperf)
+    return divvar_array,divvarperf_array
 
 
-@hydra.main(config_path = "script_configs/biasvar",config_name = "default")
+@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_miller")
 def main(args):
+    all_biasvar_arrays = []
     biasvar_array,biasvarperf_array = get_arrays_toplot(args.models)
+    all_biasvar_arrays.append(biasvar_array)
 
-    fig,ax = plt.subplots(figsize=(7,7))
+    fig,ax = plt.subplots(figsize=(9,8))
     for seed in range(10):
         biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed)
         if seed == 0:
-            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1,label = "heterogeneous")
+            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=10,label =
+                    "heterogeneous",alpha =0.5)
         else:    
-            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1)
+            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=10,alpha = 0.5)
+        all_biasvar_arrays.append(biasvar_array_permed)    
+
     defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
-    plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
+    #plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
     if args.get("colormap",False) is True: ## plot assuming scatters are ordered
         colors = cm.rainbow(np.linspace(0, 1, len(biasvar_array)))
-        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=2,label = "homogeneous",c= colors)
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=20,c= colors,label="homogeneous")
     else:    
-        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=1,label = "homogeneous")
-    ax.plot(np.linspace(0,args.line_extent,100),np.linspace(0,args.line_extent,100),label="identity")
-    ax.set_title(args.title)
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=20,label = "homogeneous")
+    #ax.plot(np.linspace(0,0.5,100),np.linspace(0,0.5,100),label="perfect ensemble")
+    all_diversity = np.concatenate(all_biasvar_arrays,axis = 0)    
+    nans = np.unique(np.where(~np.isfinite(all_diversity))[0])
+    diversity_finite = np.delete(all_diversity,nans,0)
+    z = np.polyfit(diversity_finite[:,1],diversity_finite[:,0],1)
+    p = np.poly1d(z)
+    ax.plot(diversity_finite[:,1],p(diversity_finite[:,1]),color = "black",label = "linear fit")
+    line = np.linspace(0,100,100)
+    #for i in range(19):
+    #    ax.plot(line,line+i*0.05-0.45,alpha = 0.1,color = "black")
+    #ax.plot(line,line+0.108,"--",color = "black",label = "best ensemble",alpha = 0.5)    
+    ax.set_title("CIFAR 10: Comparing predictive diversity")
     #ax.set_yscale('log')
     #ax.set_xscale('log')
-    ax.set_xlabel("Variance")
-    ax.set_ylabel("Avg. Single Model")
+    ax.set_xlim([0,0.3])
+    ax.set_ylim([0,0.3])
+    ax.set_xlabel("CE Jensen gap (pred. diversity)")
+    ax.set_ylabel("1 - Avg. pairwise correlation (pred. diversity)")
     plt.legend()
-    fig.savefig("{}_biasvar.pdf".format(args.title))
+    fig.savefig("{}_divvar_ce.pdf".format(args.title))
     plt.show()
     #fig,ax = plt.subplots()
     #ax.scatter(biasvarperf_array[:,0],biasvarperf_array[:,1],s=0.5)

@@ -12,9 +12,11 @@ from .cifar10_models.mobilenetv2 import mobilenet_v2
 from .cifar10_models.resnet import resnet18, resnet34, resnet50, wideresnet18, wideresnet18_4, widesubresnet18,wideresnet18_4_grouplinear
 from .cifar10_models.wideresnet_28 import wideresnet28_10
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
-from .cifar10_models.efficientnet import efficientnet_b0, efficientnet_b1, efficientnet_b2
-from .cifar10_models.pyramidnet import pyramidnet272
+from .cifar10_models.efficientnet import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3
+from .cifar10_models.pyramidnet import pyramidnet272,pyramidnet164,pyramidnet110
 from .cifar10_models.shake_shake import shake_resnet26_2x96d
+from .cifar10_models.resnexst import resnexst50_4x16d_cifar
+from .cifar10_models.senet import se_resnet164
 from .schduler import WarmupCosineLR
 
 all_classifiers = {
@@ -38,8 +40,13 @@ all_classifiers = {
     "efficientnet_b0": efficientnet_b0,
     "efficientnet_b1": efficientnet_b1,
     "efficientnet_b2": efficientnet_b2,
+    "efficientnet_b3": efficientnet_b3,
     "pyramidnet_272": pyramidnet272,
-    "shake_resnet26_2x96d": shake_resnet26_2x96d
+    "pyramidnet_164": pyramidnet164,
+    "pyramidnet_110": pyramidnet110,
+    "shake_resnet26_2x96d": shake_resnet26_2x96d,
+    "se_resnet164": se_resnet164,
+    "resnexst50_4x16d_cifar": resnexst50_4x16d_cifar 
 }
 
 
@@ -76,7 +83,7 @@ class CIFAR10_Models(pl.LightningModule):
         if self.hparams.scheduler in [None,"cosine"]: 
             scheduler = {
                 "scheduler": WarmupCosineLR(
-                    optimizer, warmup_epochs=total_steps*0.3, max_epochs=total_steps
+                    optimizer, warmup_epochs=self.hparams.warmup_epochs, max_epochs=total_steps
                 ),
                 "interval": "step",
                 "name": "learning_rate",

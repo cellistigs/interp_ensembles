@@ -5,7 +5,7 @@ import numpy as np
 from interpensembles.predictions import EnsembleModel 
 
 import os 
-here = os.path.abspath(os.path.dirname(__file__))
+here = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -101,7 +101,7 @@ def get_arrays_toplot(models):
     return biasvar_array,biasvarperf_array
 
 
-@hydra.main(config_path = "script_configs/biasvar",config_name = "default")
+@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_miller")
 def main(args):
     biasvar_array,biasvarperf_array = get_arrays_toplot(args.models)
 
@@ -109,20 +109,26 @@ def main(args):
     for seed in range(10):
         biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed)
         if seed == 0:
-            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1,label = "heterogeneous")
+            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1,label =
+                    "heterogeneous",alpha =0.5)
         else:    
-            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1)
+            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1,alpha = 0.5)
     defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
-    plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
+    #plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
     if args.get("colormap",False) is True: ## plot assuming scatters are ordered
         colors = cm.rainbow(np.linspace(0, 1, len(biasvar_array)))
-        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=2,label = "homogeneous",c= colors)
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=10,c= colors,label="homogeneous")
     else:    
-        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=1,label = "homogeneous")
-    ax.plot(np.linspace(0,args.line_extent,100),np.linspace(0,args.line_extent,100),label="identity")
-    ax.set_title(args.title)
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=10,label = "homogeneous")
+    ax.plot(np.linspace(0,args.line_extent,100),np.linspace(0,args.line_extent,100),label="perfect ensemble")
+    line = np.linspace(0,100,100)
+    for i in range(15):
+        ax.plot(line,line+i*0.05-0.35,alpha = 0.1,color = "black")
+    ax.set_title("CIFAR 10: All Standard Models")
     #ax.set_yscale('log')
     #ax.set_xscale('log')
+    ax.set_xlim([0,0.3])
+    ax.set_ylim([0.05,0.35])
     ax.set_xlabel("Variance")
     ax.set_ylabel("Avg. Single Model")
     plt.legend()

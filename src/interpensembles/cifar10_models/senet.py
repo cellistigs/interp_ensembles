@@ -698,8 +698,8 @@ def se_resnet110(num_classes=1000, pretrained='imagenet', **kwargs):
 
 
 # Note: This is a model for CIFAR dataset
-def se_resnet164(num_classes=1000, pretrained='imagenet', **kwargs):
-	model = SENet('se_resnet164', SEResNetBottleneck, [18, 18, 18, 18], groups=1, reduction=16,
+def se_resnet164(num_classes=10, pretrained=None, **kwargs):
+	model = SENet('se_resnet164', SEResNetBottleneck, [18, 18, 18, 18], groups=1, reduction=16, dataset = "cifar10",
 					dropout_p=None, inplanes=64, input_3x3=True,
 					downsample_kernel_size=1, downsample_padding=0,
 					num_classes=num_classes, **kwargs)

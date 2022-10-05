@@ -5,7 +5,7 @@ import numpy as np
 from interpensembles.predictions import EnsembleModel 
 
 import os 
-here = os.path.abspath(os.path.dirname(__file__))
+here = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -93,34 +93,40 @@ def get_arrays_toplot(models):
         [ens.register(os.path.join(here,m),i,None,os.path.join(here,l),**kwargs) for i,(m,l) in  enumerate(zip(model.modelnames,model.labelpaths))]
         bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
         print("{}: Bias: {}, Variance: {}, Performance: {}".format(modelname,bias,var,perf))
-        all_biasvar.append([bias,var])
-        all_biasvarperf.append([perf,bias/var])
+        if modelname in ["DKL_gamma_1","ResNet18"]:
+            base_biasvar = [bias,var]
+        else:    
+            all_biasvar.append([bias,var])
+            all_biasvarperf.append([perf,bias/var])
     
     biasvar_array = np.array(all_biasvar)
     biasvarperf_array = np.array(all_biasvarperf)
-    return biasvar_array,biasvarperf_array
+    return biasvar_array,biasvarperf_array,base_biasvar
 
 
-@hydra.main(config_path = "script_configs/biasvar",config_name = "default")
+@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_dkl_densenet")
 def main(args):
-    biasvar_array,biasvarperf_array = get_arrays_toplot(args.models)
+    biasvar_array,biasvarperf_array,base_biasvar = get_arrays_toplot(args.models)
 
     fig,ax = plt.subplots(figsize=(7,7))
-    for seed in range(10):
-        biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed)
-        if seed == 0:
-            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1,label = "heterogeneous")
-        else:    
-            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1)
-    defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
-    plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
+    #for seed in range(10):
+    #    biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed)
+    #    if seed == 0:
+    #        ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1,label = "heterogeneous")
+    #    else:    
+    #        ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=1)
+    #defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
+    #plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
     if args.get("colormap",False) is True: ## plot assuming scatters are ordered
-        colors = cm.rainbow(np.linspace(0, 1, len(biasvar_array)))
-        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=2,label = "homogeneous",c= colors)
+        colors = np.concatenate([cm.coolwarm(np.linspace(0, 0.5, 6)[:-1]) ,
+            cm.coolwarm(np.linspace(0.5,1,15)[1:])])
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=30,c=
+                colors,edgecolors="black",linewidths=0.5)
     else:    
-        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=1,label = "homogeneous")
-    ax.plot(np.linspace(0,args.line_extent,100),np.linspace(0,args.line_extent,100),label="identity")
-    ax.set_title(args.title)
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=30,edgecolors="black",linewidths=0.5)
+    ax.plot(np.linspace(0,args.line_extent,100),np.linspace(0,args.line_extent,100),label="ensemble-perfectable")
+    ax.scatter(base_biasvar[1],base_biasvar[0],marker = "x",color = "black",s=30,label = "$\gamma=1$")
+    ax.set_title("CIFAR 10: DenseNet121 $\gamma$ models")
     #ax.set_yscale('log')
     #ax.set_xscale('log')
     ax.set_xlabel("Variance")

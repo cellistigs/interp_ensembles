@@ -464,6 +464,15 @@ def resnexst50_4x16d(num_classes=1000, pretrained=None, **kwargs):
 		raise NotImplementedError
 	return model
 
+def resnexst50_4x16d_cifar(num_classes=10, pretrained=None, **kwargs):
+	model = ResNeXSt('resnexst50_4x16d', ResNeXStBottleneck, [3, 4, 6, 3],
+					radix=2, base_width=16, groups=4, dataset = "cifar10",
+					dropout_p=0.0, num_classes=num_classes,
+					avd=True, avd_first=False, **kwargs)
+	if pretrained is not None:
+		raise NotImplementedError
+	return model
+
 
 def resnexst50_8x16d(num_classes=1000, pretrained=None, **kwargs):
 	model = ResNeXSt('resnexst50_8x16d', ResNeXStBottleneck, [3, 4, 6, 3],
