@@ -27,6 +27,7 @@ def main(args):
     :param args: an argument parser object with the fields: "model1", "model2", "metric", "oodname" and optionally "basemodel". 
     """
     all_ordereddata = {"ind_":None}
+    accuracies = {}
     basedata = []
     all_ordereddata[args.oodname] = None ## create ood name. 
     maxlen = 10000
@@ -53,6 +54,13 @@ def main(args):
         #ordered = get_ordered_metricvals(model1_metrics,model2_metrics)    
         ordered = np.stack([model1_metrics,model2_metrics],axis = 0)
         all_ordereddata[data] = ordered
+        #3. accuracies
+        all_model1_accs = [get_metrics_outputs(m1,"Accuracy",data) for m1 in args.model1]
+        all_model2_accs = [get_metrics_outputs(m2,"Accuracy",data) for m2 in args.model2]
+        accuracies["model1"] = {mi:all_model1_accs[i] for i,mi in enumerate(args.model1)}
+        accuracies["model2"] = {mi:all_model2_accs[i] for i,mi in enumerate(args.model2)}
+        with open("{}_accuracies.json".format(data),"w") as f:
+            json.dump(accuracies,f,indent =4)
     
     #3. plotting: 
     dataset = [args.indshowname,args.oodshowname]
@@ -68,7 +76,8 @@ def main(args):
         #idx = z.argsort()
         ax[di].plot(np.linspace(-10,10),np.linspace(-10,10),alpha = 0.2,linestyle = "--")
         idx = basedata[di].argsort()
-        scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "winter",c=basedata[di][idx],label = data,s=1)
+        scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "plasma",c=basedata[di][idx],label = data,s=1)
+        #scatterval = ax[di].scatter(datadict[0][idx],datadict[1][idx],marker = markers[di],cmap = "winter",c=basedata[di][idx],label = data,s=1)
         fig.colorbar(scatterval,ax = ax[di])
 
         #ax[di].scatter(datadict[0],datadict[1],marker = markers[di],cmap = "plasma",label = data,s=1)

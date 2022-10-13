@@ -204,20 +204,20 @@ def main(cfg):
 
     ## Cell 2: formatting data
 
-    ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
-    ind_indices =  torch.randperm(len(ind_probs))[:10000]
+    #ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"),allow_pickle=True)).long()
+    ind_indices =  torch.randperm(len(ind_probs))[:20000]
 
-    if cfg.ood_softmax is False:
-        ood_probs = torch.stack([
-            torch.tensor(np.load(ood_prob_path)).float()
-            for ood_prob_path in ood_prob_paths
-        ], dim=-2).softmax(dim=-1)
-    else:    
-        ood_probs = torch.stack([
-            torch.tensor(np.load(ood_prob_path)).float()
-            for ood_prob_path in ood_prob_paths
-        ], dim=-2)
-    ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
+    #if cfg.ood_softmax is False:
+    #    ood_probs = torch.stack([
+    #        torch.tensor(np.load(ood_prob_path)).float()
+    #        for ood_prob_path in ood_prob_paths
+    #    ], dim=-2).softmax(dim=-1)
+    #else:    
+    #    ood_probs = torch.stack([
+    #        torch.tensor(np.load(ood_prob_path)).float()
+    #        for ood_prob_path in ood_prob_paths
+    #    ], dim=-2)
+    ##ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     ood_indices =  torch.randperm(len(ood_probs))[:20000]
 
     ## Cell 3: 
@@ -324,7 +324,7 @@ def main(cfg):
             
             return cond_expec,cond_expec_xs
 
-        def dstat(sample1,sample2,nclasses,return_ce = False,xrange = xrange):
+        def dstat(sample1,sample2,nclasses,return_ce = False,xrange = cfg.xrange_cond_expec):
             """Takes a distance statistic measuring how much greater the ood sample is than the ind sample.  
 
             :param sample1: a tuple containing conditional expectation and variance
@@ -363,8 +363,7 @@ def main(cfg):
             return perm_s1,perm_s2
 
 
-        N = 5 
-        cfg.nclasses = 10
+        N = 1 
         sample1 = (ind_avg.double(), ind_div.double())
         sample2 = (ood_avg.double(), ood_div.double())
 
@@ -452,7 +451,7 @@ def main(cfg):
             levels=np.linspace(0., 10., 50),
         )
         ind_cond_ax.set(
-            xlim=(cfg.xrange_cond[0],cfg.xrange_cond[1]), ylim=(cfg.xrange_cond[0],1), xlabel="Avg. Uncertainty: "+r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            xlim=(cfg.xrange_cond[0],cfg.xrange_cond[1]), ylim=(cfg.xrange_cond[0],1), xlabel="Avg. Single Model\n Uncertainty: "+r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
             ylabel=r"{}".format(quantity_names[cfg.uncertainty]["div_quant"]), title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,cfg.ind_name)
         )
         fig.colorbar(f, ax=ind_cond_ax)
@@ -467,7 +466,7 @@ def main(cfg):
         )
         ood_cond_ax.set(
             xlim=(cfg.xrange_cond[0],cfg.xrange_cond[1]), ylim=(cfg.xrange_cond[0],1),
-            xlabel="Avg. Uncertainty: "+r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
+            xlabel="Avg. Single Model\n  Uncertainty: "+r"{}".format(quantity_names[cfg.uncertainty]["avg"]),
             #title=cfg.cond_title+"\n{}".format(div_names[cfg.ood_suffix]),
             title="Conditional {}. Dist.\n{}".format(cfg.uncertainty,div_names[cfg.ood_suffix]),
             ylabel=r"{}".format(quantity_names[cfg.uncertainty]["div_quant"]),
@@ -479,6 +478,7 @@ def main(cfg):
             [cond_exp_ax.plot(cond_expec_xs,ce,color = "black",alpha= 0.05) for ce in ces]
         cond_exp_ax.plot(cond_expec_xs, ind_cond_expec, label=cfg.ind_name)
         cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format(div_names[cfg.ood_suffix]))
+        #cond_exp_ax.plot(cond_expec_xs, ood_cond_expec, label="{}".format("ImageNet V2\n (OOD)"))
         cond_exp_ax.set(
             xlim=(cfg.xrange_cond_expec[0],cfg.xrange_cond_expec[1]),
             ylim=(cfg.xrange_cond_expec[0],cfg.xrange_cond_expec[1]),
