@@ -1,0 +1,36 @@
+# Program arguments: 
+data_dir: /home/ubuntu/cifar10_ood/data/ 
+ood_dataset: cifar10_1  
+version: v4 
+level: null  
+corruption: null
+deterministic: 0
+seed: null  
+test_phase: 0   
+random_eval: 0
+dev: 0  
+logger: "tensorboard"  
+checkpoint: null  
+softmax: 1  
+nb_models: 4  
+module: base  
+
+# Trainer arguments 
+classifier: narrowresnet10_16  
+gamma: 1 ## weight of dkl argument. 
+embedding_dim: 25 ## attention embedding
+start_attention: 10 ## epoch on which to start attentio
+pretrained: 0 ## if we use pretrained models or not. 
+pretrained-path: null ## path to pretrained model
+precision: 32  
+batch_size: 256  
+max_epochs: 100  
+warmup_epochs: 30  
+num_workers: 8  
+gpu_id: "0"  
+learning_rate: 1e-2 
+weight_decay: 1e-2
+test_set: "CIFAR10"  
+lamb: 0.5  
+scheduler: cosine  
+
