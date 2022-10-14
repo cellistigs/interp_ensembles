@@ -1,50 +1,77 @@
-# Project with Kelly and Geoff on investigating the effectiveness of ensembles compared to bigger models. 
+# Reconsidering Deep Ensembles 
 
-## Project structure: 
+This repository contains code for the manuscript "Reconsidering Deep Ensembles". Here we provide information for how to regenerate figures 1, 2 and 4 of the corresponding paper. 
 
-Please follow these guidelines when contributing to this repo. 
-- source code (like the ensemble and model class, or calculating bias and variance) goes in `src/interpensembles`. We assume users have installed this package. I will also attempt to write tests for all code that lives in `src`.
-- scripts (to generate plots, w/hardcoded references to datasets) live in `scripts` and import `interpensembles` as a package.
+## Installation 
+We highly recommend usage of a GPU backed machine in order to reproduce the figures here. CPU only based usage is not tested.  
 
-## Old project premise:
+You will need to install the dependencies found in the requirements.txt file in order to reproduce figures. We recommend doing so in a [conda](https://www.anaconda.com) virtual environment. Once you have installed conda, check your installation by running:
 
-We all love deep ensembles because they are great for out of distribution detection and covering a diverse set of solutions. However, these benefits, that are supposedly selectively targeted by ensembles (due to diversity among ensemble members, independent errors, etc) are also usually accompanied by an increase in performance on in-distribution data. Do we actually do better in a qualitatively different way when we ensemble, as opposed to when we just properly train a much larger model? 
+```
+conda list
+```
 
-We can map this out quantitatively: consider a plot of in distribution accuracy vs. out of distribution accuracy. Usually, in the literature there is a linear relation between the two (cite). Are we just pushing further up this 1-d relation when we ensemble, or are are we exploring a different part of the in-distribution/out-of-distribution space?  
+Then create a new environment as follows: 
 
-Likewise, there have been recent results showing that increasing capacity of CNNs can outperform an ensemble sometimes, and underperform other times (cite). What governs this tradeoff? 
+```
+conda create -n env_name python=3.7
+```
 
-## How do we probe this question? 
+Now move into the root directory of this repo:
+```
+cd /path/to/this/repo
+```
 
-Idea: consider a framework in which you have a model that is twice as wide as a standard model. This model actually has 4x the number of parameters of the narrow model: we can imagine assigning identical parameters to model <img src="https://render.githubusercontent.com/render/math?math=A"> and <img src="https://render.githubusercontent.com/render/math?math=B">, and for any group of connected parameters <img src="https://render.githubusercontent.com/render/math?math={1,2}">, there are connections  <img src="https://render.githubusercontent.com/render/math?math=A1>A2,B1>B2,A1>B2,B1>A2">.
-This model can simultaneously be considered as a single, big model of size 2x (<img src="https://render.githubusercontent.com/render/math?math=\phi(x)">), and four small models <img src="https://render.githubusercontent.com/render/math?math=\varphi_i(x)"> (straight connections, zigzag connections).
-It can also be *trained* in these two different ways. What happens if we write the prediction of this model as a convex combination of these, <img src="https://render.githubusercontent.com/render/math?math=\lambda\phi(x)+(1-\lambda)\sum_i\varphi_i(x)">? 
+Activate your new environment, install dependencies and python package: 
+```
+conda activate env_name
+conda install pip 
+pip install -r requirements.txt
+pip install -e ./src
+```
 
-We can train on this model either by choosing a deterministic lambda or by sampling one of the small models to recieve a gradient (in addition to? instead of?) the small model. This has a reparametrization-trick flavor. By doing so at different lambdas, we can determine examine how the in distribution and out of distribution accuracy changes a function of the number of parameters you are using. We can also repeat this at different model capacities: there should be different regimes for us to consider where ensembles do better or worse than a single model on any given dataset.    
 
-Pros: we can probably use similar hyperparameters, we know both ends of this spectrum work, and it would be interesting to see what performance looks like as a function of lambda no matter what the results are. 
+## Figures 1 and 2 setup:
+To regenerate Figures 1 and 2, please use the repo linked as "compare_performance" in the manuscript.
 
-Write down this ensembling thought too. 
+### Retrieving data
+In order to replicate figures, you will need to load the datasets given at [this zenodo link](https://doi.org/10.5281/zenodo.6582653). Please add upload the contents into the "results" directory of this repo. 
 
-Todos: 
-- [X] read papers that geoff sent (Friday 10/15)
-- [X] choose datasets/models where we expect interesting behavioral transitions. (Tuesday 10/17)
-- [X] investigate implementation of wide models in pytorch. (Week of 10/17)
-    - [X] is it easier to build as n subnetworks that can be combined, or one big network that can be taken apart? 
-        - Easier to build as one big network, but this has capacity restrictions.  
-- [X] prototype infrastructure for training these things. 
+### Figure 1 
+Figure 1 is generated using the script `scripts/plot_conditional_variance.py`. Please navigate to the directory `scripts` before running the commands below.
+Figure 1 results can be regenerated in two steps, corresponding to the two sets of ensembles used. 
+- Row 1: 
+```
+python plot_conditional_variance.py
+```
+- Row 2: 
+```
+python plot_conditional_variance.py "+all_imagenet_ood@=config_AlexNet_imagenetv2mf_Var.yaml"
+```
 
-## Bibiliography: 
+### Figure 2 
+Figure 2 is generated using the script `scripts/paperfigs/compare_performance.py`
+Figure 2 results can be generated in two steps, corresponding to the two pairs of ensemble/single models used. 
+- Left Column: 
+```
+python compare_performance.py "+cifar10_1_bs@=config.yaml"
+```
+- Right Column: 
+```
+python compare_performance.py "+cinic10_bs@=config.yaml"
+```
 
-### Ensembles vs. Big Models in the literature: 
-- Kondratyuk, Dan, et al. "When ensembling smaller models is more efficient than single large models." arXiv preprint arXiv:2005.00570 (2020). [link](https://arxiv.org/abs/2005.00570V)
-- Wasay, Abdul, and Stratos Idreos. "More or Less: When and How to Build Convolutional Neural Network Ensembles." International Conference on Learning Representations. 2020.[link](https://openreview.net/forum?id=z5Z023VBmDZ)
-- Lobacheva, Ekaterina, et al. "On power laws in deep ensembles." arXiv preprint arXiv:2007.08483 (2020). [link](https://arxiv.org/abs/2007.08483)
+## Figure 4 setup:
+To regenerate Figure 4, please use the repo linked as "imagenet_pl" in the manuscript
 
-### Model Capacity and unintuitive behavior:
-- Nakkiran, Preetum, et al. "Deep double descent: Where bigger models and more data hurt." arXiv preprint arXiv:1912.02292 (2019). [link](https://arxiv.org/abs/1912.02292)
+### Retrieving data
+Please see the instructions in `etc/ekb/README.md` on how to download and prepare data. 
 
-### Interpolating between different models:  
-- Benton, Gregory W., et al. "Loss Surface Simplexes for Mode Connecting Volumes and Fast Ensembling." arXiv preprint arXiv:2102.13042 (2021). [link](https://arxiv.org/abs/2102.13042)
+## Figure 4 
+Navigate to the directory `etc/ekb/plot`, and please run the following:
+
+```
+store_.sh
+```
 
 

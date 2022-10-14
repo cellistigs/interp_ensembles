@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
-from interpensembles.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher,LogSoftmaxGroupLinear
+from ensemble_attention.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher,LogSoftmaxGroupLinear
 import os
 
 __all__ = [
     "ResNet",
     "wideresnet18"
     "wideresnet18_4"
+    "resnet10",
     "resnet18",
     "resnet34",
     "resnet50",
@@ -314,6 +315,7 @@ class WideResNet_GroupLinear(nn.Module):
         x = self.fc(x)
 
         return x
+
 class WideResNet(nn.Module):
     def __init__(
         self,
@@ -963,6 +965,16 @@ def wideresnet18_4(pretrained=False, progress=True, device="cpu", **kwargs):
         "wideresnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, k = 4, **kwargs
     )
 
+def narrowresnet10_16(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a narrow (x1/16) ResNet-10 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "wideresnet18", BasicBlock, [1, 1, 1, 1], pretrained, progress, device, k = 0.125, **kwargs
+    )
+
 def wideresnet18(pretrained=False, progress=True, device="cpu", **kwargs):
     """Constructs a wide (2x) ResNet-18 model.
     Args:
@@ -971,6 +983,16 @@ def wideresnet18(pretrained=False, progress=True, device="cpu", **kwargs):
     """
     return _wideresnet(
         "wideresnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, k = 2, **kwargs
+    )
+
+def resnet10(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a ResNet-18 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet(
+        "resnet10", BasicBlock, [1, 1, 1, 1], pretrained, progress, device, **kwargs
     )
 
 def resnet18(pretrained=False, progress=True, device="cpu", **kwargs):
