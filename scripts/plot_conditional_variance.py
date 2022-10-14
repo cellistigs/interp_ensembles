@@ -141,8 +141,8 @@ def main(cfg):
     """
     ## formatting limits
     kde_exp = -0.125 ## 1/4*nb_dims
-    #xranges = {"Var":[0.,1.],"JS":[0,np.log(cfg.nclasses)],"KL":[0,11]}
-    #xrange = xranges[cfg.uncertainty]
+    xranges = {"Var":[0.,1.],"JS":[0,np.log(cfg.nclasses)],"KL":[0,11]}
+    xrange = xranges[cfg.uncertainty]
 
     ## Cell 1: formatting filenames 
     basedir = os.path.join(here,"../results/")
@@ -204,20 +204,20 @@ def main(cfg):
 
     ## Cell 2: formatting data
 
-    ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"))).long()
+    #ind_labels = torch.tensor(np.load(ind_prob_paths[0].replace("preds", "labels"),allow_pickle=True)).long()
     ind_indices =  torch.randperm(len(ind_probs))[:10000]
 
-    if cfg.ood_softmax is False:
-        ood_probs = torch.stack([
-            torch.tensor(np.load(ood_prob_path)).float()
-            for ood_prob_path in ood_prob_paths
-        ], dim=-2).softmax(dim=-1)
-    else:    
-        ood_probs = torch.stack([
-            torch.tensor(np.load(ood_prob_path)).float()
-            for ood_prob_path in ood_prob_paths
-        ], dim=-2)
-    ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
+    #if cfg.ood_softmax is False:
+    #    ood_probs = torch.stack([
+    #        torch.tensor(np.load(ood_prob_path)).float()
+    #        for ood_prob_path in ood_prob_paths
+    #    ], dim=-2).softmax(dim=-1)
+    #else:    
+    #    ood_probs = torch.stack([
+    #        torch.tensor(np.load(ood_prob_path)).float()
+    #        for ood_prob_path in ood_prob_paths
+    #    ], dim=-2)
+    #ood_labels = torch.tensor(np.load(ood_prob_paths[0].replace("preds", "labels"))).long()
     ood_indices =  torch.randperm(len(ood_probs))[:20000]
 
     ## Cell 3: 
@@ -433,6 +433,17 @@ def main(cfg):
 
     varlims = {"Var":17.,"JS":5.}
     if cfg.plot:
+        ## first plot the average single model uncertainty: 
+        fig, (avg_uncert) = plt.subplots(1,1,figsize = (9,9))
+        sns.kdeplot(ind_avg,ax= avg_uncert,label = "InD")
+        sns.kdeplot(ood_avg,ax= avg_uncert,label = "OOD")
+        avg_uncert.set(xlim=[0,1],xlabel="Avg. Single Model Uncert.: {}".format(quantity_names[cfg.uncertainty]["avg"]),title =
+                "Marginal Avg. Single Model Uncert.\n Comparison: CIFAR10",ylabel="Density")
+        plt.legend()
+        plt.savefig("expected_uncert")
+        plt.close()
+
+        ## then plot the full figure
         fig, (var_ax, ind_cond_ax, ood_cond_ax, cond_exp_ax) = plt.subplots(
             1, 4, figsize=(12, 3), sharex=False, sharey=False
         )
