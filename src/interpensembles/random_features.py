@@ -38,14 +38,11 @@ def get_linear_pipelined_logistic_classification(in_d,out_d,sigma=1,logistic_arg
     full_estimator = Pipeline([('standardscaler',StandardScaler()),('projector',get_random_linear_projector(matrix)),('logistic',LogisticRegression(**logistic_args))])
     return full_estimator
 
-def get_rff_pipelined_logistic_classification(in_d,out_d,sigma=1,logistic_args={},random_state=None):    
+def get_rff_pipelined_logistic_classification(out_d,sigma=1,logistic_args={},matrix_seed = None,random_state=None):    
     """returns a pipeline that combines standard scaling, projection to a random fourier feature, and logistic classification into a single pipelined estimator that can then be bagged.  
 
     """
-    matrix =  sklearn.utils.check_random_state(random_state).randn(out_d,in_d)/np.sqrt(sigma*in_d)
-    offset = np.random.uniform(0,2*np.pi,size = out_d)
-
-    full_estimator = Pipeline([('standardscaler',StandardScaler()),('projector',get_random_fourier_projector(matrix,offset)),('logistic',LogisticRegression(**logistic_args))])
+    full_estimator = Pipeline([('standardscaler',StandardScaler()),('rff_regression',RFFLogisticRegression(out_d,matrix_seed,random_state,logistic_params = logistic_args))])
     return full_estimator
 
 ### if we want random weights every time, we need a estimator object with random state. 
@@ -77,7 +74,7 @@ class RFFLogisticRegression(BaseEstimator,ClassifierMixin):
         """Assumes data is of shape (batch,features)
 
         """
-        return np.matmul(data,self.matrix.T)
+        return np.cos(np.matmul(data,self.matrix.T)+self.offset)
 
     def decision_function(self,X):
         return self.lr.decision_function(self.project(X))
@@ -90,9 +87,12 @@ class RFFLogisticRegression(BaseEstimator,ClassifierMixin):
         input_dim = X.shape[1]
         if self.matrix_seed is None:
             self.matrix =  sklearn.utils.check_random_state(self.random_state).randn(self.n_features,input_dim)/np.sqrt(self.sigma*input_dim)
+            self.offset = sklearn.utils.check_random_state(self.random_state).uniform(0,2*np.pi,size = self.n_features)
         else:
             self.matrix =  sklearn.utils.check_random_state(self.matrix_seed).randn(self.n_features,input_dim)/np.sqrt(self.sigma*input_dim)
+            self.offset = sklearn.utils.check_random_state(self.matrix_seed).uniform(0,2*np.pi,size = out_d)
         self.lr.fit(self.project(X),y,sample_weight)
+        self.classes_ = self.lr.classes_
         return self
 
     def predict(self,X):
