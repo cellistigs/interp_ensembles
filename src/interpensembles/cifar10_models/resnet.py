@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from interpensembles.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher,LogSoftmaxGroupLinear
+from ensemble_attention.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher,LogSoftmaxGroupLinear
 import os
 
 __all__ = [
