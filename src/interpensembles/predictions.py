@@ -183,12 +183,48 @@ class Model(object):
         self.modelprefix = modelprefix
         self.data = data
 
-    def register(self, filename):
-        self.filename = filename
-        with h5py.File(str(self.filename), 'r') as f:
-            self._logits = f['logits'][()]
-            self._labels = f['targets'][()].astype('int')
-            self._probs = np.exp(self._logits) / np.sum(np.exp(self._logits), 1, keepdims=True)
+    def register(self, filename, modelname, inputtype=None,labelpath = None, logits = True,npz_flag = None):
+        """Register a model's predictions to this ensemble object. 
+        :param filename: (string) path to file containing logit model predictions. 
+        :param modelname: (string) name of the model to identify within an ensemble
+        :param inputtype: (optional) [h5,npy] h5 inputs or npy input, depending on if we're looking at imagenet or cifar10 datasets. If not given, will be inferred from filename extension.   
+        :param labelpath: (optional) if npy format files, labels must be given. 
+        :param logits: (optional) we assume logits given, but probs can also be given directly. 
+	:param npz_flag: if filetype is .npz, we asume that we need to pass a dictionary key to retrieve either `cifar10` or `cinic10` logits.
+        """
+        if inputtype is None:
+            _,ext = os.path.splitext(filename)
+            inputtype = ext[1:] 
+            assert inputtype in ["h5","hdf5","npy","npz"], "inputtype inferred from extension must be `h5` or `npy`, or `npz` if not given, not {}.".format(inputtype)
+            
+        if inputtype in ["h5","hdf5"]:
+            with h5py.File(str(filename), 'r') as f:
+                self._logits = f['logits'][()]
+                self._labels = f['targets'][()].astype('int')
+                self._probs = np.exp(self._logits) / np.sum(np.exp(self._logits), 1, keepdims=True)
+        
+        elif inputtype == "npy":
+            assert labelpath is not None, "if npy, must give labels."
+            if logits:  
+                self._logits = np.load(filename)
+                self._labels = np.load(labelpath)
+                self._probs = np.exp(self._logits) / np.sum(np.exp(self._logits), 1, keepdims=True)
+            else:               
+                self._logits = None 
+                self._labels = np.load(labelpath)
+                self._probs = np.load(filename) 
+
+        elif inputtype == "npz":   
+            assert labelpath is not None, "if npz must give labels."
+            assert npz_flag is not None, "if npz must give flag for which logits to retrieve."
+            if logits:  
+                self._logits = np.load(filename)[npz_flag]
+                self._labels = np.load(labelpath)
+                self._probs = np.exp(self._logits) / np.sum(np.exp(self._logits), 1, keepdims=True)
+            else:               
+                self._logits = None 
+                self._labels = np.load(labelpath)
+                self._probs = np.load(filename) 
 
     def mean_conf(self):
         # n x c
