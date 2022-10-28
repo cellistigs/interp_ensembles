@@ -39,6 +39,7 @@ import pytorch_lightning as pl
 #from pl_examples import cli_lightning_logo
 from pytorch_lightning.core import LightningModule
 from pytorch_lightning.plugins import ddp_plugin
+from pytorch_lightning import loggers as pl_loggers
 
 
 class ImageNetLightningModel(LightningModule):
@@ -229,6 +230,8 @@ def main(args: Namespace) -> None:
     
     model = ImageNetLightningModel(**vars(args))
 
+    if args.wandb is True:
+        args.logger = pl_loggers.WandbLogger()
     trainer = pl.Trainer.from_argparse_args(args)
     if args.evaluate:
         trainer.test(model)
@@ -245,6 +248,7 @@ def run_cli():
         "-e", "--evaluate", dest="evaluate", action="store_true", help="evaluate model on validation set"
     )
     parent_parser.add_argument("--seed", type=int, default=42, help="seed for initializing training.")
+    parent_parser.add_argument("--wandb", type=bool, default=True, help="add wandb logger.")
     parser = ImageNetLightningModel.add_model_specific_args(parent_parser)
     args = parser.parse_args()
     main(args)
