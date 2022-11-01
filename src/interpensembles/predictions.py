@@ -183,10 +183,9 @@ class Model(object):
         self.modelprefix = modelprefix
         self.data = data
 
-    def register(self, filename, modelname, inputtype=None,labelpath = None, logits = True,npz_flag = None):
+    def register(self, filename, inputtype=None,labelpath = None, logits = True,npz_flag = None):
         """Register a model's predictions to this ensemble object. 
         :param filename: (string) path to file containing logit model predictions. 
-        :param modelname: (string) name of the model to identify within an ensemble
         :param inputtype: (optional) [h5,npy] h5 inputs or npy input, depending on if we're looking at imagenet or cifar10 datasets. If not given, will be inferred from filename extension.   
         :param labelpath: (optional) if npy format files, labels must be given. 
         :param logits: (optional) we assume logits given, but probs can also be given directly. 
