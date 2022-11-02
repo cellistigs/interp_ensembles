@@ -8,8 +8,9 @@ import os
 here = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from pathlib import Path
 
-plt.style.use(os.path.join(here,"../etc/config/geoff_stylesheet.mplstyle"))
+plt.style.use(os.path.join(here,"../etc/config/stylesheet.mplstyle"))
 
 def proportion(p,M,r):
     """Given the following model :
@@ -28,7 +29,7 @@ def proportion(p,M,r):
     sum_var = 2*var_first+(M-2)*var_others
     return BS+sum_var,sum_var
 
-def get_heterogeneous_biasvar(models,seed = 0):
+def get_heterogeneous_biasvar(models,seed = 0, metric='pairwise_corr'):
     """make heterogeneous ensembles, and compare bias and variance for them. 
 
     """
@@ -60,7 +61,7 @@ def get_heterogeneous_biasvar(models,seed = 0):
         all_ensembles.append(ens)
         permed = permed[ensemble_size:]
         #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
-        pairwise_div = ens.get_pairwise_corr()
+        pairwise_div = ens.get_diversity_score(metric=metric)
         bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
         print("Permuted {}: div: {}, Variance: {}, Performance: {}".format(name,pairwise_div,var,perf))
         all_divvar.append([pairwise_div,var])
@@ -70,7 +71,7 @@ def get_heterogeneous_biasvar(models,seed = 0):
     divvarperf_array = np.array(all_divvarperf)
     return divvar_array,divvarperf_array
 
-def get_arrays_toplot(models):
+def get_arrays_toplot(models, metric='pairwise_corr'):
     """
     Gets the pairwise correlation and jensen gap diversity, and compare them. 
     Takes as argument a dictionary of models: keys giving model names, values are dictionaries with paths to individual entries. 
@@ -93,7 +94,7 @@ def get_arrays_toplot(models):
         print(model.modelnames,model.labelpaths)
         [ens.register(os.path.join(here,m),i,None,os.path.join(here,l),**kwargs) for i,(m,l) in  enumerate(zip(model.modelnames,model.labelpaths))]
         #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
-        pairwise_div = ens.get_pairwise_corr()
+        pairwise_div = ens.get_diversity_score(metric=metric)
         bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
         print("{}: pairwise_div: {}, Variance: {}, Performance: {}".format(modelname,pairwise_div,var,perf))
         all_divvar.append([pairwise_div,var])
@@ -104,15 +105,28 @@ def get_arrays_toplot(models):
     return divvar_array,divvarperf_array
 
 
-@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_miller")
+@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_miller_local")
 def main(args):
+    # setup results directory
+    results_dir = Path( here) / "../results/biasvar/{}".format(args.title)
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    metric = 'pairwise_corr'
+    #metric = 'avg_disagreement' (control)
+    #metric = 'kl_divergence'
+    # metric = 'cosine_similarity'
+
+    metric_names = {'pairwise_corr': '1 - Avg. pairwise correlation ',
+                    'avg_disagreement':'Avg. disagreement',
+                    'cosine_similarity': 'Cosine similarity',
+                    'kl_divergence': 'KL divergence',}
     all_biasvar_arrays = []
-    biasvar_array,biasvarperf_array = get_arrays_toplot(args.models)
+    biasvar_array,biasvarperf_array = get_arrays_toplot(args.models, metric=metric)
     all_biasvar_arrays.append(biasvar_array)
 
     fig,ax = plt.subplots(figsize=(9,8))
     for seed in range(10):
-        biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed)
+        biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed, metric=metric)
         if seed == 0:
             ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=10,label =
                     "heterogeneous",alpha =0.5)
@@ -134,14 +148,19 @@ def main(args):
     z = np.polyfit(diversity_finite[:,1],diversity_finite[:,0],1)
     p = np.poly1d(z)
     ax.plot(diversity_finite[:,1],p(diversity_finite[:,1]),color = "black",label = "linear fit")
-    line = np.linspace(0,100,100)
-    ax.set_title("CIFAR 10: Comparing predictive diversity")
-    ax.set_xlim([0,0.3])
-    ax.set_ylim([0,0.3])
+    line = np.linspace(0, 100, 100)
+    if 'CIFAR' in args.title:
+        dataset_name = 'CIFAR-10'
+        #ax.set_xlim([0, 0.3])
+        #ax.set_ylim([0, 0.3])
+    elif 'Imagenet' in args.title:
+        dataset_name = 'ImageNet'
+    ax.set_title("{} Comparing predictive diversity".format(dataset_name))
+
     ax.set_xlabel("CE Jensen gap (pred. diversity)")
-    ax.set_ylabel("1 - Avg. pairwise correlation (pred. diversity)")
+    ax.set_ylabel("{} (pred. diversity)".format(metric_names[metric]))
     plt.legend()
-    fig.savefig("{}_divvar_ce.pdf".format(args.title))
+    fig.savefig(results_dir / "{}_{}_ce.pdf".format(args.title, metric))
     plt.show()
 
     
