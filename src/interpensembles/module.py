@@ -9,7 +9,7 @@ from .cifar10_models.densenet import densenet121, densenet161, densenet169
 from .cifar10_models.googlenet import googlenet
 from .cifar10_models.inception import inception_v3
 from .cifar10_models.mobilenetv2 import mobilenet_v2
-from .cifar10_models.resnet import resnet10, resnet18, resnet34, resnet50, wideresnet18, wideresnet18_4, widesubresnet18,wideresnet18_4_grouplinear,narrowresnet10_16
+from .cifar10_models.resnet import resnet10, resnet18, resnet26, resnet34, resnet42, resnet52, resnet50, wideresnet18, wideresnet18_4,widesubresnet18,wideresnet18_4_grouplinear,narrowresnet10_32,narrowresnet10_16,narrowresnet10_8,narrowresnet10_4,narrowresnet10_2,resnet10,narrowresnet12_32,narrowresnet12_16,narrowresnet12_8,narrowresnet12_4,narrowresnet12_2,resnet12,narrowresnet14_32,narrowresnet14_16,narrowresnet14_8,narrowresnet14_4,narrowresnet14_2,resnet14,narrowresnet16_32,narrowresnet16_16,narrowresnet16_8,narrowresnet16_4,narrowresnet16_2,resnet16,narrowresnet18_32,narrowresnet18_16,narrowresnet18_8,narrowresnet18_4,narrowresnet18_2,resnet18
 from .cifar10_models.wideresnet_28 import wideresnet28_10
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from .cifar10_models.efficientnet import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3
@@ -28,11 +28,41 @@ all_classifiers = {
     "wideresnet18_4":wideresnet18_4,
     "wideresnet18_4_grouplinear":wideresnet18_4_grouplinear,
     "wideresnet28_10":wideresnet28_10,
+    "narrowresnet10_32":narrowresnet10_32,
     "narrowresnet10_16":narrowresnet10_16,
-    "resnet18": resnet10,
+    "narrowresnet10_8":narrowresnet10_8,
+    "narrowresnet10_4":narrowresnet10_4,
+    "narrowresnet10_2":narrowresnet10_2,
+    "resnet10":resnet10,
+    "narrowresnet12_32":narrowresnet12_32,
+    "narrowresnet12_16":narrowresnet12_16,
+    "narrowresnet12_8":narrowresnet12_8,
+    "narrowresnet12_4":narrowresnet12_4,
+    "narrowresnet12_2":narrowresnet12_2,
+    "resnet12":resnet12,
+    "narrowresnet14_32":narrowresnet14_32,
+    "narrowresnet14_16":narrowresnet14_16,
+    "narrowresnet14_8":narrowresnet14_8,
+    "narrowresnet14_4":narrowresnet14_4,
+    "narrowresnet14_2":narrowresnet14_2,
+    "resnet14":resnet14,
+    "narrowresnet16_32":narrowresnet16_32,
+    "narrowresnet16_16":narrowresnet16_16,
+    "narrowresnet16_8":narrowresnet16_8,
+    "narrowresnet16_4":narrowresnet16_4,
+    "narrowresnet16_2":narrowresnet16_2,
+    "resnet16":resnet16,
+    "narrowresnet18_32":narrowresnet18_32,
+    "narrowresnet18_16":narrowresnet18_16,
+    "narrowresnet18_8":narrowresnet18_8,
+    "narrowresnet18_4":narrowresnet18_4,
+    "narrowresnet18_2":narrowresnet18_2,
     "resnet18": resnet18,
+    "resnet26": resnet26,
     "resnet34": resnet34,
+    "resnet42": resnet42,
     "resnet50": resnet50,
+    "resnet52": resnet52,
     "densenet121": densenet121,
     "densenet161": densenet161,
     "densenet169": densenet169,
@@ -93,7 +123,7 @@ class CIFAR10_Models(pl.LightningModule):
         elif self.hparams.scheduler == "step":    
             scheduler = {
                 "scheduler": torch.optim.lr_scheduler.MultiStepLR(
-                    optimizer, milestones = [60,120,160], gamma = 0.2, last_epoch=-1
+                    optimizer, milestones = [60,120,160], gamma = 0.1, last_epoch=-1
                 ),
                 "interval": "epoch",
                 "frequency":1,
