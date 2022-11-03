@@ -249,7 +249,7 @@ class Model(object):
         if inputtype is None:
             _,ext = os.path.splitext(filename)
             inputtype = ext[1:] 
-            assert inputtype in ["h5","hdf5","npy","npz"], "inputtype inferred from extension must be `h5` or `npy`, or `npz` if not given, not {}.".format(inputtype)
+            assert inputtype in ["h5","hdf5","npy","npz","pickle"], "inputtype inferred from extension must be either (`h5`, `npy`,`npz` `pickle`) if not given, not {}.".format(inputtype)
             
         if inputtype in ["h5","hdf5"]:
             with h5py.File(str(filename), 'r') as f:
@@ -279,6 +279,13 @@ class Model(object):
                 self._logits = None 
                 self._labels = np.load(labelpath)
                 self._probs = np.load(filename) 
+        elif inputtype == 'pickle':
+            if logits:
+                self._logits = pd.read_pickle(filename)['logits']
+                self._labels = np.load(labelpath)
+                self._probs = np.exp(self._logits) / np.sum(np.exp(self._logits), 1, keepdims=True)
+            else:
+                raise NotImplementedError("If inputtype is pickle, logits must be True.")
 
     def mean_conf(self):
         # n x c
