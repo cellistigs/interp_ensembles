@@ -10,6 +10,7 @@ from .cifar10_models.googlenet import googlenet
 from .cifar10_models.inception import inception_v3
 from .cifar10_models.mobilenetv2 import mobilenet_v2
 from .cifar10_models.resnet import resnet10, resnet18, resnet26, resnet34, resnet42, resnet52, resnet50, wideresnet18, wideresnet18_4,widesubresnet18,wideresnet18_4_grouplinear,narrowresnet10_32,narrowresnet10_16,narrowresnet10_8,narrowresnet10_4,narrowresnet10_2,resnet10,narrowresnet12_32,narrowresnet12_16,narrowresnet12_8,narrowresnet12_4,narrowresnet12_2,resnet12,narrowresnet14_32,narrowresnet14_16,narrowresnet14_8,narrowresnet14_4,narrowresnet14_2,resnet14,narrowresnet16_32,narrowresnet16_16,narrowresnet16_8,narrowresnet16_4,narrowresnet16_2,resnet16,narrowresnet18_32,narrowresnet18_16,narrowresnet18_8,narrowresnet18_4,narrowresnet18_2,resnet18
+from .cifar10_models.resnet_cifar import resnet8_cf,resnet14_cf,resnet20_cf,resnet26_cf,resnet32_cf,resnet38_cf,resnet44_cf 
 from .cifar10_models.wideresnet_28 import wideresnet28_10
 from .cifar10_models.vgg import vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from .cifar10_models.efficientnet import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3
@@ -28,6 +29,12 @@ all_classifiers = {
     "wideresnet18_4":wideresnet18_4,
     "wideresnet18_4_grouplinear":wideresnet18_4_grouplinear,
     "wideresnet28_10":wideresnet28_10,
+    "resnet8_cifar": resnet8_cf,
+    "resnet14_cifar": resnet14_cf,
+    "resnet20_cifar": resnet20_cf,
+    "resnet26_cifar": resnet26_cf,
+    "resnet32_cifar": resnet32_cf,
+    "resnet44_cifar": resnet44_cf,
     "narrowresnet10_32":narrowresnet10_32,
     "narrowresnet10_16":narrowresnet10_16,
     "narrowresnet10_8":narrowresnet10_8,
