@@ -34,6 +34,7 @@ all_classifiers = {
     "resnet20_cifar": resnet20_cf,
     "resnet26_cifar": resnet26_cf,
     "resnet32_cifar": resnet32_cf,
+    "resnet38_cifar": resnet38_cf,
     "resnet44_cifar": resnet44_cf,
     "narrowresnet10_32":narrowresnet10_32,
     "narrowresnet10_16":narrowresnet10_16,
