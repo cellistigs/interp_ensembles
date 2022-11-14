@@ -159,6 +159,26 @@ class CIFAR10LinearGroupModule(CIFAR10_Models):
         scheduler = self.setup_scheduler(optimizer,total_steps)
         return [optimizer], [scheduler]
 
+class CIFAR10RFFModule(CIFAR10_Models):
+    """Module to train RFF with LBFGS
+
+    """
+    def __init__(self,hparams):
+        super().__init__(hparams)
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.accuracy = Accuracy()
+        
+        assert self.hparams.classifier.startswith("RFF")
+        
+        self.model = all_classifiers[self.hparams.classifier]()
+    def forward(self,batch):
+        images,labels = batch
+        predictions = self.model(images)
+        imloss = self.criterion(predictions, labels)
+        regloss = self.hparams.weight_decay*
+
+
+
 class CIFAR10Module(CIFAR10_Models):
     def __init__(self, hparams):
         super().__init__(hparams)
