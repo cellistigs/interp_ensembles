@@ -18,9 +18,11 @@ from .cifar10_models.pyramidnet import pyramidnet272,pyramidnet164,pyramidnet110
 from .cifar10_models.shake_shake import shake_resnet26_2x96d
 from .cifar10_models.resnexst import resnexst50_4x16d_cifar
 from .cifar10_models.senet import se_resnet164
+from .cifar10_models.rff import RFF
 from .schduler import WarmupCosineLR
 
 all_classifiers = {
+    "RFF":RFF,    
     "vgg11_bn": vgg11_bn,
     "vgg13_bn": vgg13_bn,
     "vgg16_bn": vgg16_bn,
@@ -170,11 +172,12 @@ class CIFAR10RFFModule(CIFAR10_Models):
         
         assert self.hparams.classifier.startswith("RFF")
         
-        self.model = all_classifiers[self.hparams.classifier]()
+        self.model = all_classifiers[self.hparams.classifier](32*32*3,self.hparams.projection_size,10)
         l2loss = torch.nn.MSELoss()
 
     def forward(self,batch):
         images,labels = batch
+        images = torch.reshape(images,(images.shape[0],-1))
         predictions = self.model(images)
         imloss = self.criterion(predictions, labels)
         #TODO check this next line 
