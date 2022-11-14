@@ -171,13 +171,51 @@ class CIFAR10RFFModule(CIFAR10_Models):
         assert self.hparams.classifier.startswith("RFF")
         
         self.model = all_classifiers[self.hparams.classifier]()
+        l2loss = torch.nn.MSELoss()
+
     def forward(self,batch):
         images,labels = batch
         predictions = self.model(images)
         imloss = self.criterion(predictions, labels)
-        regloss = self.hparams.weight_decay*
+        #TODO check this next line 
+        regloss = self.hparams.weight_decay*l2loss(self.model.parameters(),torch.zeros(self.model.params().shape))
+        loss = imloss+regloss
+        accuracy = (predictions, labels)
+        return loss, accuracy *100
 
+    def calibration(self,batch,use_softmax = True):
+        """Like forward, but just exit with the softmax predictions and labels. . 
+        """
+        softmax = torch.nn.Softmax(dim = 1)
+        images, labels = batch
+        predictions = self.model(images)
+        if use_softmax:
+            smpredictions = softmax(predictions)
+        else:    
+            smpredictions = predictions
+        return smpredictions,labels
 
+    def training_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/train", loss)
+        self.log("acc/train", accuracy)
+        return loss
+
+    def validation_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/val", loss)
+        self.log("acc/val", accuracy)
+
+    def test_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("acc/test", accuracy)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.LBFGS(
+                self.model.parameters()
+                )
+
+        return optimizer
 
 class CIFAR10Module(CIFAR10_Models):
     def __init__(self, hparams):
