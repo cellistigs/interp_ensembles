@@ -1,5 +1,6 @@
 # Program arguments: 
 data_dir: /home/ubuntu/cifar10_ood/data/ 
+ind_dataset: mnist
 ood_dataset: cifar10_1  
 version: v4 
 level: null  
@@ -29,7 +30,7 @@ warmup_epochs: 30
 num_workers: 8  
 gpu_id: "0"  
 learning_rate: 1e-2 
-weight_decay: 1e-2
+weight_decay: 0 
 test_set: "CIFAR10"  
 lamb: 0.5  
 scheduler: cosine  

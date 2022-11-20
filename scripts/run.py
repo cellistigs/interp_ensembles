@@ -11,16 +11,21 @@ from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
-from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10RFFModule
+from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10RFFModule,CIFAR10RFFSGDModule
 
-from cifar10_ood.data import CIFAR10Data,CIFAR10_1Data,CINIC10_Data,CIFAR10_CData
+from cifar10_ood.data import CIFAR10Data,CIFAR10_1Data,CINIC10_Data,CIFAR10_CData,MNISTData
 
 
-modules = {
+if 
+cifar_modules = {
         "base":CIFAR10Module,
         "ensemble":CIFAR10EnsembleModule,
         "rff":CIFAR10RFFModule,
+        "rffsgd":CIFAR10RFFSGDModule,
         }
+
+mnist_modules = {
+        "base": MNISTModule}
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -104,6 +109,12 @@ def custom_eval(model,ind_data,ood_data,device,softmax = True):
 
 @hydra.main(config_path = os.path.join(script_dir,"../configs/"),config_name = "run_default_gpu")
 def main(args):
+    if args.ind_dataset == "cifar10":
+        modules = cifar_modules
+    elif args.ind_dataset == "mnist":    
+        modules = mnist_modules
+    else:    
+        raise AssertionError("ind_dataset not recognized.")
 
     ## Set seeds if given.  
     if args.seed is not None:
@@ -113,9 +124,9 @@ def main(args):
 
     ## Set up logging. 
     if args.logger == "wandb":
-        logger = WandbLogger(name=args.classifier, project="cifar10")
+        logger = WandbLogger(name=args.classifier, project=args.ind_dataset)
     elif args.logger == "tensorboard":
-        logger = TensorBoardLogger("cifar10", name=args.classifier)
+        logger = TensorBoardLogger(args.ind_dataset, name=args.classifier)
 
     ## Configure checkpoint and trainer: 
     checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False, dirpath = os.path.join(script_dir,"../","models",args.classifier,args.module,datetime.datetime.now().strftime("%m-%d-%y"),datetime.datetime.now().strftime("%H_%M_%S")))
@@ -171,7 +182,11 @@ def main(args):
             model.model.load_state_dict(torch.load(state_dict))
             
     ## what dataset should we evaluate on? 
-    cifar10data = CIFAR10Data(args)
+    if args.ind_dataset == "cifar10":
+        ind_data = CIFAR10Data(args)
+    elif args.ind_dataset == "mnist":    
+        ind_data = MNISTData(args)
+
     if args.ood_dataset == "cifar10_1":
         ood_data = CIFAR10_1Data(args,version =args.version)
     elif args.ood_dataset == "cinic10":    
@@ -185,15 +200,15 @@ def main(args):
     if bool(args.test_phase) or bool(args.random_eval):
         pass
     else:
-        trainer.fit(model, cifar10data)
+        trainer.fit(model, ind_data)
 
     ## testing and evaluation : 
     data = {"in_dist_acc":None,"out_dist_acc":None}
-    data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
+    data["in_dist_acc"] = trainer.test(model, ind_data.test_dataloader())[0]["acc/test"]
     data["out_dist_acc"] = trainer.test(model, ood_data.test_dataloader())[0]["acc/test"]
 
-    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,ood_data,device,softmax = bool(args.softmax))
-    preds_train,labels_train = traindata_eval(model,cifar10data,device,softmax = bool(args.softmax))
+    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,ind_data,ood_data,device,softmax = bool(args.softmax))
+    preds_train,labels_train = traindata_eval(model,ind_data,device,softmax = bool(args.softmax))
 
     full_path = "." #os.path.join(results_dir,"robust_results{}_{}_{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S"),args.module,args.classifier))
     np.save("ind_preds",preds_ind)
