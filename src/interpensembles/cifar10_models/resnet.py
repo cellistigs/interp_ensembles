@@ -1,7 +1,11 @@
 import torch
 import torch.nn as nn
-from ensemble_attention.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher,LogSoftmaxGroupLinear
 import os
+try:
+    from ensemble_attention.layers import create_subnet_params,create_subnet_params_output_only,Conv2d_subnet_layer,ChannelSwitcher,LogSoftmaxGroupLinear
+except ImportError:
+    print("ensemble_attention is not installed.")
+
 
 __all__ = [
     "ResNet",
