@@ -67,7 +67,7 @@ class CIFAR10_Models(pl.LightningModule):
     """
     def __init__(self,hparams):
         super().__init__()
-        self.hparams.update(hparams)
+        self.hparams.update(vars(hparams))
     def forward(x):    
         raise NotImplementedError
     def training_step():
