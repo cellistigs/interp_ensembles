@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 import torch
+import argparse
 try:
     from pytorch_lightning.metrics import Accuracy
 except ModuleNotFoundError:    
@@ -67,7 +68,10 @@ class CIFAR10_Models(pl.LightningModule):
     """
     def __init__(self,hparams):
         super().__init__()
-        self.hparams.update(vars(hparams))
+        if type(hparams) is argparse.Namespace:
+            self.hparams.update(vars(hparams))
+        else:
+            self.hparams.update(hparams)
     def forward(x):    
         raise NotImplementedError
     def training_step():
@@ -169,7 +173,6 @@ class CIFAR10RFFModule(CIFAR10_Models):
         super().__init__(hparams)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
-        
         assert self.hparams.classifier.startswith("RFF")
         
         self.model = all_classifiers[self.hparams.classifier](32*32*3,self.hparams.projection_size,10)
