@@ -5,7 +5,7 @@ import itertools
 import os 
 import h5py
 import numpy as np
-from .metrics import AccuracyData, NLLData, BrierScoreData
+from .metrics import AccuracyData, NLLData, BrierScoreData, quadratic_uncertainty
 import pandas as pd
 
 
@@ -16,10 +16,11 @@ class EnsembleModel(object):
     :param data: string to identify the dataset that set of models is evaluated on. 
     """
 
-    def __init__(self, modelprefix, data):
+    def __init__(self, modelprefix, data, dtype='float32'):
         self.modelprefix = modelprefix
         self.models = {}  ## dict of dicts- key is modelname, value is dictionary of preds/labels.
         self.data = data
+        self.dtype = dtype
 
     def register(self, filename, modelname, inputtype=None,labelpath = None, logits = True,npz_flag = None):
         """Register a model's predictions to this ensemble object. 
@@ -71,7 +72,7 @@ class EnsembleModel(object):
             else:
                 raise NotImplementedError("If inputtype is pickle, logits must be True.")
 
-        self.models[modelname] = {"preds":self._probs, "labels":self._labels,"logits": self._logits}
+        self.models[modelname] = {"preds":self._probs.astype(self.dtype), "labels":self._labels,"logits": self._logits.astype(self.dtype)}
 
     def probs(self):
         """Calculates mean confidence across all softmax output.
@@ -124,10 +125,10 @@ class EnsembleModel(object):
         for model,modeldata in self.models.items():
             probs = modeldata["preds"]
             all_probs.append(probs)
-        array_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
-        var = np.var(array_probs,axis = 0,ddof = 1)
+        all_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
+        var = np.var(all_probs,axis = 0,ddof = 1)
         return np.mean(np.sum(var,axis = -1))
-    
+
     def get_bias_bs(self):
         """Given a brier score, estimate bias across the dataset.   
         """
@@ -165,9 +166,9 @@ class EnsembleModel(object):
             all_probs.append(probs[np.arange(len(targets)),targets])
             
 
-        array_probs = np.stack(all_probs,axis = 0) # (models,samples)
-        norm_term = np.log(np.mean(array_probs,axis = 0))
-        diversity = np.mean(-np.mean(np.log(array_probs),axis = 0)+norm_term)
+        all_probs = np.stack(all_probs,axis = 0) # (models,samples)
+        norm_term = np.log(np.mean(all_probs,axis = 0))
+        diversity = np.mean(-np.mean(np.log(all_probs),axis = 0)+norm_term)
         return diversity 
 
     def get_pairwise_corr(self):
@@ -232,6 +233,31 @@ class EnsembleModel(object):
             return self.get_pairwise_corr()
         else:
             return self._get_diversity_score(metric=metric)
+
+    def get_avg_qunc(self, as_vec=False):
+        """estimate the average single model uncertainty.
+
+        """
+        all_unc = []
+        for model, modeldata in self.models.items():
+            probs = modeldata["preds"]
+            model_unc = quadratic_uncertainty(probs, as_vec=True)  #(samples)
+            all_unc.append(model_unc)
+
+        all_unc = np.stack(all_unc, axis=0)  # (models,samples)
+        all_unc = np.mean(all_unc, axis=0)  # (samples)
+        if as_vec:
+            return all_unc
+        else:
+            return np.mean(all_unc)
+
+    def get_ens_qunc(self, as_vec=False):
+        """estimate the average single model uncertainty.
+
+        """
+        all_probs = self.probs()  # (samples,classes)
+        return quadratic_uncertainty(all_probs, as_vec=as_vec)
+
 
 class Model(object):
     def __init__(self,  modelprefix, data):
@@ -315,3 +341,6 @@ class Model(object):
     def get_brier(self):
         bsd = BrierScoreData()
         return bsd.brierscore_multi(self.probs(), self.labels())
+
+    def get_qunc(self):
+        return quadratic_uncertainty(self.probs())
