@@ -11,3 +11,4 @@ gpytorch
 hydra-core
 statsmodels
 h5py
+matplotlib
