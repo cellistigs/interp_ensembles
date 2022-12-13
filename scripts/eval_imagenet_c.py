@@ -81,8 +81,7 @@ parser.add_argument('--store_logits_fname', default='', type=str,
                     help='filename where to store logits')
 parser.add_argument('--save_checkpoint_fname', default='checkpoint.pth.tar', type=str,
                     help='filename where to store checkpoints')
-parser.add_argument('--from_pl', default=0, type=int,
-                    help='flag to signal if model was trained using pytorch lightning which renames model variables')
+
 
 best_acc1 = 0
 
@@ -195,29 +194,12 @@ def main_worker(gpu, ngpus_per_node, args):
                 loc = 'cuda:{}'.format(args.gpu)
                 checkpoint = torch.load(args.resume, map_location=loc)
             args.start_epoch = checkpoint['epoch']
-
-            if args.from_pl == 0:
-                best_acc1 = checkpoint['best_acc1']
-                if args.gpu is not None:
-                    # best_acc1 may be from a checkpoint from a different GPU
-                    best_acc1 = best_acc1.to(args.gpu)
-                model.load_state_dict(checkpoint['state_dict'])
-                optimizer.load_state_dict(checkpoint['optimizer'])
-            else:
-                def key_transformation(key):
-                    new_key = key.replace("model.", "")
-                    new_key = new_key.replace("features", "features.module")
-                    return new_key
-
-                from collections import OrderedDict
-                new_state_dict = OrderedDict()
-                for key, value in checkpoint['state_dict'].items():
-                    new_key = key_transformation(key)
-                    new_state_dict[new_key] = value
-
-                model.load_state_dict(new_state_dict)
-                optimizer.load_state_dict(checkpoint['optimizer_states'][0])
-
+            best_acc1 = checkpoint['best_acc1']
+            if args.gpu is not None:
+                # best_acc1 may be from a checkpoint from a different GPU
+                best_acc1 = best_acc1.to(args.gpu)
+            model.load_state_dict(checkpoint['state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:
@@ -226,116 +208,46 @@ def main_worker(gpu, ngpus_per_node, args):
     cudnn.benchmark = True
 
     print("Data loading code")
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
-    if not args.evaluate:
-        print("Skip loading train set")
-        train_dataset = datasets.ImageFolder(
-            traindir,
-            transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]))
+    # load all the files
+    #  gaussian noise, contrast, brightness and fog
+    distortions = [
+        'gaussian_noise', 'shot_noise', 'impulse_noise',
+        'defocus_blur', 'glass_blur', 'motion_blur', 'zoom_blur',
+        'snow', 'frost', 'fog', 'brightness',
+        'contrast', 'elastic_transform', 'pixelate', 'jpeg_compression',
+        'speckle_noise', 'gaussian_blur', 'spatter', 'saturate'
+    ]
 
-        if args.distributed:
-            train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-        else:
-            train_sampler = None
+    distortions = [
+        'brightness', 'contrast','fog', 'gaussian_noise',
+    ]
 
-        train_loader = torch.utils.data.DataLoader(
-            train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
-            num_workers=args.workers, pin_memory=True, sampler=train_sampler)
+    for distortion_name in distortions:
 
-    val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(valdir, transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ])),
-        batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+        #for severity in range(1, 6):
+        for severity in [1, 3, 5]:
 
-    if args.evaluate:
-        print("Evaluating code")
-        validate(val_loader, model, criterion, args)
-        return
+            valdir = os.path.join(args.data, distortion_name, str(severity))
 
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
+            print(distortion_name, str(severity))
+            normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225])
 
-        # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch, args)
+            val_loader = torch.utils.data.DataLoader(
+                datasets.ImageFolder(valdir, transforms.Compose([
+                    transforms.Resize(256),
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor(),
+                    normalize,
+                ])),
+                batch_size=args.batch_size, shuffle=False,
+                num_workers=args.workers, pin_memory=True)
 
-        # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, args)
+            print("Evaluating code")
+            args.distortion = "--" + distortion_name + "--" + str(severity)
+            validate(val_loader, model, criterion, args)
 
-        # remember best acc@1 and save checkpoint
-        is_best = acc1 > best_acc1
-        best_acc1 = max(acc1, best_acc1)
-
-        if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-                and args.rank % ngpus_per_node == 0):
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'state_dict': model.state_dict(),
-                'best_acc1': best_acc1,
-                'optimizer' : optimizer.state_dict(),
-            }, is_best, args.save_checkpoint_fname)
-
-
-def train(train_loader, model, criterion, optimizer, epoch, args):
-    batch_time = AverageMeter('Time', ':6.3f')
-    data_time = AverageMeter('Data', ':6.3f')
-    losses = AverageMeter('Loss', ':.4e')
-    top1 = AverageMeter('Acc@1', ':6.2f')
-    top5 = AverageMeter('Acc@5', ':6.2f')
-    progress = ProgressMeter(
-        len(train_loader),
-        [batch_time, data_time, losses, top1, top5],
-        prefix="Epoch: [{}]".format(epoch))
-
-    # switch to train mode
-    model.train()
-
-    end = time.time()
-    for i, (images, target) in enumerate(train_loader):
-        # measure data loading time
-        data_time.update(time.time() - end)
-
-        if args.gpu is not None:
-            images = images.cuda(args.gpu, non_blocking=True)
-        if torch.cuda.is_available():
-            target = target.cuda(args.gpu, non_blocking=True)
-
-        # compute output
-        output = model(images)
-        loss = criterion(output, target)
-
-        # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))
-
-        # compute gradient and do SGD step
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        if i % args.print_freq == 0:
-            progress.display(i)
+    return
 
 
 def validate(val_loader, model, criterion, args):
@@ -361,9 +273,10 @@ def validate(val_loader, model, criterion, args):
         num_outputs = int(len(val_loader)*args.batch_size)
         assert num_outputs % 1000 == 0
 
-        assert not os.path.isfile(args.store_logits_fname)
+        store_logits_fname = args.store_logits_fname + args.distortion + ".hdf5"
+        assert not os.path.isfile(store_logits_fname)
         # with h5py.File(args.store_logits_fname, 'w', libver='latest', swmr=True) as f:
-        f = h5py.File(args.store_logits_fname, 'w',  libver='latest')
+        f = h5py.File(store_logits_fname, 'w',  libver='latest')
         # f.swmr_mode = True  # single write multi-read
         logits_out = f.create_dataset('logits', (num_outputs, 1000))
         targets_out = f.create_dataset('targets', (num_outputs,))

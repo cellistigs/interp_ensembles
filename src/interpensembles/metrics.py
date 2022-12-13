@@ -30,6 +30,17 @@ class BrierScoreData(object):
         deviance = prob-target_onehot
         return np.mean(np.sum(deviance**2,axis = 1))
 
+    def brierscore_multi_vec(self,prob,target):
+        """The "original" brier score definition that accounts for other classes explicitly. Note the range of this test is 0-2. output the vector per sample 
+        :param prob: array of probabilities per class. 
+        :param target: list/array of true targets. 
+
+        """
+        target_onehot = np.zeros(prob.shape)
+        target_onehot[np.arange(len(target)),target] = 1 ## onehot encoding. 
+        deviance = prob-target_onehot
+        return np.sum(deviance**2,axis = 1)
+
 class VarianceData(object):
     """Calculates variance/related metrics. In particular, this is the variance in the confidence of the top predicted label. 
 
@@ -137,6 +148,19 @@ class NLLData(object):
         if normalize:
             nll= nll/len(logprobs)
         return nll
+
+    def nll_vec(self,prob,target):
+        """NLL contribution for each individual datapoint. 
+
+        """
+        probs = prob[np.arange(len(target)),target]
+        logprobs = np.log(probs)
+        return logprobs
+
+    def nll_diversity(self,prob,target):    
+        """Sample estimate based calculation of NLL 
+
+        """
 
 class CalibrationData(object):
     """Initializes an object to bin predictions that are fed to it in batches.  

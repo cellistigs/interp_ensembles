@@ -1,0 +1,197 @@
+title: "CIFAR 10"
+line_extent: 0.15
+models: 
+  ResNet18: 
+    logits: True
+    modelnames: 
+      - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_03:01.22_base_resnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_03:16.31_base_resnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_03:31.40_base_resnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_03:46.53_base_resnet18ind_preds.npy"
+    labelpaths: 
+      - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_03:01.22_base_resnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_03:16.31_base_resnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_03:31.40_base_resnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_03:46.53_base_resnet18ind_labels.npy"
+  ResNet18-2:    
+    logits: True
+    modelnames:
+      - "../results/robust_results11-14-21_23:49.57_base_wideresnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_00:30.20_base_wideresnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_01:10.29_base_wideresnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_01:50.49_base_wideresnet18ind_preds.npy"
+      - "../results/robust_results11-15-21_02:31.03_base_wideresnet18ind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-14-21_23:49.57_base_wideresnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_00:30.20_base_wideresnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_01:10.29_base_wideresnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_01:50.49_base_wideresnet18ind_labels.npy"
+      - "../results/robust_results11-15-21_02:31.03_base_wideresnet18ind_labels.npy"
+  ResNet18-4:    
+    logits: True
+    modelnames:
+      - "../results/robust_results11-13-21_01:28.26_base_wideresnet18_4ind_preds.npy"
+      - "../results/robust_results11-13-21_03:38.44_base_wideresnet18_4ind_preds.npy"
+      - "../results/robust_results11-13-21_05:49.19_base_wideresnet18_4ind_preds.npy"
+      - "../results/robust_results11-13-21_07:59.30_base_wideresnet18_4ind_preds.npy"
+      - "../results/robust_results11-13-21_10:10.17_base_wideresnet18_4ind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-13-21_01:28.26_base_wideresnet18_4ind_labels.npy"
+      - "../results/robust_results11-13-21_03:38.44_base_wideresnet18_4ind_labels.npy"
+      - "../results/robust_results11-13-21_05:49.19_base_wideresnet18_4ind_labels.npy"
+      - "../results/robust_results11-13-21_07:59.30_base_wideresnet18_4ind_labels.npy"
+      - "../results/robust_results11-13-21_10:10.17_base_wideresnet18_4ind_labels.npy"
+  DenseNet-121:    
+    logits: True
+    modelnames:
+      - "../results/robust_results11-17-21_00:55.03_base_densenet121ind_preds.npy"
+      - "../results/robust_results11-17-21_01:36.53_base_densenet121ind_preds.npy"
+      - "../results/robust_results11-17-21_02:19.01_base_densenet121ind_preds.npy"
+      - "../results/robust_results11-17-21_03:01.03_base_densenet121ind_preds.npy"
+      - "../results/robust_results11-17-21_03:43.39_base_densenet121ind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-17-21_00:55.03_base_densenet121ind_labels.npy"
+      - "../results/robust_results11-17-21_01:36.53_base_densenet121ind_labels.npy"
+      - "../results/robust_results11-17-21_02:19.01_base_densenet121ind_labels.npy"
+      - "../results/robust_results11-17-21_03:01.03_base_densenet121ind_labels.npy"
+      - "../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy"
+  DenseNet-169:
+    logits: True
+    modelnames:
+      - "../results/robust_results11-17-21_20:28.21_base_densenet169ind_preds.npy"
+      - "../results/robust_results11-17-21_21:23.18_base_densenet169ind_preds.npy"
+      - "../results/robust_results11-17-21_22:20.10_base_densenet169ind_preds.npy"
+      - "../results/robust_results11-17-21_23:17.03_base_densenet169ind_preds.npy"
+      - "../results/robust_results11-18-21_00:13.12_base_densenet169ind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-17-21_20:28.21_base_densenet169ind_labels.npy"
+      - "../results/robust_results11-17-21_21:23.18_base_densenet169ind_labels.npy"
+      - "../results/robust_results11-17-21_22:20.10_base_densenet169ind_labels.npy"
+      - "../results/robust_results11-17-21_23:17.03_base_densenet169ind_labels.npy"
+      - "../results/robust_results11-18-21_00:13.12_base_densenet169ind_labels.npy"
+  Inception-v3:
+    logits: True
+    modelnames:
+      - "../results/robust_results11-16-21_18:58.44_base_inception_v3ind_preds.npy"
+      - "../results/robust_results11-16-21_22:29.39_base_inception_v3ind_preds.npy"
+      - "../results/robust_results11-17-21_02:00.37_base_inception_v3ind_preds.npy"
+      - "../results/robust_results11-17-21_05:31.50_base_inception_v3ind_preds.npy"
+      - "../results/robust_results11-17-21_09:02.26_base_inception_v3ind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-16-21_18:58.44_base_inception_v3ind_labels.npy"
+      - "../results/robust_results11-16-21_22:29.39_base_inception_v3ind_labels.npy"
+      - "../results/robust_results11-17-21_02:00.37_base_inception_v3ind_labels.npy"
+      - "../results/robust_results11-17-21_05:31.50_base_inception_v3ind_labels.npy"
+      - "../results/robust_results11-17-21_09:02.26_base_inception_v3ind_labels.npy"
+  GoogleNet:  
+    logits: True
+    modelnames:
+      - "../results/robust_results11-17-21_01:19.42_base_googlenetind_preds.npy"
+      - "../results/robust_results11-17-21_02:53.46_base_googlenetind_preds.npy"
+      - "../results/robust_results11-17-21_04:27.55_base_googlenetind_preds.npy"
+      - "../results/robust_results11-17-21_06:02.07_base_googlenetind_preds.npy"
+      - "../results/robust_results11-17-21_07:36.23_base_googlenetind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-17-21_01:19.42_base_googlenetind_labels.npy"
+      - "../results/robust_results11-17-21_02:53.46_base_googlenetind_labels.npy"
+      - "../results/robust_results11-17-21_04:27.55_base_googlenetind_labels.npy"
+      - "../results/robust_results11-17-21_06:02.07_base_googlenetind_labels.npy"
+      - "../results/robust_results11-17-21_07:36.23_base_googlenetind_labels.npy"
+  VGG-11:
+    logits: True
+    modelnames:
+      - "../results/robust_results11-15-21_20:42.38_base_vgg11_bnind_preds.npy"
+      - "../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_preds.npy"
+      - "../results/robust_results11-15-21_21:08.03_base_vgg11_bnind_preds.npy"
+      - "../results/robust_results11-15-21_21:20.48_base_vgg11_bnind_preds.npy"
+      - "../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-15-21_20:42.38_base_vgg11_bnind_labels.npy"
+      - "../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_labels.npy"
+      - "../results/robust_results11-15-21_21:08.03_base_vgg11_bnind_labels.npy"
+      - "../results/robust_results11-15-21_21:20.48_base_vgg11_bnind_labels.npy"
+      - "../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_labels.npy"
+  VGG-19:  
+    logits: True
+    modelnames:
+      - "../results/robust_results11-15-21_22:29.03_base_vgg19_bnind_preds.npy"
+      - "../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_preds.npy"
+      - "../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_preds.npy"
+      - "../results/robust_results11-15-21_23:29.30_base_vgg19_bnind_preds.npy"
+      - "../results/robust_results11-15-21_23:49.39_base_vgg19_bnind_preds.npy"
+    labelpaths:
+      - "../results/robust_results11-15-21_22:29.03_base_vgg19_bnind_labels.npy"
+      - "../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_labels.npy"
+      - "../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_labels.npy"
+      - "../results/robust_results11-15-21_23:29.30_base_vgg19_bnind_labels.npy"
+      - "../results/robust_results11-15-21_23:49.39_base_vgg19_bnind_labels.npy"
+  ResNet28-10:    
+    logits: True
+    modelnames:
+      - "../results/robust_results12-07-21_21:54.17_base_wideresnet28_10ind_preds.npy"
+      - "../results/robust_results12-07-21_21:55.20_base_wideresnet28_10ind_preds.npy"
+      - "../results/robust_results12-07-21_21:56.19_base_wideresnet28_10ind_preds.npy"
+      - "../results/robust_results12-07-21_21:57.14_base_wideresnet28_10ind_preds.npy"
+      - "../results/robust_results12-07-21_21:58.22_base_wideresnet28_10ind_preds.npy"
+    labelpaths:
+      - "../results/robust_results12-07-21_21:54.17_base_wideresnet28_10ind_labels.npy"
+      - "../results/robust_results12-07-21_21:55.20_base_wideresnet28_10ind_labels.npy"
+      - "../results/robust_results12-07-21_21:56.19_base_wideresnet28_10ind_labels.npy"
+      - "../results/robust_results12-07-21_21:57.14_base_wideresnet28_10ind_labels.npy"
+      - "../results/robust_results12-07-21_21:58.22_base_wideresnet28_10ind_labels.npy"
+  ShakeShake26_2x96d:    
+    logits: False
+    modelnames:
+      - "outputs/2022-08-18/14-13-58/ind_preds.npy"
+      - "outputs/2022-08-18/23-01-00/ind_preds.npy"
+      - "outputs/2022-08-19/01-22-50/ind_preds.npy"
+      - "outputs/2022-08-19/03-44-37/ind_preds.npy"
+      - "outputs/2022-08-19/06-06-20/ind_preds.npy"
+    labelpaths:
+      - "outputs/2022-08-18/14-13-58/ind_labels.npy"
+      - "outputs/2022-08-18/23-01-00/ind_labels.npy"
+      - "outputs/2022-08-19/01-22-50/ind_labels.npy"
+      - "outputs/2022-08-19/03-44-37/ind_labels.npy"
+      - "outputs/2022-08-19/06-06-20/ind_labels.npy"
+  SeResNet-164:    
+    logits: False
+    modelnames:
+      - "outputs/2022-08-19/14-25-24/ind_preds.npy"
+      - "outputs/2022-08-19/16-07-06/ind_preds.npy"
+      - "outputs/2022-08-19/17-49-46/ind_preds.npy"
+      - "outputs/2022-08-19/19-32-20/ind_preds.npy"
+      - "outputs/2022-08-19/21-15-29/ind_preds.npy"
+    labelpaths:
+      - "outputs/2022-08-19/14-25-24/ind_labels.npy"
+      - "outputs/2022-08-19/16-07-06/ind_labels.npy"
+      - "outputs/2022-08-19/17-49-46/ind_labels.npy"
+      - "outputs/2022-08-19/19-32-20/ind_labels.npy"
+      - "outputs/2022-08-19/21-15-29/ind_labels.npy"
+  ResNexst50_4x16d:    
+    logits: False
+    modelnames:
+      - "outputs/2022-08-19/22-57-29/ind_preds.npy"
+      - "outputs/2022-08-20/00-38-23/ind_preds.npy"
+      - "outputs/2022-08-20/02-19-30/ind_preds.npy"
+      - "outputs/2022-08-20/04-00-32/ind_preds.npy"
+      - "outputs/2022-08-20/05-41-33/ind_preds.npy"
+    labelpaths:
+      - "outputs/2022-08-19/22-57-29/ind_labels.npy"
+      - "outputs/2022-08-20/00-38-23/ind_labels.npy"
+      - "outputs/2022-08-20/02-19-30/ind_labels.npy"
+      - "outputs/2022-08-20/04-00-32/ind_labels.npy"
+      - "outputs/2022-08-20/05-41-33/ind_labels.npy"
+  Pyramidnet110:    
+    logits: False
+    modelnames:
+      - "outputs/2022-08-20/19-23-49/ind_preds.npy"
+      - "outputs/2022-08-20/23-39-52/ind_preds.npy"
+      - "outputs/2022-08-21/03-55-37/ind_preds.npy"
+      - "outputs/2022-08-21/08-11-34/ind_preds.npy"
+    labelpaths:
+      - "outputs/2022-08-20/19-23-49/ind_labels.npy"
+      - "outputs/2022-08-20/23-39-52/ind_labels.npy"
+      - "outputs/2022-08-21/03-55-37/ind_labels.npy"
+      - "outputs/2022-08-21/08-11-34/ind_labels.npy"

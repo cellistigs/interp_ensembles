@@ -80,8 +80,8 @@ class MMDModule():
         """
         raise NotImplementedError("This implementation is not commensurate with others in this class.")
         ## assuming correctly shaped inputs: 
-        sample1_factor = lambda t: np.mean(self.kernel(data1,t),axis = 1)
-        sample2_factor = lambda t: np.mean(self.kernel(data2,t),axis = 1)
+        sample1_factor = lambda t: np.mean(self.kernel(np.asarray(data1,np.float32),t),axis = 1)
+        sample2_factor = lambda t: np.mean(self.kernel(np.asarray(data2,np.float32),t),axis = 1)
 
         def witness(factor):
             """We are going to project the evaluation point into a numpy array of the correct shape. 
