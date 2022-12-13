@@ -21,3 +21,13 @@ If you wanted to analyze imagenet data, you could run the following instead:
 python estimate_biasvar.py +imagenet@=imagenet.yaml
 ```
 
+## Random Fourier Features sawtooth experiments
+
+If we want to plot the bias/var decomposition for individual data points in RFF models
+trained with/o bagging for different widths
+```
+# code to save probabilities
+python scripts/random_features/random_feature_regression.py
+# code to plot the logits
+python scripts/random_features/study_permutations.py
+```
