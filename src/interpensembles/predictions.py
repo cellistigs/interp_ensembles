@@ -119,6 +119,18 @@ class EnsembleModel(object):
         var = np.var(array_probs,axis = 0,ddof = 1)
         return np.mean(np.sum(var,axis = -1))
     
+    def get_bias_bs_vec(self):
+        """Given a brier score, estimate bias across the dataset.   
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0)
+        bsd = BrierScoreData()
+        model_bs = np.array([bsd.brierscore_multi_vec(m["preds"],m["labels"]) for m in self.models.values()])
+        return np.mean(model_bs,axis = 0)
+
     def get_bias_bs(self):
         """Given a brier score, estimate bias across the dataset.   
         """
