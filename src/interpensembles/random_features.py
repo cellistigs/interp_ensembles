@@ -45,6 +45,13 @@ def get_rff_pipelined_logistic_classification(out_d,sigma=1,logistic_args={},mat
     full_estimator = Pipeline([('standardscaler',StandardScaler()),('rff_regression',RFFLogisticRegression(out_d,matrix_seed,random_state,logistic_params = logistic_args))])
     return full_estimator
 
+
+def get_rff_pipelined_linear_regression(out_d,sigma=1,linear_args ={},matrix_seed = None,random_state= None)
+    full_estimator = Pipeline([('standardscaler',StandardScaler()),('rff_regression',RFFLinearRegression(out_d,matrix_seed,random_state,linear_params = linear_args))])
+    return full_estimator
+
+
+
 ### if we want random weights every time, we need a estimator object with random state. 
 
 class RFFLogisticRegression(BaseEstimator,ClassifierMixin):
