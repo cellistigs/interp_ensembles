@@ -107,6 +107,65 @@ class RFFLogisticRegression(BaseEstimator,ClassifierMixin):
     def score(self,X,y,sample_weight = None):
         return self.lr.score(self.project(X),y,sample_weight)
 
+class RFFLinearRegression(BaseEstimator,ClassifierMixin):
+    """Builds out a random features projection to apply to input data before standard linear regression. 
+
+    Parameters
+    ----------
+    n_features : int
+        number of features to project to (default: 1). 
+    sigma : float    
+        variance of the normal distribution used to sample projection weights (default: 1) 
+    random_state : int or None     
+        random state used to control randomness of the weight initialization. If provided in a Bagging classifier, resulting bagged estimators will have different projection matrices.
+    matrix_seed : int or None    
+        random state used to directly fix a projection matrix. If provided in a Bagging classifer, results in bagged estimators with the same projection matrix.  
+    logistic_params: dict    
+        dictionary of parameters to pass to LinearRegression.
+    """
+    def __init__(self,n_features=1,sigma=1,random_state = None,matrix_seed = None,logistic_params = {}):
+        self.n_features = n_features
+        self.random_state = random_state
+        self.sigma = 1
+        self.linear_params = linear_params
+        self.matrix_seed = matrix_seed
+    
+    def project(self,data):
+        """Assumes data is of shape (batch,features)
+
+        """
+        return np.cos(np.matmul(data,self.matrix.T)+self.offset)
+
+    #def decision_function(self,X):
+    #    return self.lr.decision_function(self.project(X))
+
+    #def densify(self):
+    #    return self.lr.densify()
+
+    def fit(self,X,y,sample_weight = None):
+        self.lr = LinearRegression(**self.linear_params)
+        input_dim = X.shape[1]
+        if self.matrix_seed is None:
+            self.matrix =  sklearn.utils.check_random_state(self.random_state).randn(self.n_features,input_dim)/np.sqrt(self.sigma*input_dim)
+            self.offset = sklearn.utils.check_random_state(self.random_state).uniform(0,2*np.pi,size = self.n_features)
+        else:
+            self.matrix =  sklearn.utils.check_random_state(self.matrix_seed).randn(self.n_features,input_dim)/np.sqrt(self.sigma*input_dim)
+            self.offset = sklearn.utils.check_random_state(self.matrix_seed).uniform(0,2*np.pi,size = out_d)
+        self.lr.fit(self.project(X),y,sample_weight)
+        self.classes_ = self.lr.classes_
+        return self
+
+    def predict(self,X):
+        return self.lr.predict(self.project(X))
+
+    #def predict_log_proba(self,X):
+    #    return self.lr.predict_log_proba(self.project(X))
+
+    #def predict_proba(self,X):        
+    #    return self.lr.predict_proba(self.project(X))
+
+    def score(self,X,y,sample_weight = None):
+        return self.lr.score(self.project(X),y,sample_weight)
 
 
 
