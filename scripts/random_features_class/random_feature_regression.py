@@ -1,4 +1,8 @@
-## implement random feature regression based classification. 
+"""
+Trains multiple RFF models on mnist and
+saves the rsulting logits in results/
+"""
+## implement random feature regression based classification.
 ## compare three things: 1. a 
 import json 
 import numpy as np
@@ -71,13 +75,16 @@ def main():
 
     ## ensemble params
     ens_size = 10 
-    width_maxrange = 400
-    matrix_seed = 5
-    repeat_iterates = 1
-    interval = 10 
-    interp_thresh = 250 
+    width_maxrange = 400  # max width
+    matrix_seed = 5  # seed for RFF init but not for bagging.
+    repeat_iterates = 1  # number of times to repeat the experiment for each width (bagging is included)
+    interval = 10  # grid spacing for width of RFF.
+    # plotting threshold for interpolation. approx should be (N*C) here is fixed for all models.
+    interp_thresh = 250
+
     fig,ax = plt.subplots(1,2,figsize=(10,3))
     coolwarm = cm.get_cmap("coolwarm",interp_thresh)
+    # Arguments for logistic classifier in scikit learn
     logistic_args = {"max_iter":max_iter,"tol":1e-6,"penalty":"none"}
     ens_params_dict = {
             "ens_size":ens_size,
@@ -91,6 +98,7 @@ def main():
 
     save_dir = os.path.join(results_dir,identifier)
     os.mkdir(os.path.join(results_dir,identifier))
+    # save the parameters used for the experiment
     file = os.path.join(save_dir,"experiment_params.json")
     with open(file,"w") as f:
         json.dump(ens_params_dict,f)
@@ -100,13 +108,18 @@ def main():
         if width == 0:
             width = 1
         for it in range(repeat_iterates):
+            # run scikit learn LR of custom RFF class.
             base_randomf = get_rff_pipelined_logistic_classification(width,logistic_args = logistic_args,random_state = random_state).fit(xtrain,ytrain)
+            # random initialization of RFF weigths and specific width.
             init_randomf = BaggingClassifier(get_rff_pipelined_logistic_classification(width,matrix_seed=None,logistic_args = logistic_args),bootstrap = False,n_estimators = ens_size,random_state=random_state).fit(xtrain,ytrain)
+            # fixed RFF weights with bagging.
             bag_randomf = BaggingClassifier(get_rff_pipelined_logistic_classification(width,matrix_seed=matrix_seed,logistic_args = logistic_args),bootstrap = False,n_estimators = ens_size,random_state=random_state).fit(xtrain,ytrain)
+            # bagging and random initialization of RFF weights.
             bag_init_randomf = BaggingClassifier(get_rff_pipelined_logistic_classification(width,matrix_seed = None,logistic_args = logistic_args),n_estimators = ens_size,random_state=random_state).fit(xtrain,ytrain)
 
-            ## fitting trees
+            ## Take trained models and generate predictions.
             base_score = brier_multi(ytest,base_randomf.predict_proba(xtest))
+            # pull the ensemble , average single model and diversity scores and save the resulting logits.
             init_score,init_indiv,init_div = compare_at_depth(xtest,ytest,init_randomf,width,ens_params_dict)
             bag_score,bag_indiv,bag_div = compare_at_depth(xtest,ytest,bag_randomf,width)
             bag_init_score,bag_init_indiv,bag_init_div = compare_at_depth(xtest,ytest,bag_init_randomf,width)

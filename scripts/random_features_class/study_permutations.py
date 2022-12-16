@@ -256,15 +256,25 @@ if __name__ == "__main__":
         labelinds = np.argsort(labels)
 
         # Get unpermuted results 
+        # get mean average single model brier score and variance.
         score,var = compare_at_depth(wdata["preds"],wdata["label"])
+        # get average single model brier score and variance for all samples.
         fullscore,fullvar = compare_at_depth(wdata["preds"],wdata["label"],reduce_mean=False)
-        # Permute by samples:  
+        # ------------------------------------------------------
+        # Control:
+        # decorrelating the errors  by randomizing them
+        # while keeping the same error rate per class.
+
+        # Permute by samples:
         sample_perm_preds = []
         for preds in wdata["preds"]:
             perm_pred,perm_labels = permute_samples_inclass(preds,labels)
             sample_perm_preds.append(perm_pred)
         sample_permscore,sample_permvar = compare_at_depth(sample_perm_preds,perm_labels)
-        
+
+        # decorrelating the errors by randomizing
+        # the class the model predicts for each error sample.
+
         # Permute by class    
         class_perm_preds = []
         for preds in wdata["preds"]:
@@ -274,13 +284,16 @@ if __name__ == "__main__":
             preds = preds[np.arange(nb_examples),permuted_indices].T
             class_perm_preds.append(preds)
         class_permscore,class_permvar = compare_at_depth(class_perm_preds,wdata["label"])    
+        # ----------------------------------------------
 
-        # apply another softmax
+        # log(p) rescaling.
         softmaxed_preds = []
         for preds in wdata["preds"]:
             logpreds = np.log(preds)+100
             preds = softmax(500*logpreds,axis = 1)
             softmaxed_preds.append(preds)
+        # compute avg single model and variance on rescaled predictions
+        # both for mean and individual samples.
         softmaxed_permscore,softmaxed_permvar = compare_at_depth(softmaxed_preds,wdata["label"])    
         softmaxed_permscore_all,softmaxed_permvar_all = compare_at_depth(softmaxed_preds,wdata["label"],reduce_mean = False)    
 
