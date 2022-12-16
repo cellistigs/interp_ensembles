@@ -2,15 +2,13 @@ import numpy as np
 import subprocess
 import matplotlib.pyplot as plt
 import os
-import matplotlib
 from matplotlib import cm
 import copy
 from scipy.special import softmax
 
 here = os.path.dirname(__file__)
 #results = os.path.join(here,"results","mnist_no_reg")
-results = os.path.join(here,"results","mnist_no_reg_3")
-extraresults = os.path.join(here,"results","mnist_no_reg_2")
+results = os.path.join(here,"results","regression_no_reg_friedman_only_bag_init_10_features")
 movie_dir = os.path.join(here,"videos")
 plt.style.use(os.path.join(here,"../../etc/config/stylesheet.mplstyle"))
 
@@ -39,11 +37,10 @@ def make_movie(to_plot,colormap):
     sort_to_plot = dict(sorted(to_plot.items()))
     ## movie file of distribution
     files = []
-    movfig = plt.figure(figsize=(24, 8))
+    movfig = plt.figure(figsize=(24,8))
     movax = plt.subplot(131)
-    angax = plt.subplot(132,projection="polar")
-    phiax = plt.subplot(133,projection="polar")
-    #movfig, (movax,angax) = plt.subplots(2,1,figsize=(16, 8))
+    angax = plt.subplot(132,projection = "polar")
+    phiax = plt.subplot(133,projection = "polar")
     d_prev0,d_prev1 = np.zeros(sort_to_plot[1]["all"][0].shape),np.zeros(sort_to_plot[1]["all"][1].shape)
     phi_offset = 0 
     for i,(w,d) in enumerate(sort_to_plot.items()):  # 50 frames
@@ -56,15 +53,16 @@ def make_movie(to_plot,colormap):
         abins = np.linspace(-np.pi+phi_offset,np.pi+phi_offset,120)
 
         ## movie of distribution 
+        print(w)
         movax.cla()
         movax.set_xlabel("Variance (Pred. Diversity)")
         movax.set_ylabel("Avg. Single Model Brier Score")
-        movax.set_title("Mnist RFF: Width = {}".format(w))
-        movax.set_xlim(0,1)
-        movax.set_ylim(0,2.1)
+        movax.set_title("Width = {}".format(w))
+        movax.set_xlim(0,200)
+        movax.set_ylim(0,200)
         for j in range(40):
-            offset = j*0.1-1
-            line = np.linspace(0,1,100)
+            offset = j*10-200
+            line = np.linspace(0,200,100)
             movax.plot(line,offset+line,alpha = 0.3,color = "black")
         movax.scatter(d["all"][1],d["all"][0],s=2,marker ="o",alpha = 1,color = coolwarm(w),**kwargs)
 
@@ -72,7 +70,6 @@ def make_movie(to_plot,colormap):
         angax.cla()
         angax.grid(alpha = 1)
         angax.set_title("Polar Histogram: Per-datapoint differences\n (angle and magnitude)")
-        angax.set_rmax(1.4)
         hist,_,_ = np.histogram2d(phi+phi_offset,rho,bins = (abins_2d,rbins))
 
         normed_hist= hist/np.sum(hist)
@@ -80,15 +77,13 @@ def make_movie(to_plot,colormap):
         pc = angax.pcolormesh(A,R,normed_hist.T,cmap = "magma_r",vmax = 0.1)
 
         phiax.cla()
-        phiax.set_rmax(4000)
         phiax.set_title("Polar Histogram: Per-datapoint differences\n (angle)")
         phiax.grid(True)
         phiax.hist(phi, bins = abins)
-        #movfig.colorbar(pc)
+
 
         fname = '_tmp%03d.png' % i
         print('Saving frame', fname)
-        plt.tight_layout()
         plt.savefig(os.path.join(movie_dir,fname))
         files.append(fname)
 
@@ -167,7 +162,7 @@ def analytic(classes):
 def get_filenames(results):
     result_cands = os.listdir(results)
     widths = [r for r in result_cands if not r.endswith(".json")]
-    width_dirs = {int(w):{"dirname":os.path.join(results,w),"preds":[os.path.join(results,w,"{}_probs.npy".format(i)) for i in range(size_ensemble)],"label":os.path.join(results,w,"labels.npy")} for w in widths} 
+    width_dirs = {int(w):{"dirname":os.path.join(results,w),"preds":[os.path.join(results,w,"{}_preds.npy".format(i)) for i in range(size_ensemble)],"label":os.path.join(results,w,"labels.npy")} for w in widths} 
     #extraresult_cands = os.listdir(extraresults)
     #extrawidths = [r for r in extraresult_cands if not r.endswith(".json")]
     #for ew in extrawidths:
@@ -207,35 +202,36 @@ def generate_class_permute_indices(permindex):
         all_true_indices[:,p] = np.random.permutation(nb_classes)
     return all_true_indices    
 
+def mse(labels,probs,reduce_mean = True): 
+    if reduce_mean:
+        return np.mean((probs-labels)**2)    
+    else:
+        return (probs-labels)**2   
+
 def var_diversity(probs,labels,reduce_mean = True):
     """Given probs of shape (models,samples, classes) and labels of shape (samples), generate a corresponding diversity measure.  
 
     """
-    variances = np.sum(np.var(probs,axis = 0,ddof = 0),axis = -1)
+    variances = np.var(probs,axis = 0)
     if reduce_mean:
         return np.mean(variances)
     else:
         return variances
 
-def brier_multi(probs,labels,reduce_mean = True): 
-    labels_onehot = np.zeros(np.shape(probs))
-    for i,li in enumerate(labels):
-        labels_onehot[i,int(li)] = 1
-    if reduce_mean:    
-        return np.mean(np.sum((probs-labels_onehot)**2,axis = 1))    
-    else:
-        return np.sum((probs-labels_onehot)**2,axis = 1)
-
-def compare_at_depth(probs,labels,reduce_mean = True):
+def compare_at_depth(preds,labels,save_params=None,reduce_mean = True):
     """Compute the bias variance decompositions and scores for individual models, bags, and random forest classifiers. 
 
     """
 
     ## fitting bags
     ## This is the average of probabilities output by each individual tree. 
-    ens_individual_score = [brier_multi(np.stack(probs[i],axis = 0),labels,reduce_mean) for i in range(len(probs))]
-    ens_variance = var_diversity(np.stack(probs,axis = 0),labels,reduce_mean)
-    return ens_individual_score,ens_variance
+    ens_individual_score = [mse(labels,predsi,reduce_mean=reduce_mean) for predsi in preds]
+    ens_diversity = var_diversity(np.stack(preds,axis =0),labels,reduce_mean = reduce_mean)
+
+
+    return ens_individual_score,ens_diversity
+
+
 
 def rescale_softmax(softmax,temp = 100):
     """take softmax probability output and rescale with a new temperature. 
@@ -265,29 +261,12 @@ if __name__ == "__main__":
             sample_perm_preds.append(perm_pred)
         sample_permscore,sample_permvar = compare_at_depth(sample_perm_preds,perm_labels)
         
-        # Permute by class    
-        class_perm_preds = []
-        for preds in wdata["preds"]:
-            classes = np.argmax(preds,axis = 1)
-            incorrect = np.where(classes != labels)[0]
-            permuted_indices = generate_class_permute_indices(incorrect)
-            preds = preds[np.arange(nb_examples),permuted_indices].T
-            class_perm_preds.append(preds)
-        class_permscore,class_permvar = compare_at_depth(class_perm_preds,wdata["label"])    
 
-        # apply another softmax
-        softmaxed_preds = []
-        for preds in wdata["preds"]:
-            logpreds = np.log(preds)+100
-            preds = softmax(500*logpreds,axis = 1)
-            softmaxed_preds.append(preds)
-        softmaxed_permscore,softmaxed_permvar = compare_at_depth(softmaxed_preds,wdata["label"])    
-        softmaxed_permscore_all,softmaxed_permvar_all = compare_at_depth(softmaxed_preds,wdata["label"],reduce_mean = False)    
 
         #    print(incorrect)
         #    print(len(incorrect))
         # Log plotting results
-        to_plot[w] = {"base":[np.mean(score),np.mean(var)],"sample_shuffle":[np.mean(sample_permscore),np.mean(sample_permvar)],"class_error_shuffle":[np.mean(class_permscore),np.mean(class_permvar)],"all":[np.mean(np.array(fullscore),axis =0),fullvar],"softmax":[np.mean(softmaxed_permscore),np.mean(softmaxed_permvar)],"softmax_all":[np.mean(np.array(softmaxed_permscore_all),axis = 0),softmaxed_permvar_all]}
+        to_plot[w] = {"base":[np.mean(score),np.mean(var)],"all":[np.mean(np.array(fullscore),axis =0),fullvar]}
 
     fig,ax = plt.subplots(1,2,figsize = (16,8))
 
@@ -300,19 +279,19 @@ if __name__ == "__main__":
             kwargs = {}
         ax[0].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
 
-    # panel 2 (renormalized softmax)
-    # plot means 
-    for w,d in to_plot.items():
-        if w == 1:
-            kwargs = {"label":"new means"}
-        else:    
-            kwargs = {}
-        ax[1].plot(d["softmax"][1],d["softmax"][0],"v",color = coolwarm(w),markersize = 8,markeredgecolor = "black",**kwargs)
-        if w == 1:
-            kwargs = {"label":"orig. means"}
-        else:    
-            kwargs = {}
-        ax[1].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",alpha = 0.5,**kwargs)
+    ## panel 2 (renormalized softmax)
+    ## plot means 
+    #for w,d in to_plot.items():
+    #    if w == 1:
+    #        kwargs = {"label":"new means"}
+    #    else:    
+    #        kwargs = {}
+    #    ax[1].plot(d["softmax"][1],d["softmax"][0],"v",color = coolwarm(w),markersize = 8,markeredgecolor = "black",**kwargs)
+    #    if w == 1:
+    #        kwargs = {"label":"orig. means"}
+    #    else:    
+    #        kwargs = {}
+    #    ax[1].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",alpha = 0.5,**kwargs)
 
     for i in range(40):
         offset = i*0.1-1
@@ -374,19 +353,19 @@ if __name__ == "__main__":
             kwargs = {"label":"indiv. samples"}
         else:    
             kwargs = {}
-        ax[1].scatter(d["softmax_all"][1],d["softmax_all"][0],s=0.5,marker ="o",alpha = 0.5,color = coolwarm(w),**kwargs)
+        #ax[1].scatter(d["softmax_all"][1],d["softmax_all"][0],s=0.5,marker ="o",alpha = 0.5,color = coolwarm(w),**kwargs)
     # plot means 
     for w,d in to_plot.items():
         if w == 1:
             kwargs = {"label":"new means"}
         else:    
             kwargs = {}
-        ax[1].plot(d["softmax"][1],d["softmax"][0],"v",color = coolwarm(w),markersize = 8,markeredgecolor = "black",**kwargs)
+        #ax[1].plot(d["softmax"][1],d["softmax"][0],"v",color = coolwarm(w),markersize = 8,markeredgecolor = "black",**kwargs)
         if w == 1:
             kwargs = {"label":"orig. means"}
         else:    
             kwargs = {}
-        ax[1].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",alpha = 0.5,**kwargs)
+        #ax[1].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",alpha = 0.5,**kwargs)
 
     # plot predictions (unmodified)
     for t,tcurve in enumerate(theory_curves):
@@ -411,58 +390,58 @@ if __name__ == "__main__":
     [ax[i].legend() for i in range(ax.shape[0])]
     ax[0].set_title("RFF variance vs. single model loss:\n Empirical frontier w/ full distribution")    
     ax[1].set_title("RFF variance vs. single model loss (renormalized softmax):\n Empirical frontier w/ full distribution")    
-    ax[0].set_xlim(0,1)
-    ax[0].set_ylim(0,2.1)
-    ax[1].set_xlim(0,1)
-    ax[1].set_ylim(0,2.1)
+    ax[0].set_xlim(0,20)
+    ax[0].set_ylim(0,21)
+    ax[1].set_xlim(0,20)
+    ax[1].set_ylim(0,21)
     ax[0].set_xlabel("Variance (Pred. Diversity)")
     ax[1].set_xlabel("Variance (Pred. Diversity)")
     ax[0].set_ylabel("Avg. Single Model Brier Score")
     ax[1].set_ylabel("Avg. Single Model Brier Score")
     plt.savefig("figs/pareto_frontier_distribution_{}.pdf".format(str(size_ensemble)))
     
-    fig,ax = plt.subplots(1,2,figsize = (16,8))
+    #fig,ax = plt.subplots(1,2,figsize = (16,8))
 
-    for w,d in to_plot.items():
-        if w == 1:
-            kwargs = {"label":"shuffle means"}
-        else:    
-            kwargs = {}
-        ax[0].plot(d["class_error_shuffle"][1],d["class_error_shuffle"][0],"s",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
-        if w == 1:
-            kwargs = {"label":"means"}
-        else:    
-            kwargs = {}
-        ax[0].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
+    #for w,d in to_plot.items():
+    #    if w == 1:
+    #        kwargs = {"label":"shuffle means"}
+    #    else:    
+    #        kwargs = {}
+    #    ax[0].plot(d["class_error_shuffle"][1],d["class_error_shuffle"][0],"s",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
+    #    if w == 1:
+    #        kwargs = {"label":"means"}
+    #    else:    
+    #        kwargs = {}
+    #    ax[0].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
 
-        if w == 1:
-            kwargs = {"label":"shuffle means"}
-        else:    
-            kwargs = {}
-        ax[1].plot(d["sample_shuffle"][1],d["sample_shuffle"][0],"^",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
-        if w == 1:
-            kwargs = {"label":"means"}
-        else:    
-            kwargs = {}
-        ax[1].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
-    for i in range(40):
-        offset = i*0.1-1
-        line = np.linspace(0,1,100)
-        [ax[i].plot(line,offset+line,alpha = 0.3,color = "black") for i in range(ax.shape[0])]
-    [ax[i].legend() for i in range(ax.shape[0])]
+    #    if w == 1:
+    #        kwargs = {"label":"shuffle means"}
+    #    else:    
+    #        kwargs = {}
+    #    ax[1].plot(d["sample_shuffle"][1],d["sample_shuffle"][0],"^",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
+    #    if w == 1:
+    #        kwargs = {"label":"means"}
+    #    else:    
+    #        kwargs = {}
+    #    ax[1].plot(d["base"][1],d["base"][0],"o",color = coolwarm(w),markersize = 5,markeredgecolor = "black",**kwargs)
+    #for i in range(40):
+    #    offset = i*0.1-1
+    #    line = np.linspace(0,1,100)
+    #    [ax[i].plot(line,offset+line,alpha = 0.3,color = "black") for i in range(ax.shape[0])]
+    #[ax[i].legend() for i in range(ax.shape[0])]
 
-    
-    ax[0].set_title("RFF variance vs. single model loss control:\n classwise shuffle (error samples only)")    
-    ax[1].set_title("RFF variance vs. single model loss control:\n samplewise shuffle")    
-    ax[0].set_xlim(0,0.35)
-    ax[0].set_ylim(0.2,1.1)
-    ax[1].set_xlim(0,0.35)
-    ax[1].set_ylim(0.2,1.1)
-    ax[1].set_xlabel("Variance (Pred. Diversity)")
-    ax[0].set_xlabel("Variance (Pred. Diversity)")
-    ax[0].set_ylabel("Avg. Single Model Brier Score")
-    ax[1].set_ylabel("Avg. Single Model Brier Score")
-    plt.savefig("figs/pareto_frontier_shuffle_control_{}.pdf".format(str(size_ensemble)))
+    #
+    #ax[0].set_title("RFF variance vs. single model loss control:\n classwise shuffle (error samples only)")    
+    #ax[1].set_title("RFF variance vs. single model loss control:\n samplewise shuffle")    
+    #ax[0].set_xlim(0,0.35)
+    #ax[0].set_ylim(0.2,1.1)
+    #ax[1].set_xlim(0,0.35)
+    #ax[1].set_ylim(0.2,1.1)
+    #ax[1].set_xlabel("Variance (Pred. Diversity)")
+    #ax[0].set_xlabel("Variance (Pred. Diversity)")
+    #ax[0].set_ylabel("Avg. Single Model Brier Score")
+    #ax[1].set_ylabel("Avg. Single Model Brier Score")
+    #plt.savefig("figs/pareto_frontier_shuffle_control_{}.pdf".format(str(size_ensemble)))
 
 
     #fig,ax = plt.subplots(3,2,figsize = (3,10))
