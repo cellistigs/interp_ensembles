@@ -2,7 +2,7 @@
 import numpy as np
 import sklearn
 from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression,LinearRegression
 from sklearn.preprocessing import FunctionTransformer,StandardScaler
 from sklearn.pipeline import Pipeline
 
@@ -46,7 +46,7 @@ def get_rff_pipelined_logistic_classification(out_d,sigma=1,logistic_args={},mat
     return full_estimator
 
 
-def get_rff_pipelined_linear_regression(out_d,sigma=1,linear_args ={},matrix_seed = None,random_state= None)
+def get_rff_pipelined_linear_regression(out_d,sigma=1,linear_args ={},matrix_seed = None,random_state= None):
     full_estimator = Pipeline([('standardscaler',StandardScaler()),('rff_regression',RFFLinearRegression(out_d,matrix_seed,random_state,linear_params = linear_args))])
     return full_estimator
 
@@ -130,7 +130,7 @@ class RFFLinearRegression(BaseEstimator,ClassifierMixin):
     logistic_params: dict    
         dictionary of parameters to pass to LinearRegression.
     """
-    def __init__(self,n_features=1,sigma=1,random_state = None,matrix_seed = None,logistic_params = {}):
+    def __init__(self,n_features=1,sigma=1,random_state = None,matrix_seed = None,linear_params = {}):
         self.n_features = n_features
         self.random_state = random_state
         self.sigma = 1
@@ -159,7 +159,7 @@ class RFFLinearRegression(BaseEstimator,ClassifierMixin):
             self.matrix =  sklearn.utils.check_random_state(self.matrix_seed).randn(self.n_features,input_dim)/np.sqrt(self.sigma*input_dim)
             self.offset = sklearn.utils.check_random_state(self.matrix_seed).uniform(0,2*np.pi,size = out_d)
         self.lr.fit(self.project(X),y,sample_weight)
-        self.classes_ = self.lr.classes_
+        #self.classes_ = self.lr.classes_
         return self
 
     def predict(self,X):
