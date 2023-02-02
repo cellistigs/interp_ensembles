@@ -9,7 +9,7 @@ here = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-plt.style.use(os.path.join(here,"../etc/config/geoff_stylesheet.mplstyle"))
+plt.style.use(os.path.join(here,"../etc/config/stylesheet.mplstyle"))
 
 def proportion(p,M,r):
     """Given the following model :
