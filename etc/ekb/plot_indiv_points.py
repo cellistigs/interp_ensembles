@@ -15,7 +15,10 @@ import sys
 sys.path.insert(0, '/data/Projects/linear_ensembles/interp_ensembles/etc/ekb/')
 
 from results_class import Model, EnsembleModel
+
+data_type="val"
 results_dir='/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/'
+#results_dir="/datahd3a/imagenet_testbest_outputs/logits/val/"
 folder_names = os.listdir(results_dir)
 # pretrained models
 
@@ -26,7 +29,7 @@ models = [ "resnet50",  "resnet18", "vgg11", "wide_resnet50_2",
 
 
 datasets = ['imagenet', 'imagenetv2mf']
-data_types = ['','']
+data_types = ['deepens1','']
 """
 models = [ "resnet50", "resnet18", "vgg11", "wide_resnet50_2", "alexnet"]
 #data_type_ood = '--brightness--1'
@@ -48,7 +51,7 @@ print(fileout)
 model = "resnet50"
 data_idx = 0
 dataset = datasets[data_idx]
-folder_name = model + '--' + dataset + data_types[data_idx] + '.hdf5'
+folder_name = model + '--' + dataset + '--' + data_types[data_idx] + '.hdf5'
 print('Register {}'.format(folder_name))
 store_logits_fname = Path(results_dir + folder_name)
 model_cls = Model(model, dataset)
