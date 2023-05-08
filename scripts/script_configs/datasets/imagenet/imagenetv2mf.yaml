@@ -1,0 +1,433 @@
+# File with all logits of model trained on imagenet and evaluated on imagenet
+title: "imagenetv2mf" # Title for the resulting plot.
+line_extent: 0.15
+models:
+  FixPNASNet:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_FixPNASNet.pickle
+  FixResNet50:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_FixResNet50.pickle
+  FixResNet50_no_adaptation:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_FixResNet50_no_adaptation.pickle
+  FixResNet50_v2:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_FixResNet50_v2.pickle
+  alexnet:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_alexnet.pickle
+  bninception:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_bninception.pickle
+  cafferesnet101:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_cafferesnet101.pickle
+  densenet121:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_densenet121.pickle
+  densenet161:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_densenet161.pickle
+  densenet169:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_densenet169.pickle
+  densenet201:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_densenet201.pickle
+  dpn131:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_dpn131.pickle
+  dpn68:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_dpn68.pickle
+  dpn98:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_dpn98.pickle
+  efficientnet-b0:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b0.pickle
+  efficientnet-b0-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b0-autoaug.pickle
+  efficientnet-b1:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b1.pickle
+  efficientnet-b1-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b1-autoaug.pickle
+  efficientnet-b2:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b2.pickle
+  efficientnet-b2-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b2-autoaug.pickle
+  efficientnet-b3:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b3.pickle
+  efficientnet-b3-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b3-autoaug.pickle
+  efficientnet-b4:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b4.pickle
+  efficientnet-b4-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b4-autoaug.pickle
+  efficientnet-b5:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b5.pickle
+  efficientnet-b5-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b5-autoaug.pickle
+  efficientnet-b5-randaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b5-randaug.pickle
+  efficientnet-b6-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b6-autoaug.pickle
+  efficientnet-b7-autoaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b7-autoaug.pickle
+  efficientnet-b7-randaug:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_efficientnet-b7-randaug.pickle
+  fbresnet152:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_fbresnet152.pickle
+  googlenet_inceptionv1:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_googlenet_inceptionv1.pickle
+  inceptionresnetv2:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_inceptionresnetv2.pickle
+  inceptionv3:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_inceptionv3.pickle
+  inceptionv4:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_inceptionv4.pickle
+  mnasnet0_5:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_mnasnet0_5.pickle
+  mnasnet1_0:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_mnasnet1_0.pickle
+  mobilenet_v2:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_mobilenet_v2.pickle
+  nasnetalarge:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_nasnetalarge.pickle
+  nasnetamobile:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_nasnetamobile.pickle
+  pnasnet5large:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_pnasnet5large.pickle
+  polynet:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_polynet.pickle
+  resnet101:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet101.pickle
+  resnet152:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet152.pickle
+  resnet18:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet18.pickle
+  resnet34:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet34.pickle
+  resnet50:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50.pickle
+  resnet50-vtab:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50-vtab.pickle
+  resnet50-vtab-exemplar:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50-vtab-exemplar.pickle
+  resnet50-vtab-rotation:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50-vtab-rotation.pickle
+  resnet50-vtab-semi-exemplar:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50-vtab-semi-exemplar.pickle
+  resnet50-vtab-semi-rotation:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50-vtab-semi-rotation.pickle
+  resnet50_aws_baseline:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnet50_aws_baseline.pickle
+  resnext101_32x4d:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnext101_32x4d.pickle
+  resnext101_32x8d:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnext101_32x8d.pickle
+  resnext101_64x4d:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnext101_64x4d.pickle
+  resnext50_32x4d:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_resnext50_32x4d.pickle
+  se_resnet101:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_se_resnet101.pickle
+  se_resnet152:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_se_resnet152.pickle
+  se_resnet50:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_se_resnet50.pickle
+  se_resnext101_32x4d:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_se_resnext101_32x4d.pickle
+  se_resnext50_32x4d:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_se_resnext50_32x4d.pickle
+  senet154:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_senet154.pickle
+  shufflenet_v2_x0_5:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_shufflenet_v2_x0_5.pickle
+  shufflenet_v2_x1_0:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_shufflenet_v2_x1_0.pickle
+  squeezenet1_0:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_squeezenet1_0.pickle
+  squeezenet1_1:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_squeezenet1_1.pickle
+  vgg11:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg11.pickle
+  vgg11_bn:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg11_bn.pickle
+  vgg13:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg13.pickle
+  vgg13_bn:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg13_bn.pickle
+  vgg16:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg16.pickle
+  vgg16_bn:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg16_bn.pickle
+  vgg19:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg19.pickle
+  vgg19_bn:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_vgg19_bn.pickle
+  wide_resnet101_2:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_wide_resnet101_2.pickle
+  wide_resnet50_2:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_wide_resnet50_2.pickle
+  xception:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /datahd3a/imagenet_testbest_outputs/logits/imagenetv2-matched-frequency-format-val/imagenetv2-matched-frequency-format-val_|_xception.pickle
+  deepens_alexnet:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens1.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens2.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens3.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens4.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens5.hdf5
+  deepens_resnet101:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenetv2mf--deepens1.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenetv2mf--deepens2.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenetv2mf--deepens3.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenetv2mf--deepens4.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenetv2mf--deepens5.hdf5
+  deepens_resnet50:
+    labelpaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    - /data/Projects/linear_ensembles/interp_ensembles/data/imagenet_targets/imagenetv2mf.npy
+    filepaths:
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens1.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens2.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens3.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens4.hdf5
+    - /data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens5.hdf5
