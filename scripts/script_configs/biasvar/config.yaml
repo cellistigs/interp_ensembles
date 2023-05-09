@@ -1,0 +1,3 @@
+defaults:
+  - imagenet: imagenet_het1.yaml
+  - cifar10: cifar10_het1.yaml

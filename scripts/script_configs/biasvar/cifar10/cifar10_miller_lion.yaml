@@ -1,0 +1,399 @@
+title: "CIFAR 10"
+line_extent: 0.15
+models: 
+  densenet121:
+    modelnames: 
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet121/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet121/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet121/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet121/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projecxts/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  densenet_cifar:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet_cifar/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet_cifar/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet_cifar/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet_cifar/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/densenet_cifar/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  dpn26:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/dpn26/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/dpn26/run_1.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  efficientnetb0:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/efficientnetb0/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/efficientnetb0/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/efficientnetb0/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/efficientnetb0/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/efficientnetb0/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  googlenet:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/googlenet/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/googlenet/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/googlenet/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  lenet:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/lenet/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/lenet/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/lenet/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  mobilenet:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/mobilenet/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/mobilenet/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/mobilenet/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/mobilenet/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  mobilenetv2:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/mobilenetv2/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/mobilenetv2/run_1.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  pnasneta:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasneta/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasneta/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasneta/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasneta/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasneta/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  pnasnetb:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasnetb/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasnetb/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasnetb/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasnetb/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/pnasnetb/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  preactresnet101:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet101/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet101/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet101/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  preactresnet18:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet18/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet18/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet18/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  preactresnet34:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet34/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet34/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet34/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet34/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet34/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  preactresnet50:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet50/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet50/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/preactresnet50/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  regnetx_200mf:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_200mf/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_200mf/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_200mf/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  regnetx_400mf:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_400mf/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_400mf/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_400mf/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_400mf/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/regnetx_400mf/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  resnet101:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet101/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet101/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet101/run_2.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  resnet18:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet18/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet18/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet18/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet18/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet18/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  resnet34:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet34/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet34/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet34/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet34/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnet34/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  resnext29_2x64d:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_2x64d/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_2x64d/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_2x64d/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_2x64d/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  resnext29_32x4d:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_32x4d/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_32x4d/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_32x4d/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/resnext29_32x4d/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  senet18:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/senet18/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/senet18/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/senet18/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/senet18/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/senet18/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  shufflenetg2:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg2/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg2/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg2/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg2/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  shufflenetg3:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg3/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg3/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg3/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetg3/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  shufflenetv2_0_5:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_0_5/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_0_5/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_0_5/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_0_5/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  shufflenetv2_1:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  shufflenetv2_1_5:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1_5/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1_5/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1_5/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1_5/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_1_5/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  shufflenetv2_2:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_4.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_5.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/shufflenetv2_2/run_6.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  vgg11:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg11/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg11/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg11/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg11/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg11/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  vgg13:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg13/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg13/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg13/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg13/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg13/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  vgg16:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg16/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg16/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg16/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg16/run_3.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg16/run_4.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"
+  vgg19:
+    modelnames:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg19/run_0.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg19/run_1.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg19/run_2.npz"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/logits_miller/vgg19/run_3.npz"
+    labelpaths:
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+      - "/data/Projects/linear_ensembles/interp_ensembles/data/cifar10_targets.npy"
+    npz_flag: "cifar10"

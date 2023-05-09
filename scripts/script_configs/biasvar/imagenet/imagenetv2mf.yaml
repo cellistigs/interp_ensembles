@@ -1,0 +1,27 @@
+title: "Imagenet" # Title for the resulting plot.  
+line_extent: 0.15 # extent of identity line to draw on your plot. 
+models: ## all of the model information you want to plot. 
+  ResNet50: ## Name of the first model to plot. 
+    modelnames: ## List of all of filepaths where model predictions are stored (h5 files for imagenet, .npy files for cifar10.) Should be given relative to `scripts` directory. 
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens1.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens2.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens3.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens4.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet50--imagenetv2mf--deepens5.hdf5"
+  Alexnet: ## Name of the first model to plot. 
+    modelnames: ## List of all of filepaths where model predictions are stored (h5 files for imagenet, .npy files for cifar10.) Should be given relative to `scripts` directory. 
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens1.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens2.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens3.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens4.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/alexnet--imagenetv2mf--deepens5.hdf5"
+  Resnet101: ## Name of the first model to plot.
+    modelnames: ## List of all of filepaths where model predictions are stored (h5 files for imagenet, .npy files for cifar10.) Should be given relative to `scripts` directory.
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenet--deepens1.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenet--deepens2.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenet--deepens3.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenet--deepens4.hdf5"
+      - "/data/Projects/linear_ensembles/interp_ensembles/results/imagenet/logits/resnet101--imagenet--deepens5.hdf5"
+
+  
+
