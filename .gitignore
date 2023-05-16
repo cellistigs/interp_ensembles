@@ -1,3 +1,6 @@
+#files
+*.pdf
+#
 data_v4/*
 data/*
 models/*
@@ -14,6 +17,7 @@ docs/_build/*
 etc/*
 scripts/cifar-10-python.tar.gz
 scripts/cifar-10-batches-py/*
+scripts/random_features/results/*
 .DS_Store
 tests/test_mats/*
 *.pyc

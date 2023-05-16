@@ -240,4 +240,10 @@ class CalibrationData(object):
         return {"maxprob":maxprob,"maxind":maxind,"target":target,"correct":correct,"bin":binind}
 
 
+def quadratic_uncertainty(probs, as_vec=False):
+    # probs = samples, classes
+    if as_vec:
+        return 1 - (probs**2).sum(axis=-1)
+    else:
+        return np.mean(1 - (probs**2).sum(axis=-1))
 
