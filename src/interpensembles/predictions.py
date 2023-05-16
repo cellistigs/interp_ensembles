@@ -119,6 +119,18 @@ class EnsembleModel(object):
         var = np.var(array_probs,axis = 0,ddof = 1)
         return np.mean(np.sum(var,axis = -1))
     
+    def get_avg_certainty(self):
+        """Get average certainty across ensemble members. 
+        """
+        all_probs = []
+        for model, modeldata in self.models.items():
+            probs = modeldata["preds"]
+            all_probs.append(probs)
+        array_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
+        norms = np.linalg.norm(array_probs,axis = -1)
+        avg_norms = np.mean(norms,axis = 0)
+        return avg_norms
+
     def get_bias_bs_vec(self):
         """Given a brier score, estimate bias across the dataset.   
         """
@@ -171,6 +183,36 @@ class EnsembleModel(object):
         array_probs = np.stack(all_probs,axis = 0) # (models,samples)
         norm_term = np.log(np.mean(array_probs,axis = 0))
         diversity = np.mean(-np.mean(np.log(array_probs),axis = 0)+norm_term)
+        return diversity 
+
+    def get_avg_nll_vec(self):
+        """estimate the average NLL across the ensemble per datapoint. 
+
+        """
+        all_nll = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            targets = modeldata["labels"]
+            all_nll.append(-np.log(probs[np.arange(len(targets)),targets]))
+
+        array_nll = np.stack(all_nll,axis = 0) # (models,samples)
+        return np.mean(array_nll,axis = 0)
+
+    def get_nll_div_vec(self):    
+        """estimate diversity between ensembles members corresponding to the jensen gap between ensemble and single
+        model nll per datapoint 
+
+        """
+        all_probs = []
+        for model,modeldata in self.models.items():
+            probs = modeldata["preds"]
+            targets = modeldata["labels"]
+            all_probs.append(probs[np.arange(len(targets)),targets])
+            
+
+        array_probs = np.stack(all_probs,axis = 0) # (models,samples)
+        norm_term = np.log(np.mean(array_probs,axis = 0))
+        diversity = -np.mean(np.log(array_probs),axis = 0)+norm_term
         return diversity 
 
     def get_pairwise_corr(self):
