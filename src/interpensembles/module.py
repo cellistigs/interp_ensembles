@@ -204,7 +204,7 @@ class CIFAR10RFFModule(CIFAR10_Models):
         assert self.hparams.classifier.startswith("RFF")
         
         self.model = all_classifiers[self.hparams.classifier](32*32*3,self.hparams.projection_size,10)
-        l2loss = torch.nn.MSELoss()
+        self.l2loss = torch.nn.MSELoss()
 
     def forward(self,batch):
         images,labels = batch
@@ -212,9 +212,10 @@ class CIFAR10RFFModule(CIFAR10_Models):
         predictions = self.model(images)
         imloss = self.criterion(predictions, labels)
         #TODO check this next line 
-        regloss = self.hparams.weight_decay*l2loss(self.model.parameters(),torch.zeros(self.model.params().shape))
+        zeros = torch.zeros(self.model.regress.weight.shape).to(self.model.regress.weight)
+        regloss = self.hparams.weight_decay*self.l2loss(self.model.regress.weight,zeros)
         loss = imloss+regloss
-        accuracy = (predictions, labels)
+        accuracy = self.accuracy(predictions, labels)
         return loss, accuracy *100
 
     def calibration(self,batch,use_softmax = True):
@@ -250,6 +251,65 @@ class CIFAR10RFFModule(CIFAR10_Models):
                 )
 
         return optimizer
+
+class CIFAR10RFFSGDModule(CIFAR10_Models):
+    def __init__(self, hparams):
+        super().__init__(hparams)
+        print(hparams)
+        print(self.hparams)
+
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.accuracy = Accuracy()
+
+        #self.model = all_classifiers[self.hparams.classifier]()
+        self.model = all_classifiers[self.hparams.classifier](32*32*3,self.hparams.projection_size,10)
+
+    def forward(self, batch):
+        images, labels = batch
+        images = torch.reshape(images,(images.shape[0],-1))
+        predictions = self.model(images)
+        loss = self.criterion(predictions, labels)
+        accuracy = self.accuracy(predictions, labels)
+        return loss, accuracy * 100
+
+    def calibration(self,batch,use_softmax = True):
+        """Like forward, but just exit with the softmax predictions and labels. . 
+        """
+        softmax = torch.nn.Softmax(dim = 1)
+        images, labels = batch
+        predictions = self.model(images)
+        if use_softmax:
+            smpredictions = softmax(predictions)
+        else:    
+            smpredictions = predictions
+        return smpredictions,labels
+
+    def training_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/train", loss)
+        self.log("acc/train", accuracy)
+        return loss
+
+    def validation_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/val", loss)
+        self.log("acc/val", accuracy)
+
+    def test_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("acc/test", accuracy)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.SGD(
+            self.model.parameters(),
+            lr=self.hparams.learning_rate,
+            weight_decay=self.hparams.weight_decay,
+            momentum=0.9,
+            nesterov=True,
+        )
+        total_steps = self.hparams.max_epochs * len(self.train_dataloader())
+        scheduler = self.setup_scheduler(optimizer,total_steps)
+        return [optimizer], [scheduler]
 
 class CIFAR10Module(CIFAR10_Models):
     def __init__(self, hparams):
@@ -489,3 +549,121 @@ class CIFAR10InterEnsembleModule(CIFAR10_Models):
         scheduler = self.setup_scheduler(optimizer,total_steps)
         return [optimizer], [scheduler]
 
+class MNISTRFFModule(CIFAR10_Models):
+    """Module to train RFF with LBFGS
+
+    """
+    def __init__(self,hparams):
+        super().__init__(hparams)
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.accuracy = Accuracy()
+        
+        assert self.hparams.classifier.startswith("RFF")
+        
+        self.model = all_classifiers[self.hparams.classifier](28*28,self.hparams.projection_size,10)
+        self.l2loss = torch.nn.MSELoss()
+
+    def forward(self,batch):
+        images,labels = batch
+        images = torch.reshape(images,(images.shape[0],-1))
+        predictions = self.model(images)
+        imloss = self.criterion(predictions, labels)
+        #TODO check this next line 
+        zeros = torch.zeros(self.model.regress.weight.shape).to(self.model.regress.weight)
+        regloss = self.hparams.weight_decay*self.l2loss(self.model.regress.weight,zeros)
+        loss = imloss+regloss
+        accuracy = self.accuracy(predictions, labels)
+        return loss, accuracy *100
+
+    def calibration(self,batch,use_softmax = True):
+        """Like forward, but just exit with the softmax predictions and labels. . 
+        """
+        softmax = torch.nn.Softmax(dim = 1)
+        images, labels = batch
+        predictions = self.model(images)
+        if use_softmax:
+            smpredictions = softmax(predictions)
+        else:    
+            smpredictions = predictions
+        return smpredictions,labels
+
+    def training_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/train", loss)
+        self.log("acc/train", accuracy)
+        return loss
+
+    def validation_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/val", loss)
+        self.log("acc/val", accuracy)
+
+    def test_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("acc/test", accuracy)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.LBFGS(
+                self.model.parameters(),
+                lr = self.hparams.learning_rate)
+
+        return optimizer
+
+class MNISTRFFSGDModule(CIFAR10_Models):
+    def __init__(self, hparams):
+        super().__init__(hparams)
+        print(hparams)
+        print(self.hparams)
+
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.accuracy = Accuracy()
+
+        #self.model = all_classifiers[self.hparams.classifier]()
+        self.model = all_classifiers[self.hparams.classifier](28*28,self.hparams.projection_size,10)
+
+    def forward(self, batch):
+        images, labels = batch
+        images = torch.reshape(images,(images.shape[0],-1))
+        predictions = self.model(images)
+        loss = self.criterion(predictions, labels)
+        accuracy = self.accuracy(predictions, labels)
+        return loss, accuracy * 100
+
+    def calibration(self,batch,use_softmax = True):
+        """Like forward, but just exit with the softmax predictions and labels. . 
+        """
+        softmax = torch.nn.Softmax(dim = 1)
+        images, labels = batch
+        predictions = self.model(images)
+        if use_softmax:
+            smpredictions = softmax(predictions)
+        else:    
+            smpredictions = predictions
+        return smpredictions,labels
+
+    def training_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/train", loss)
+        self.log("acc/train", accuracy)
+        return loss
+
+    def validation_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/val", loss)
+        self.log("acc/val", accuracy)
+
+    def test_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("acc/test", accuracy)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.SGD(
+            self.model.parameters(),
+            lr=self.hparams.learning_rate,
+            weight_decay=self.hparams.weight_decay,
+            momentum=0.9,
+            nesterov=True,
+        )
+        total_steps = self.hparams.max_epochs * len(self.train_dataloader())
+        scheduler = self.setup_scheduler(optimizer,total_steps)
+        return [optimizer], [scheduler]

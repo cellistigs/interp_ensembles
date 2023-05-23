@@ -11,7 +11,7 @@ class RFF_Projection(nn.Module):
         super().__init__()
         self.weights = nn.Parameter(torch.Tensor(project_size,input_size),requires_grad = False)
         self.offset = nn.Parameter(torch.Tensor(project_size),requires_grad = False)
-        nn.init.normal_(self.weights,sigma,1/np.sqrt(sigma*input_size))
+        nn.init.normal_(self.weights,0,1/np.sqrt(sigma*input_size))
         nn.init.uniform_(self.offset,0,2*np.pi)
         
     def forward(self,x):    

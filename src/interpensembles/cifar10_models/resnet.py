@@ -988,6 +988,16 @@ def resnet18(pretrained=False, progress=True, device="cpu", **kwargs):
     )
 
 
+def resnet26(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a ResNet-26 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet(
+        "resnet26", BasicBlock, [3, 3, 3, 3], pretrained, progress, device, **kwargs
+    )
+
 def resnet34(pretrained=False, progress=True, device="cpu", **kwargs):
     """Constructs a ResNet-34 model.
     Args:
@@ -996,6 +1006,26 @@ def resnet34(pretrained=False, progress=True, device="cpu", **kwargs):
     """
     return _resnet(
         "resnet34", BasicBlock, [3, 4, 6, 3], pretrained, progress, device, **kwargs
+    )
+
+def resnet42(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a ResNet-42 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet(
+        "resnet42", BasicBlock, [3, 4, 10, 3], pretrained, progress, device, **kwargs
+    )
+
+def resnet52(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a ResNet-52 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _resnet(
+        "resnet52", BasicBlock, [3, 4, 15, 3], pretrained, progress, device, **kwargs
     )
 
 
@@ -1009,6 +1039,15 @@ def resnet50(pretrained=False, progress=True, device="cpu", **kwargs):
         "resnet50", Bottleneck, [3, 4, 6, 3], pretrained, progress, device, **kwargs
     )
 
+def narrowresnet10_32(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a narrow (x1/16) ResNet-10 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "narrowresnet10_32", BasicBlock, [1, 1, 1, 1], pretrained, progress, device, k = 1./32., **kwargs
+    )
 def narrowresnet10_16(pretrained=False, progress=True, device="cpu", **kwargs):
     """Constructs a narrow (x1/16) ResNet-10 model.
     Args:
@@ -1055,6 +1094,15 @@ def resnet10(pretrained=False, progress=True, device="cpu", **kwargs):
         "resnet10", BasicBlock, [1, 1, 1, 1], pretrained, progress, device, **kwargs
     )
 
+def narrowresnet12_32(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a narrow (x1/32) ResNet-12 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "narrowresnet12_32", BasicBlock, [2, 1, 1, 1], pretrained, progress, device, k = 1./32., **kwargs
+    )
 def narrowresnet12_16(pretrained=False, progress=True, device="cpu", **kwargs):
     """Constructs a narrow (x1/16) ResNet-12 model.
     Args:
@@ -1099,6 +1147,16 @@ def resnet12(pretrained=False, progress=True, device="cpu", **kwargs):
     """
     return _resnet(
         "resnet12", BasicBlock, [2, 1, 1, 1], pretrained, progress, device, **kwargs
+    )
+
+def narrowresnet14_32(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a narrow (x1/32) ResNet-14 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "narrowresnet14_32", BasicBlock, [2, 2, 1, 1], pretrained, progress, device, k = 1./32., **kwargs
     )
 
 def narrowresnet14_16(pretrained=False, progress=True, device="cpu", **kwargs):
@@ -1147,6 +1205,15 @@ def resnet14(pretrained=False, progress=True, device="cpu", **kwargs):
         "resnet14", BasicBlock, [2, 2, 1, 1], pretrained, progress, device, **kwargs
     )
 
+def narrowresnet16_32(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a narrow (x1/32) ResNet-16 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "narrowresnet16_32", BasicBlock, [2, 2, 2, 1], pretrained, progress, device, k = 1./32., **kwargs
+    )
 def narrowresnet16_16(pretrained=False, progress=True, device="cpu", **kwargs):
     """Constructs a narrow (x1/16) ResNet-16 model.
     Args:
@@ -1191,6 +1258,15 @@ def resnet16(pretrained=False, progress=True, device="cpu", **kwargs):
     """
     return _resnet(
         "resnet16", BasicBlock, [2, 2, 2, 1], pretrained, progress, device, **kwargs
+    )
+def narrowresnet18_32(pretrained=False, progress=True, device="cpu", **kwargs):
+    """Constructs a narrow (x1/32) ResNet-18 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _wideresnet(
+        "narrowresnet18_32", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, k = 1./32., **kwargs
     )
 
 def narrowresnet18_16(pretrained=False, progress=True, device="cpu", **kwargs):

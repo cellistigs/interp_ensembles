@@ -1,6 +1,6 @@
 # Program arguments: 
 data_dir: /home/ubuntu/cifar10_ood/data/ 
-ind_dataset: mnist
+ind_dataset: cifar10
 ood_dataset: cifar10_1  
 version: v4 
 level: null  
