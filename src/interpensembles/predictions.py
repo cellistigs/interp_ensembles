@@ -31,9 +31,11 @@ class Model(object):
           used for `cifar10` or `cinic10` logits.
     """
 
-        if mask_array is None:
-            mask_array = ()
-        self.filename = filename
+    def __init__(self, modelprefix, data, dtype='float32'):
+        self.modelprefix = modelprefix
+        self.models = {}  ## dict of dicts- key is modelname, value is dictionary of preds/labels.
+        self.data = data
+        self.dtype = dtype
 
         if inputtype is None:
             _, ext = os.path.splitext(filename)
@@ -82,7 +84,6 @@ class Model(object):
                 self._logits = pd.read_pickle(filename)['logits']
                 self._labels = np.load(labelpath)
                 self._probs = np.exp(self._logits) / np.sum(np.exp(self._logits), 1, keepdims=True)
-
 
     def mean_conf(self):
         # n x c
@@ -211,8 +212,8 @@ class EnsembleModel(Model):
         for model,modeldata in self.models.items():
             probs = modeldata.probs()
             all_probs.append(probs)
-        array_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
-        var = np.var(array_probs,axis = 0,ddof = 1)
+        all_probs = np.stack(all_probs,axis = 0) # (models,samples,classes)
+        var = np.var(all_probs,axis = 0,ddof = 1)
         return np.mean(np.sum(var,axis = -1))
     
     def get_avg_certainty(self):
@@ -318,9 +319,9 @@ class EnsembleModel(Model):
             all_probs.append(probs[np.arange(len(targets)),targets])
             
 
-        array_probs = np.stack(all_probs,axis = 0) # (models,samples)
-        norm_term = np.log(np.mean(array_probs,axis = 0))
-        diversity = -np.mean(np.log(array_probs),axis = 0)+norm_term
+        all_probs = np.stack(all_probs,axis = 0) # (models,samples)
+        norm_term = np.log(np.mean(all_probs,axis = 0))
+        diversity = np.mean(-np.mean(np.log(all_probs),axis = 0)+norm_term)
         return diversity 
 
     def get_pairwise_corr(self):
@@ -408,6 +409,31 @@ class EnsembleModel(Model):
         else:
             return self._get_diversity_score(metric=metric)
 
+    def get_avg_qunc(self, as_vec=False):
+        """estimate the average single model uncertainty.
+
+        """
+        all_unc = []
+        for model, modeldata in self.models.items():
+            probs = modeldata["preds"]
+            model_unc = quadratic_uncertainty(probs, as_vec=True)  #(samples)
+            all_unc.append(model_unc)
+
+        all_unc = np.stack(all_unc, axis=0)  # (models,samples)
+        all_unc = np.mean(all_unc, axis=0)  # (samples)
+        if as_vec:
+            return all_unc
+        else:
+            return np.mean(all_unc)
+
+    def get_ens_qunc(self, as_vec=False):
+        """estimate the average single model uncertainty.
+
+        """
+        all_probs = self.probs()  # (samples,classes)
+        return quadratic_uncertainty(all_probs, as_vec=as_vec)
+
+
 class Model(object):
     def __init__(self,  modelprefix, data):
         self.modelprefix = modelprefix
@@ -482,3 +508,14 @@ class Model(object):
         ad = AccuracyData()
         return ad.accuracy(self.probs(), self.labels())
 
+    def get_nll(self, normalize=True):
+
+        nld = NLLData()
+        return nld.nll(self.probs(), self.labels(), normalize=normalize)
+
+    def get_brier(self):
+        bsd = BrierScoreData()
+        return bsd.brierscore_multi(self.probs(), self.labels())
+
+    def get_qunc(self):
+        return quadratic_uncertainty(self.probs())

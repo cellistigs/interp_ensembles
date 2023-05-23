@@ -2,18 +2,18 @@ gpu: false
 nclasses: 10  
 ind_softmax: false
 ind_stubs:
-- robust_results12-07-21_21:54.17_base_wideresnet28_10
-- robust_results12-07-21_21:55.20_base_wideresnet28_10
-- robust_results12-07-21_21:56.19_base_wideresnet28_10
-- robust_results12-07-21_21:57.14_base_wideresnet28_10
-- robust_results12-07-21_21:58.22_base_wideresnet28_10
+- repo/results/robust_results12-07-21_21:54.17_base_wideresnet28_10
+- repo/results/robust_results12-07-21_21:55.20_base_wideresnet28_10
+- repo/results/robust_results12-07-21_21:56.19_base_wideresnet28_10
+- repo/results/robust_results12-07-21_21:57.14_base_wideresnet28_10
+- repo/results/robust_results12-07-21_21:58.22_base_wideresnet28_10
 ood_softmax: false
 ood_stubs:
-- robust_results12-13-21_20:45.11_base_wideresnet28_10
-- robust_results12-14-21_00:49.36_base_wideresnet28_10
-- robust_results12-14-21_04:53.58_base_wideresnet28_10
-- robust_results12-14-21_08:58.12_base_wideresnet28_10
-- robust_results12-14-21_13:02.36_base_wideresnet28_10
+- repo/results/robust_results12-13-21_20:45.11_base_wideresnet28_10
+- repo/results/robust_results12-14-21_00:49.36_base_wideresnet28_10
+- repo/results/robust_results12-14-21_04:53.58_base_wideresnet28_10
+- repo/results/robust_results12-14-21_08:58.12_base_wideresnet28_10
+- repo/results/robust_results12-14-21_13:02.36_base_wideresnet28_10
 ood_suffix: ood_cinic_preds.npy
 ind_name: "CIFAR10 (InD)"  
 ## Run significance tests?
