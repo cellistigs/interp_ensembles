@@ -11,13 +11,21 @@ from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
-from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule
+from interpensembles.module import CIFAR10Module,CIFAR10EnsembleModule,CIFAR10RFFModule,CIFAR10RFFSGDModule,MNISTRFFModule,MNISTRFFSGDModule
 
-from cifar10_ood.data import CIFAR10Data,CIFAR10_1Data,CINIC10_Data,CIFAR10_CData
+from cifar10_ood.data import CIFAR10Data,CIFAR10_1Data,CINIC10_Data,CIFAR10_CData,MNISTData
 
 
-modules = {"base":CIFAR10Module,
+cifar_modules = {
+        "base":CIFAR10Module,
         "ensemble":CIFAR10EnsembleModule,
+        "rff":CIFAR10RFFModule,
+        "rffsgd":CIFAR10RFFSGDModule,
+        }
+
+mnist_modules = {
+        "rff":MNISTRFFModule,
+        "rffsgd":MNISTRFFSGDModule,
         }
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
@@ -42,9 +50,10 @@ def traindata_eval(model,ind_data,device,softmax = False):
     with torch.no_grad():
         for idx,batch in tqdm(enumerate(ind_data.train_dataloader(shuffle=False,aug=False))):
             ims = batch[0].to(device)
+            ims_flat = ims.reshape(ims.shape[0],-1)
             labels = batch[1].to(device)
             ## TODO change this to not pred, but linear. 
-            pred,label = model.calibration((ims,labels),use_softmax=softmax)
+            pred,label = model.calibration((ims_flat,labels),use_softmax=softmax)
             ## to cpu
             predarray = pred.cpu().numpy() ## 256x10
             labelarray = label.cpu().numpy() ## 
@@ -54,6 +63,26 @@ def traindata_eval(model,ind_data,device,softmax = False):
     all_preds_array = np.concatenate(all_preds,axis = 0)
     all_labels_array = np.concatenate(all_labels,axis = 0)
     return all_preds_array,all_labels_array
+
+def eval_dataset(model,dataset,device,softmax=True):
+    all_preds = []
+    all_labels = []
+    model.eval()
+    with torch.no_grad():
+        for idx,batch in tqdm(enumerate(dataset.test_dataloader())):
+            ims = batch[0].to(device)
+            ims_flat = ims.reshape(ims.shape[0],-1)
+            print(ims.shape)
+            labels = batch[1].to(device)
+            pred,label = model.calibration((ims_flat,labels),use_softmax=softmax)
+            ## to cpu
+            predarray = pred.cpu().numpy() ## 256x10
+            labelarray = label.cpu().numpy() ## 
+            all_preds.append(predarray)
+            all_labels.append(labelarray)
+    all_preds_array = np.concatenate(all_preds,axis = 0)
+    all_labels_array = np.concatenate(all_labels,axis = 0)
+    return all_preds_array,all_labels_array        
 
 def custom_eval(model,ind_data,ood_data,device,softmax = True):   
     """Custom evaluation function to output logits as arrays from models given the trained model, in distribution data and out of distribution data. 
@@ -67,41 +96,41 @@ def custom_eval(model,ind_data,ood_data,device,softmax = True):
 
     """
     ## This is the only place where we need to worry about devices. The model should already know what device to use. 
-    all_preds_ind = []
-    all_labels_ind = []
-    all_preds_ood = []
-    all_labels_ood = []
 
     ## model, cifart10data,cifart10_1data,
-    model.eval()
-    with torch.no_grad():
-        for idx,batch in tqdm(enumerate(ind_data.test_dataloader())):
-            ims = batch[0].to(device)
-            labels = batch[1].to(device)
-            pred,label = model.calibration((ims,labels),use_softmax=softmax)
-            ## to cpu
-            predarray = pred.cpu().numpy() ## 256x10
-            labelarray = label.cpu().numpy() ## 
-            all_preds_ind.append(predarray)
-            all_labels_ind.append(labelarray)
-        for idx,batch in tqdm(enumerate(ood_data.test_dataloader())):
-            ims = batch[0].to(device)
-            labels = batch[1].to(device)
-            pred,label = model.calibration((ims,labels),use_softmax=softmax)
-            ## to cpu
-            predarray = pred.cpu().numpy() ## 256x10
-            labelarray = label.cpu().numpy() ## 
-            all_preds_ood.append(predarray)
-            all_labels_ood.append(labelarray)
+    all_preds_ind,all_labels_ind = eval_dataset(model,ind_data,device,softmax=softmax)
+    all_preds_ood,all_labels_ood = eval_dataset(model,ood_data,device,softmax=softmax)
+    #model.eval()
+    #with torch.no_grad():
+    #    for idx,batch in tqdm(enumerate(ind_data.test_dataloader())):
+    #        ims = batch[0].to(device)
+    #        labels = batch[1].to(device)
+    #        pred,label = model.calibration((ims,labels),use_softmax=softmax)
+    #        ## to cpu
+    #        predarray = pred.cpu().numpy() ## 256x10
+    #        labelarray = label.cpu().numpy() ## 
+    #        all_preds_ind.append(predarray)
+    #        all_labels_ind.append(labelarray)
+    #    for idx,batch in tqdm(enumerate(ood_data.test_dataloader())):
+    #        ims = batch[0].to(device)
+    #        labels = batch[1].to(device)
+    #        pred,label = model.calibration((ims,labels),use_softmax=softmax)
+    #        ## to cpu
+    #        predarray = pred.cpu().numpy() ## 256x10
+    #        labelarray = label.cpu().numpy() ## 
+    #        all_preds_ood.append(predarray)
+    #        all_labels_ood.append(labelarray)
 
-    all_preds_ind_array = np.concatenate(all_preds_ind,axis = 0)
-    all_labels_ind_array = np.concatenate(all_labels_ind,axis = 0)
-    all_preds_ood_array = np.concatenate(all_preds_ood,axis = 0)
-    all_labels_ood_array = np.concatenate(all_labels_ood,axis = 0)
-    return all_preds_ind_array,all_labels_ind_array,all_preds_ood_array,all_labels_ood_array
+    return all_preds_ind,all_labels_ind,all_preds_ood,all_labels_ood
 
 @hydra.main(config_path = os.path.join(script_dir,"../configs/"),config_name = "run_default_gpu")
 def main(args):
+    if args.ind_dataset == "cifar10":
+        modules = cifar_modules
+    elif args.ind_dataset == "mnist":    
+        modules = mnist_modules
+    else:    
+        raise AssertionError("ind_dataset not recognized.")
 
     ## Set seeds if given.  
     if args.seed is not None:
@@ -111,9 +140,9 @@ def main(args):
 
     ## Set up logging. 
     if args.logger == "wandb":
-        logger = WandbLogger(name=args.classifier, project="cifar10")
+        logger = WandbLogger(name=args.classifier, project=args.ind_dataset)
     elif args.logger == "tensorboard":
-        logger = TensorBoardLogger("cifar10", name=args.classifier)
+        logger = TensorBoardLogger(args.ind_dataset, name=args.classifier)
 
     ## Configure checkpoint and trainer: 
     checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", save_last=False, dirpath = os.path.join(script_dir,"../","models",args.classifier,args.module,datetime.datetime.now().strftime("%m-%d-%y"),datetime.datetime.now().strftime("%H_%M_%S")))
@@ -129,6 +158,10 @@ def main(args):
         "checkpoint_callback":checkpoint,
         "precision":args.precision,
         }
+    if args.module.startswith("rff"):
+        print("not saving model for rff")
+        trainerargs["checkpoint_callback"] = False
+
     if torch.cuda.is_available():
         print("training on GPU")
         trainerargs["gpus"] = -1  
@@ -169,7 +202,11 @@ def main(args):
             model.model.load_state_dict(torch.load(state_dict))
             
     ## what dataset should we evaluate on? 
-    cifar10data = CIFAR10Data(args)
+    if args.ind_dataset == "cifar10":
+        ind_data = CIFAR10Data(args)
+    elif args.ind_dataset == "mnist":    
+        ind_data = MNISTData(args)
+
     if args.ood_dataset == "cifar10_1":
         ood_data = CIFAR10_1Data(args,version =args.version)
     elif args.ood_dataset == "cinic10":    
@@ -183,37 +220,46 @@ def main(args):
     if bool(args.test_phase) or bool(args.random_eval):
         pass
     else:
-        trainer.fit(model, cifar10data)
+        trainer.fit(model, ind_data)
 
     ## testing and evaluation : 
     data = {"in_dist_acc":None,"out_dist_acc":None}
-    data["in_dist_acc"] = trainer.test(model, cifar10data.test_dataloader())[0]["acc/test"]
-    data["out_dist_acc"] = trainer.test(model, ood_data.test_dataloader())[0]["acc/test"]
+    data["in_dist_acc"] = trainer.test(model, ind_data.test_dataloader())[0]["acc/test"]
 
-    preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,cifar10data,ood_data,device,softmax = bool(args.softmax))
-    preds_train,labels_train = traindata_eval(model,cifar10data,device,softmax = bool(args.softmax))
+    if args.ind_dataset == "mnist":
+        print("no ood for mnist")
+        preds_ind,labels_ind = eval_dataset(model,ind_data,device,softmax=bool(args.softmax))
+
+    else:
+        data["out_dist_acc"] = trainer.test(model, ood_data.test_dataloader())[0]["acc/test"]
+        preds_ind, labels_ind, preds_ood, labels_ood = custom_eval(model,ind_data,ood_data,device,softmax = bool(args.softmax))
+        ## ood
+        if args.ood_dataset == "cifar10_1":
+            np.save("ood_preds",preds_ood)
+            np.save("ood_labels",labels_ood)
+        elif args.ood_dataset == "cinic10":    
+            np.save("ood_cinic_preds",preds_ood)
+            np.save("ood_cinic_labels",labels_ood)
+        elif args.ood_dataset == "cifar10_c":    
+            np.save("ood_cifar10_c_{}_{}_preds".format(args.corruption,args.level),preds_ood)
+            np.save("ood_cifar10_c_{}_{}_labels".format(args.corruption,args.level),labels_ood)
+        else:     
+            raise Exception("option for ood dataset not recognized.")
+
+    preds_train,labels_train = traindata_eval(model,ind_data,device,softmax = bool(args.softmax))
 
     full_path = "." #os.path.join(results_dir,"robust_results{}_{}_{}".format(datetime.datetime.now().strftime("%m-%d-%y_%H:%M.%S"),args.module,args.classifier))
     np.save("ind_preds",preds_ind)
     np.save("ind_labels",labels_ind)
     np.save("train_preds",preds_train)
     np.save("train_labels",labels_train)
-    if args.ood_dataset == "cifar10_1":
-        np.save("ood_preds",preds_ood)
-        np.save("ood_labels",labels_ood)
-    elif args.ood_dataset == "cinic10":    
-        np.save("ood_cinic_preds",preds_ood)
-        np.save("ood_cinic_labels",labels_ood)
-    elif args.ood_dataset == "cifar10_c":    
-        np.save("ood_cifar10_c_{}_{}_preds".format(args.corruption,args.level),preds_ood)
-        np.save("ood_cifar10_c_{}_{}_labels".format(args.corruption,args.level),labels_ood)
-    else:     
-        raise Exception("option for ood dataset not recognized.")
+    
     ## write metadata
-    metadata = {}
-    metadata["model_save_path"] = trainer.checkpoint_callback.dirpath
-    with open("meta.json","w") as f:
-        json.dump(metadata,f)
+    if not args.module.startswith("rff"):
+        metadata = {}
+        metadata["model_save_path"] = trainer.checkpoint_callback.dirpath
+        with open("meta.json","w") as f:
+            json.dump(metadata,f)
 
 
 if __name__ == "__main__":
