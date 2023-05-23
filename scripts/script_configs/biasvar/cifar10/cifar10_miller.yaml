@@ -629,3 +629,88 @@ models:
         - /home/ubuntu/cifar10_miller_logits/vgg19/run_0.npz
         - /home/ubuntu/cifar10_miller_logits/vgg19/run_2.npz
         npz_flag: cifar10
+    resnet14_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/0/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/0/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/0/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/0/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+    resnet20_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/1/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/1/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/1/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/1/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+    resnet26_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/2/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/2/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/2/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/2/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+    resnet32_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/3/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/3/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/3/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/3/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+    resnet38_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/4/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/4/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/4/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/4/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+    resnet44_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/5/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/5/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/5/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/5/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+    resnet8_cifar:    
+        logits: false
+        modelnames: 
+        - "../scripts/multirun/2022-11-03/19-49-43/6/ind_preds.npy"
+        - "../scripts/multirun/2022-11-03/23-51-10/6/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/04-35-32/6/ind_preds.npy"
+        - "../scripts/multirun/2022-11-04/08-36-28/6/ind_preds.npy"
+        labelpaths: 
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+        - "../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy"
+

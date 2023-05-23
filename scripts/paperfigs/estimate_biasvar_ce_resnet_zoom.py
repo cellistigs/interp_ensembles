@@ -55,20 +55,20 @@ def get_arrays_toplot(models):
         bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
         #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
         print(modelname,var,bias)
-        if modelname in ["DKL_gamma_1","ResNet18"]:
+        if modelname in ["Var_gamma_0"]:
             base_biasvar = [bias,var]
         else:    
             #print("{}: Bias: {}, Variance: {}, Performance: {}".format(modelname,bias,var,perf))
             all_biasvar.append([bias,var])
             all_biasvarperf.append([perf,bias/var])
-            gammas.append(modelname.split("DKL_gamma_")[-1])
+            gammas.append(modelname.split("Var_gamma_")[-1])
     
     biasvar_array = np.array(all_biasvar)
     biasvarperf_array = np.array(all_biasvarperf)
     return biasvar_array,biasvarperf_array,base_biasvar,np.array(gammas)
 
 
-@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_dkl")
+@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_var")
 def main(args):
     print(len(args.models))
     biasvar_array,biasvarperf_array,base_biasvar,gammas = get_arrays_toplot(args.models)
@@ -84,8 +84,8 @@ def main(args):
     #defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
     #plt.plot(defaultline[:,1],defaultline[:,0],"--",color = "black",label="sim frontier")
     if args.get("colormap",False) is True: ## plot assuming scatters are ordered
-        colors =np.concatenate([ cm.coolwarm(np.linspace(0, 0.5, 8)[:-1]) ,
-            cm.coolwarm(np.linspace(0.5,1,16)[1:])])
+        colors =np.concatenate([ cm.coolwarm(np.linspace(0, 0.5, 13)[:-1]) ,
+            cm.coolwarm(np.linspace(0.5,1,10)[1:])])
         sc = ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=90,c= colors,edgecolors =
                 "black",linewidths = 0.5)
     else:    

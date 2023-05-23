@@ -1,0 +1,168 @@
+# Estimate the bias and variance of a variety of models. 
+from omegaconf.errors import ConfigAttributeError
+import hydra
+import numpy as np
+from interpensembles.predictions import EnsembleModel 
+
+import os 
+here = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from pathlib import Path
+
+plt.style.use(os.path.join(here,"../etc/config/stylesheet.mplstyle"))
+
+def proportion(p,M,r):
+    """Given the following model :
+
+    f_i ~ {Cat(p,(1-p)/(M-1),...,(1-p)/(M-1)) with probability r}
+          {Cat((1-p)/(M-1),p,...,(1-p)/(M-1)) with probability 1-r}
+
+    get the average single model brier score and average variance. This means calculating the brier score and variance for each instance of r, and averaging quantites over r.
+    """
+
+    BS_r = (p-1)**2+(1-p)/(M-1) # brier score for correct proportion.
+    BS_1_r = ((1-p)/(M-1)-1)**2+p**2+(M-2)*((1-p)/(M-1))**2 ## brier score for incorrect proportion.
+    BS = r*BS_r+(1-r)*(BS_1_r)
+    var_first = p*(1-p)*r+(1-p)/(M-1)*(1-(1-p)/(M-1))*(1-r) #expected variance of the first two entries.
+    var_others = (1-p)/(M-1)*(1-(1-p)/(M-1)) #expected variance of all other entries.
+    sum_var = 2*var_first+(M-2)*var_others
+    return BS+sum_var,sum_var
+
+def get_heterogeneous_biasvar(models,seed = 0, metric='pairwise_corr'):
+    """make heterogeneous ensembles, and compare bias and variance for them. 
+
+    """
+    all_divvar = []
+    all_divvarperf = []
+    all_models = []
+    for arch,modelinfo in models.items():
+        for mi,modelpath in enumerate(modelinfo.modelnames):  
+            modeldict = {"arch":arch,"modelpath":modelpath,"labelpath":modelinfo.labelpaths[mi]}
+            try: 
+                modeldict["logits"] = modelinfo.logits
+            except ConfigAttributeError:    
+                modeldict["logits"] = True ## if not given, assume true
+            try: 
+                modeldict["npz_flag"] = modelinfo.npz_flag
+            except ConfigAttributeError:    
+                modeldict["npz_flag"] = None
+            all_models.append(modeldict)
+    ensemble_sizes = [len(modelinfo.modelnames) for m,modelinfo in models.items()]
+
+    np.random.seed(seed)
+    permed = np.random.permutation(all_models)
+    all_ensembles = []
+    for ensemble_size in ensemble_sizes:
+        chunk = permed[:ensemble_size]
+        name = "Model:_".join([m["arch"] for m in chunk])
+        ens = EnsembleModel(name,"ind") 
+        [ens.register(os.path.join(here,m["modelpath"]),i,None,os.path.join(here,m["labelpath"]),logits= m["logits"],npz_flag = m["npz_flag"]) for i,m in enumerate(chunk)]
+        all_ensembles.append(ens)
+        permed = permed[ensemble_size:]
+        #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
+        pairwise_div = ens.get_diversity_score(metric=metric)
+        bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
+        print("Permuted {}: div: {}, Variance: {}, Performance: {}".format(name,pairwise_div,var,perf))
+        all_divvar.append([pairwise_div,var])
+        all_divvarperf.append([perf,bias/var])
+    
+    divvar_array = np.array(all_divvar)
+    divvarperf_array = np.array(all_divvarperf)
+    return divvar_array,divvarperf_array
+
+def get_arrays_toplot(models, metric='pairwise_corr'):
+    """
+    Gets the pairwise correlation and jensen gap diversity, and compare them. 
+    Takes as argument a dictionary of models: keys giving model names, values are dictionaries with paths to individual entries. 
+    :param models: names of individual models. 
+    """
+    all_divvar = []
+    all_divvarperf = []
+    for modelname,model in models.items():
+        ens = EnsembleModel(modelname,"ind")
+        kwargs = {}
+        try: 
+            kwargs["logits"] = model.logits
+        except ConfigAttributeError:    
+            pass
+        try: 
+            kwargs["npz_flag"] = model.npz_flag
+        except ConfigAttributeError:    
+            pass
+ 
+        print(model.modelnames,model.labelpaths)
+        [ens.register(os.path.join(here,m),i,None,os.path.join(here,l),**kwargs) for i,(m,l) in  enumerate(zip(model.modelnames,model.labelpaths))]
+        #bias,var,perf = ens.get_bias_bs(),ens.get_variance(),ens.get_brier()
+        pairwise_div = ens.get_diversity_score(metric=metric)
+        bias,var,perf = ens.get_avg_nll(),ens.get_nll_div(),ens.get_nll()
+        print("{}: pairwise_div: {}, Variance: {}, Performance: {}".format(modelname,pairwise_div,var,perf))
+        all_divvar.append([pairwise_div,var])
+        all_divvarperf.append([perf,bias/var])
+    
+    divvar_array = np.array(all_divvar)
+    divvarperf_array = np.array(all_divvarperf)
+    return divvar_array,divvarperf_array
+
+
+@hydra.main(config_path = "../script_configs/biasvar/cifar10",config_name = "cifar10_miller_local")
+def main(args):
+    # setup results directory
+    results_dir = Path( here) / "../results/biasvar/{}".format(args.title)
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    metric = 'pairwise_corr'
+    #metric = 'avg_disagreement' (control)
+    #metric = 'kl_divergence'
+    # metric = 'cosine_similarity'
+
+    metric_names = {'pairwise_corr': '1 - Avg. pairwise correlation ',
+                    'avg_disagreement':'Avg. disagreement',
+                    'cosine_similarity': 'Cosine similarity',
+                    'kl_divergence': 'KL divergence',}
+    all_biasvar_arrays = []
+    biasvar_array,biasvarperf_array = get_arrays_toplot(args.models, metric=metric)
+    all_biasvar_arrays.append(biasvar_array)
+
+    fig,ax = plt.subplots(figsize=(9,8))
+    for seed in range(10):
+        biasvar_array_permed,biasvarperf_array_permed= get_heterogeneous_biasvar(args.models,seed=seed, metric=metric)
+        if seed == 0:
+            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=10,label =
+                    "heterogeneous",alpha =0.5)
+        else:    
+            ax.scatter(biasvar_array_permed[:,1],biasvar_array_permed[:,0],color = "orange",s=10,alpha = 0.5)
+        all_biasvar_arrays.append(biasvar_array_permed)    
+
+    defaultline = np.array([proportion(pi,10,0.98) for pi in np.linspace(0.87,1,100)])        
+    if args.get("colormap",False) is True: ## plot assuming scatters are ordered
+        colors = cm.rainbow(np.linspace(0, 1, len(biasvar_array)))
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=20,c= colors,label="homogeneous")
+    else:    
+        ax.scatter(biasvar_array[:,1],biasvar_array[:,0],s=20,label = "homogeneous")
+    all_diversity = np.concatenate(all_biasvar_arrays,axis = 0)    
+    ## Delete values that give nans/infs. 
+    nans = np.unique(np.where(~np.isfinite(all_diversity))[0])
+    diversity_finite = np.delete(all_diversity,nans,0)
+    ## Fit a trend line. 
+    z = np.polyfit(diversity_finite[:,1],diversity_finite[:,0],1)
+    p = np.poly1d(z)
+    ax.plot(diversity_finite[:,1],p(diversity_finite[:,1]),color = "black",label = "linear fit")
+    line = np.linspace(0, 100, 100)
+    if 'CIFAR' in args.title:
+        dataset_name = 'CIFAR-10'
+        #ax.set_xlim([0, 0.3])
+        #ax.set_ylim([0, 0.3])
+    elif 'Imagenet' in args.title:
+        dataset_name = 'ImageNet'
+    ax.set_title("{} Comparing predictive diversity".format(dataset_name))
+
+    ax.set_xlabel("CE Jensen gap (pred. diversity)")
+    ax.set_ylabel("{} (pred. diversity)".format(metric_names[metric]))
+    plt.legend()
+    fig.savefig(results_dir / "{}_{}_ce.pdf".format(args.title, metric))
+    plt.show()
+
+    
+if __name__ == "__main__":
+    main()
