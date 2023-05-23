@@ -121,7 +121,7 @@ def get_arrays_toplot(models, ensemble_size = 4):
     return biasvar_array, biasvarperf_array
 
 
-@hydra.main(config_path = "../script_configs/biasvar/imagenet", config_name="imagenet_het1")
+@hydra.main(config_path = "../script_configs/biasvar/cifar10", config_name="cifar10_miller")
 def main(args):
     # Set up results directory
     results_dir = Path( here) / "../results/biasvar/{}".format(args.title)
@@ -164,7 +164,7 @@ def main(args):
             ax.plot(line, line+i*0.05-0.45,alpha = 0.1,color = "black")
         ax.plot(line,line+0.108,"--",color = "black",label = "best ensemble",alpha = 0.5)
         ax.set_xlim([0, 0.3])
-        ax.set_ylim([0.1, 0.4])
+        ax.set_ylim([0.1, 0.6])
     elif 'Imagenet' in args.title:
         # find level set for best model
         best_ensemble_idx = np.argmin(biasvarperf_array_permed[:,0])

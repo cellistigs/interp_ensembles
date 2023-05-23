@@ -17,21 +17,21 @@ module: rff
 
 # Trainer arguments 
 classifier: RFF  
-projection_size:  10
+projection_size:  10000
 gamma: 1 ## weight of dkl argument. 
 embedding_dim: 25 ## attention embedding
 start_attention: 10 ## epoch on which to start attentio
 pretrained: 0 ## if we use pretrained models or not. 
 pretrained-path: null ## path to pretrained model
 precision: 32  
-batch_size: 256  
-max_epochs: 100  
-warmup_epochs: 30  
+batch_size: 512  
+max_epochs: 160  
+warmup_epochs: 0  
 num_workers: 8  
 gpu_id: "0"  
-learning_rate: 1e-2 
-weight_decay: 1
+learning_rate: 1e-1 
+weight_decay: 0
 test_set: "CIFAR10"  
 lamb: 0.5  
-scheduler: cosine  
+scheduler: step  
 
