@@ -81,7 +81,8 @@ parser.add_argument('--store_logits_fname', default='', type=str,
                     help='filename where to store logits')
 parser.add_argument('--save_checkpoint_fname', default='checkpoint.pth.tar', type=str,
                     help='filename where to store checkpoints')
-
+parser.add_argument('--from_pl', default=0, type=int,
+                    help='flag to signal if model was trained using pytorch lightning which renames model variables')
 
 best_acc1 = 0
 
@@ -194,12 +195,29 @@ def main_worker(gpu, ngpus_per_node, args):
                 loc = 'cuda:{}'.format(args.gpu)
                 checkpoint = torch.load(args.resume, map_location=loc)
             args.start_epoch = checkpoint['epoch']
-            best_acc1 = checkpoint['best_acc1']
-            if args.gpu is not None:
-                # best_acc1 may be from a checkpoint from a different GPU
-                best_acc1 = best_acc1.to(args.gpu)
-            model.load_state_dict(checkpoint['state_dict'])
-            optimizer.load_state_dict(checkpoint['optimizer'])
+
+            if args.from_pl == 0:
+                best_acc1 = checkpoint['best_acc1']
+                if args.gpu is not None:
+                    # best_acc1 may be from a checkpoint from a different GPU
+                    best_acc1 = best_acc1.to(args.gpu)
+                model.load_state_dict(checkpoint['state_dict'])
+                optimizer.load_state_dict(checkpoint['optimizer'])
+            else:
+                def key_transformation(key):
+                    new_key = key.replace("model.", "")
+                    new_key = new_key.replace("features", "features.module")
+                    return new_key
+
+                from collections import OrderedDict
+                new_state_dict = OrderedDict()
+                for key, value in checkpoint['state_dict'].items():
+                    new_key = key_transformation(key)
+                    new_state_dict[new_key] = value
+
+                model.load_state_dict(new_state_dict)
+                optimizer.load_state_dict(checkpoint['optimizer_states'][0])
+
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:

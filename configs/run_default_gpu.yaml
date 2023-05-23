@@ -16,7 +16,11 @@ nb_models: 4
 module: base  
 
 # Trainer arguments 
+<<<<<<< HEAD
 classifier: narrowresnet10_16  
+=======
+classifier: efficientnet_b3  
+>>>>>>> trees
 gamma: 1 ## weight of dkl argument. 
 embedding_dim: 25 ## attention embedding
 start_attention: 10 ## epoch on which to start attentio
@@ -28,8 +32,13 @@ max_epochs: 100
 warmup_epochs: 30  
 num_workers: 8  
 gpu_id: "0"  
+<<<<<<< HEAD
 learning_rate: 1e-2 
 weight_decay: 1e-2
+=======
+learning_rate: 1e-1 
+weight_decay: 1e-4 
+>>>>>>> trees
 test_set: "CIFAR10"  
 lamb: 0.5  
 scheduler: cosine  

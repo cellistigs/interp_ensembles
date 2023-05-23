@@ -1,0 +1,14 @@
+title: "Imagenet" # Title for the resulting plot.  
+line_extent: 0.15 # extent of identity line to draw on your plot. 
+models: ## all of the model information you want to plot. 
+  ResNet50: ## Name of the first model to plot. 
+    modelnames: ## List of all of filepaths where model predictions are stored (h5 files for imagenet, .npy files for cifar10.) Should be given relative to `scripts` directory. 
+      - modelpath1
+      - modelpath2
+  Alexnet: ## Name of the first model to plot. 
+    modelnames: ## List of all of filepaths where model predictions are stored (h5 files for imagenet, .npy files for cifar10.) Should be given relative to `scripts` directory. 
+      - modelpath1
+      - modelpath2
+
+  
+

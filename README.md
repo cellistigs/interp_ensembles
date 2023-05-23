@@ -1,6 +1,15 @@
 # Reconsidering Deep Ensembles 
 
 This repository contains code for the manuscript "Reconsidering Deep Ensembles". Here we provide information for how to regenerate figures 1, 2 and 4 of the corresponding paper. 
+## Project structure: 
+
+Please follow these guidelines when contributing to this repo. 
+- source code (like the ensemble and model class, or calculating bias and variance) goes in `src/interpensembles`. We assume users have installed this package. I will also attempt to write tests for all code that lives in `src`.
+- scripts (to generate plots, w/hardcoded references to datasets) live in `scripts` and import `interpensembles` as a package.
+
+## Old project premise:
+
+We all love deep ensembles because they are great for out of distribution detection and covering a diverse set of solutions. However, these benefits, that are supposedly selectively targeted by ensembles (due to diversity among ensemble members, independent errors, etc) are also usually accompanied by an increase in performance on in-distribution data. Do we actually do better in a qualitatively different way when we ensemble, as opposed to when we just properly train a much larger model? 
 
 ## Installation 
 We highly recommend usage of a GPU backed machine in order to reproduce the figures here. CPU only based usage is not tested.  

@@ -1,0 +1,185 @@
+# num of parameters for models
+title: imagenet
+model_type: ModelTypes.STANDARD
+line_extent: 0.15
+models:
+  FixPNASNet:
+    num_params: 86057674
+  FixResNet50:
+    num_params: 25557038
+  FixResNet50_no_adaptation:
+    num_params: 25557038
+  FixResNet50_v2:
+    num_params: 25557038
+  alexnet:
+    num_params: 61100846
+  bninception:
+    num_params: 11295246
+  cafferesnet101:
+    num_params: 44549166
+  densenet121:
+    num_params: 7978862
+  densenet161:
+    num_params: 28681006
+  densenet169:
+    num_params: 14149486
+  densenet201:
+    num_params: 20013934
+  dpn131:
+    num_params: 79254510
+  dpn68:
+    num_params: 12611608
+  dpn98:
+    num_params: 61570734
+  efficientnet-b0:
+    num_params: 5288554
+  efficientnet-b0-autoaug:
+    num_params: 5288554
+  efficientnet-b1:
+    num_params: 7794190
+  efficientnet-b1-autoaug:
+    num_params: 7794190
+  efficientnet-b2:
+    num_params: 9110000
+  efficientnet-b2-autoaug:
+    num_params: 9110000
+  efficientnet-b3:
+    num_params: 12233238
+  efficientnet-b3-autoaug:
+    num_params: 12233238
+  efficientnet-b4:
+    num_params: 19341622
+  efficientnet-b4-autoaug:
+    num_params: 19341622
+  efficientnet-b5:
+    num_params: 30389790
+  efficientnet-b5-autoaug:
+    num_params: 30389790
+  efficientnet-b5-randaug:
+    num_params: 30389790
+  efficientnet-b6-autoaug:
+    num_params: 43040710
+  efficientnet-b7-autoaug:
+    num_params: 66347966
+  efficientnet-b7-randaug:
+    num_params: 66347966
+  fbresnet152:
+    num_params: 60268526
+  googlenet_inceptionv1:
+    num_params: 6624910
+  inceptionresnetv2:
+    num_params: 55843470
+  inceptionv3:
+    num_params: 27161270
+  inceptionv4:
+    num_params: 42679822
+  mnasnet0_5:
+    num_params: 2218518
+  mnasnet1_0:
+    num_params: 4383318
+  mobilenet_v2:
+    num_params: 3504878
+  nasnetalarge:
+    num_params: 88753156
+  nasnetamobile:
+    num_params: 5289984
+  pnasnet5large:
+    num_params: 86057674
+  polynet:
+    num_params: 95366606
+  resnet101:
+    num_params: 44549166
+  resnet152:
+    num_params: 60192814
+  resnet152_3x_simclrv2_finetuned_100pct_tf_port:
+    num_params: 800849160
+  resnet152_3x_simclrv2_linear_probe_tf_port:
+    num_params: 800849160
+  resnet18:
+    num_params: 11689518
+  resnet34:
+    num_params: 21797678
+  resnet50:
+    num_params: 25557038
+  resnet50-randomized_smoothing_noise_0.00:
+    num_params: 25557038
+  resnet50-vtab:
+    num_params: 25594792
+  resnet50-vtab-exemplar:
+    num_params: 25594792
+  resnet50-vtab-rotation:
+    num_params: 23553988
+  resnet50-vtab-semi-exemplar:
+    num_params: 27643792
+  resnet50-vtab-semi-rotation:
+    num_params: 25602988
+  resnet50_aws_baseline:
+    num_params: 25557038
+  resnet50_imagenet_100percent_batch64_original_images:
+    num_params: 25557038
+  resnet50_simclrv2_finetuned_100pct_tf_port:
+    num_params: 25557032
+  resnet50_simclrv2_linear_probe_tf_port:
+    num_params: 25557032
+  resnet50_simsiam:
+    num_params: 25557038
+  resnet50_swav:
+    num_params: 25557038
+  resnext101_32x4d:
+    num_params: 44177710
+  resnext101_32x8d:
+    num_params: 88791342
+  resnext101_64x4d:
+    num_params: 83455278
+  resnext50_32x4d:
+    num_params: 25028910
+  se_resnet101:
+    num_params: 49326878
+  se_resnet152:
+    num_params: 66821854
+  se_resnet50:
+    num_params: 28088030
+  se_resnext101_32x4d:
+    num_params: 48955422
+  se_resnext50_32x4d:
+    num_params: 27559902
+  senet154:
+    num_params: 115088990
+  shufflenet_v2_x0_5:
+    num_params: 1366798
+  shufflenet_v2_x1_0:
+    num_params: 2278610
+  squeezenet1_0:
+    num_params: 1248430
+  squeezenet1_1:
+    num_params: 1235502
+  vgg11:
+    num_params: 132863342
+  vgg11_bn:
+    num_params: 132868846
+  vgg13:
+    num_params: 133047854
+  vgg13_bn:
+    num_params: 133053742
+  vgg16:
+    num_params: 138357550
+  vgg16_bn:
+    num_params: 138365998
+  vgg19:
+    num_params: 143667246
+  vgg19_bn:
+    num_params: 143678254
+  vit_small_patch16_224:
+    num_params: 22050664
+  wide_resnet101_2:
+    num_params: 126886702
+  wide_resnet50_2:
+    num_params: 68883246
+  xception:
+    num_params: 22855958
+  deepens_alexnet:
+    num_params: 61100846
+  deepens_resnet101:
+    num_params: 44549166
+  deepens_resnet50:
+    num_params: 25557038

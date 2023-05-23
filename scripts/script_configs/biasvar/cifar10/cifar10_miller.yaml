@@ -1,0 +1,631 @@
+title: "CIFAR 10"
+line_extent: 0.45
+models:
+    DenseNet-121:
+        labelpaths:
+        - ../results/robust_results11-17-21_00:55.03_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_01:36.53_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_02:19.01_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:01.03_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-17-21_00:55.03_base_densenet121ind_preds.npy
+        - ../results/robust_results11-17-21_01:36.53_base_densenet121ind_preds.npy
+        - ../results/robust_results11-17-21_02:19.01_base_densenet121ind_preds.npy
+        - ../results/robust_results11-17-21_03:01.03_base_densenet121ind_preds.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_preds.npy
+    DenseNet-169:
+        labelpaths:
+        - ../results/robust_results11-17-21_20:28.21_base_densenet169ind_labels.npy
+        - ../results/robust_results11-17-21_21:23.18_base_densenet169ind_labels.npy
+        - ../results/robust_results11-17-21_22:20.10_base_densenet169ind_labels.npy
+        - ../results/robust_results11-17-21_23:17.03_base_densenet169ind_labels.npy
+        - ../results/robust_results11-18-21_00:13.12_base_densenet169ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-17-21_20:28.21_base_densenet169ind_preds.npy
+        - ../results/robust_results11-17-21_21:23.18_base_densenet169ind_preds.npy
+        - ../results/robust_results11-17-21_22:20.10_base_densenet169ind_preds.npy
+        - ../results/robust_results11-17-21_23:17.03_base_densenet169ind_preds.npy
+        - ../results/robust_results11-18-21_00:13.12_base_densenet169ind_preds.npy
+    GoogleNet:
+        labelpaths:
+        - ../results/robust_results11-17-21_01:19.42_base_googlenetind_labels.npy
+        - ../results/robust_results11-17-21_02:53.46_base_googlenetind_labels.npy
+        - ../results/robust_results11-17-21_04:27.55_base_googlenetind_labels.npy
+        - ../results/robust_results11-17-21_06:02.07_base_googlenetind_labels.npy
+        - ../results/robust_results11-17-21_07:36.23_base_googlenetind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-17-21_01:19.42_base_googlenetind_preds.npy
+        - ../results/robust_results11-17-21_02:53.46_base_googlenetind_preds.npy
+        - ../results/robust_results11-17-21_04:27.55_base_googlenetind_preds.npy
+        - ../results/robust_results11-17-21_06:02.07_base_googlenetind_preds.npy
+        - ../results/robust_results11-17-21_07:36.23_base_googlenetind_preds.npy
+    Inception-v3:
+        labelpaths:
+        - ../results/robust_results11-16-21_18:58.44_base_inception_v3ind_labels.npy
+        - ../results/robust_results11-16-21_22:29.39_base_inception_v3ind_labels.npy
+        - ../results/robust_results11-17-21_02:00.37_base_inception_v3ind_labels.npy
+        - ../results/robust_results11-17-21_05:31.50_base_inception_v3ind_labels.npy
+        - ../results/robust_results11-17-21_09:02.26_base_inception_v3ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-16-21_18:58.44_base_inception_v3ind_preds.npy
+        - ../results/robust_results11-16-21_22:29.39_base_inception_v3ind_preds.npy
+        - ../results/robust_results11-17-21_02:00.37_base_inception_v3ind_preds.npy
+        - ../results/robust_results11-17-21_05:31.50_base_inception_v3ind_preds.npy
+        - ../results/robust_results11-17-21_09:02.26_base_inception_v3ind_preds.npy
+    Pyramidnet110:
+        labelpaths:
+        - outputs/2022-08-20/19-23-49/ind_labels.npy
+        - outputs/2022-08-20/23-39-52/ind_labels.npy
+        - outputs/2022-08-21/03-55-37/ind_labels.npy
+        - outputs/2022-08-21/08-11-34/ind_labels.npy
+        logits: false
+        modelnames:
+        - outputs/2022-08-20/19-23-49/ind_preds.npy
+        - outputs/2022-08-20/23-39-52/ind_preds.npy
+        - outputs/2022-08-21/03-55-37/ind_preds.npy
+        - outputs/2022-08-21/08-11-34/ind_preds.npy
+    ResNet18:
+        labelpaths:
+        - ../results/robust_results11-15-21_02:46.11_base_resnet18ind_labels.npy
+        - ../results/robust_results11-15-21_03:01.22_base_resnet18ind_labels.npy
+        - ../results/robust_results11-15-21_03:16.31_base_resnet18ind_labels.npy
+        - ../results/robust_results11-15-21_03:31.40_base_resnet18ind_labels.npy
+        - ../results/robust_results11-15-21_03:46.53_base_resnet18ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-15-21_02:46.11_base_resnet18ind_preds.npy
+        - ../results/robust_results11-15-21_03:01.22_base_resnet18ind_preds.npy
+        - ../results/robust_results11-15-21_03:16.31_base_resnet18ind_preds.npy
+        - ../results/robust_results11-15-21_03:31.40_base_resnet18ind_preds.npy
+        - ../results/robust_results11-15-21_03:46.53_base_resnet18ind_preds.npy
+    ResNet18-2:
+        labelpaths:
+        - ../results/robust_results11-14-21_23:49.57_base_wideresnet18ind_labels.npy
+        - ../results/robust_results11-15-21_00:30.20_base_wideresnet18ind_labels.npy
+        - ../results/robust_results11-15-21_01:10.29_base_wideresnet18ind_labels.npy
+        - ../results/robust_results11-15-21_01:50.49_base_wideresnet18ind_labels.npy
+        - ../results/robust_results11-15-21_02:31.03_base_wideresnet18ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-14-21_23:49.57_base_wideresnet18ind_preds.npy
+        - ../results/robust_results11-15-21_00:30.20_base_wideresnet18ind_preds.npy
+        - ../results/robust_results11-15-21_01:10.29_base_wideresnet18ind_preds.npy
+        - ../results/robust_results11-15-21_01:50.49_base_wideresnet18ind_preds.npy
+        - ../results/robust_results11-15-21_02:31.03_base_wideresnet18ind_preds.npy
+    ResNet18-4:
+        labelpaths:
+        - ../results/robust_results11-13-21_01:28.26_base_wideresnet18_4ind_labels.npy
+        - ../results/robust_results11-13-21_03:38.44_base_wideresnet18_4ind_labels.npy
+        - ../results/robust_results11-13-21_05:49.19_base_wideresnet18_4ind_labels.npy
+        - ../results/robust_results11-13-21_07:59.30_base_wideresnet18_4ind_labels.npy
+        - ../results/robust_results11-13-21_10:10.17_base_wideresnet18_4ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-13-21_01:28.26_base_wideresnet18_4ind_preds.npy
+        - ../results/robust_results11-13-21_03:38.44_base_wideresnet18_4ind_preds.npy
+        - ../results/robust_results11-13-21_05:49.19_base_wideresnet18_4ind_preds.npy
+        - ../results/robust_results11-13-21_07:59.30_base_wideresnet18_4ind_preds.npy
+        - ../results/robust_results11-13-21_10:10.17_base_wideresnet18_4ind_preds.npy
+    ResNet28-10:
+        labelpaths:
+        - ../results/robust_results12-07-21_21:54.17_base_wideresnet28_10ind_labels.npy
+        - ../results/robust_results12-07-21_21:55.20_base_wideresnet28_10ind_labels.npy
+        - ../results/robust_results12-07-21_21:56.19_base_wideresnet28_10ind_labels.npy
+        - ../results/robust_results12-07-21_21:57.14_base_wideresnet28_10ind_labels.npy
+        - ../results/robust_results12-07-21_21:58.22_base_wideresnet28_10ind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results12-07-21_21:54.17_base_wideresnet28_10ind_preds.npy
+        - ../results/robust_results12-07-21_21:55.20_base_wideresnet28_10ind_preds.npy
+        - ../results/robust_results12-07-21_21:56.19_base_wideresnet28_10ind_preds.npy
+        - ../results/robust_results12-07-21_21:57.14_base_wideresnet28_10ind_preds.npy
+        - ../results/robust_results12-07-21_21:58.22_base_wideresnet28_10ind_preds.npy
+    ResNexst50_4x16d:
+        labelpaths:
+        - outputs/2022-08-19/22-57-29/ind_labels.npy
+        - outputs/2022-08-20/00-38-23/ind_labels.npy
+        - outputs/2022-08-20/02-19-30/ind_labels.npy
+        - outputs/2022-08-20/04-00-32/ind_labels.npy
+        - outputs/2022-08-20/05-41-33/ind_labels.npy
+        logits: false
+        modelnames:
+        - outputs/2022-08-19/22-57-29/ind_preds.npy
+        - outputs/2022-08-20/00-38-23/ind_preds.npy
+        - outputs/2022-08-20/02-19-30/ind_preds.npy
+        - outputs/2022-08-20/04-00-32/ind_preds.npy
+        - outputs/2022-08-20/05-41-33/ind_preds.npy
+    SeResNet-164:
+        labelpaths:
+        - outputs/2022-08-19/14-25-24/ind_labels.npy
+        - outputs/2022-08-19/16-07-06/ind_labels.npy
+        - outputs/2022-08-19/17-49-46/ind_labels.npy
+        - outputs/2022-08-19/19-32-20/ind_labels.npy
+        - outputs/2022-08-19/21-15-29/ind_labels.npy
+        logits: false
+        modelnames:
+        - outputs/2022-08-19/14-25-24/ind_preds.npy
+        - outputs/2022-08-19/16-07-06/ind_preds.npy
+        - outputs/2022-08-19/17-49-46/ind_preds.npy
+        - outputs/2022-08-19/19-32-20/ind_preds.npy
+        - outputs/2022-08-19/21-15-29/ind_preds.npy
+    ShakeShake26_2x96d:
+        labelpaths:
+        - outputs/2022-08-18/14-13-58/ind_labels.npy
+        - outputs/2022-08-18/23-01-00/ind_labels.npy
+        - outputs/2022-08-19/01-22-50/ind_labels.npy
+        - outputs/2022-08-19/03-44-37/ind_labels.npy
+        - outputs/2022-08-19/06-06-20/ind_labels.npy
+        logits: false
+        modelnames:
+        - outputs/2022-08-18/14-13-58/ind_preds.npy
+        - outputs/2022-08-18/23-01-00/ind_preds.npy
+        - outputs/2022-08-19/01-22-50/ind_preds.npy
+        - outputs/2022-08-19/03-44-37/ind_preds.npy
+        - outputs/2022-08-19/06-06-20/ind_preds.npy
+    VGG-11:
+        labelpaths:
+        - ../results/robust_results11-15-21_20:42.38_base_vgg11_bnind_labels.npy
+        - ../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_labels.npy
+        - ../results/robust_results11-15-21_21:08.03_base_vgg11_bnind_labels.npy
+        - ../results/robust_results11-15-21_21:20.48_base_vgg11_bnind_labels.npy
+        - ../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-15-21_20:42.38_base_vgg11_bnind_preds.npy
+        - ../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_preds.npy
+        - ../results/robust_results11-15-21_21:08.03_base_vgg11_bnind_preds.npy
+        - ../results/robust_results11-15-21_21:20.48_base_vgg11_bnind_preds.npy
+        - ../results/robust_results11-15-21_20:55.18_base_vgg11_bnind_preds.npy
+    VGG-19:
+        labelpaths:
+        - ../results/robust_results11-15-21_22:29.03_base_vgg19_bnind_labels.npy
+        - ../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_labels.npy
+        - ../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_labels.npy
+        - ../results/robust_results11-15-21_23:29.30_base_vgg19_bnind_labels.npy
+        - ../results/robust_results11-15-21_23:49.39_base_vgg19_bnind_labels.npy
+        logits: true
+        modelnames:
+        - ../results/robust_results11-15-21_22:29.03_base_vgg19_bnind_preds.npy
+        - ../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_preds.npy
+        - ../results/robust_results11-15-21_22:49.10_base_vgg19_bnind_preds.npy
+        - ../results/robust_results11-15-21_23:29.30_base_vgg19_bnind_preds.npy
+        - ../results/robust_results11-15-21_23:49.39_base_vgg19_bnind_preds.npy
+    densenet121:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/densenet121/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet121/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet121/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet121/run_2.npz
+        npz_flag: cifar10
+    densenet_cifar:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/densenet_cifar/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet_cifar/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet_cifar/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet_cifar/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/densenet_cifar/run_4.npz
+        npz_flag: cifar10
+    dpn26:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/dpn26/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/dpn26/run_0.npz
+        npz_flag: cifar10
+    efficientnetb0:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/efficientnetb0/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/efficientnetb0/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/efficientnetb0/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/efficientnetb0/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/efficientnetb0/run_4.npz
+        npz_flag: cifar10
+    googlenet:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/googlenet/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/googlenet/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/googlenet/run_2.npz
+        npz_flag: cifar10
+    lenet:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/lenet/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/lenet/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/lenet/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/lenet/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/lenet/run_4.npz
+        npz_flag: cifar10
+    mobilenet:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/mobilenet/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/mobilenet/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/mobilenet/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/mobilenet/run_2.npz
+        npz_flag: cifar10
+    mobilenetv2:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/mobilenetv2/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/mobilenetv2/run_0.npz
+        npz_flag: cifar10
+    pnasneta:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/pnasneta/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasneta/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasneta/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasneta/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasneta/run_4.npz
+        npz_flag: cifar10
+    pnasnetb:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/pnasnetb/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasnetb/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasnetb/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasnetb/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/pnasnetb/run_4.npz
+        npz_flag: cifar10
+    preactresnet101:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/preactresnet101/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/preactresnet101/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/preactresnet101/run_2.npz
+        npz_flag: cifar10
+    preactresnet18:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/preactresnet18/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/preactresnet18/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/preactresnet18/run_2.npz
+        npz_flag: cifar10
+    #preactresnet34:
+    #    labelpaths:
+    #    - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+    #    - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+    #    - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+    #    - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+    #    - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+    #    - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+    #    modelnames:
+    #    - /home/ubuntu/cifar10_miller_logits/preactresnet34/run_1.npz
+    #    - /home/ubuntu/cifar10_miller_logits/preactresnet34/run_3.npz
+    #    - /home/ubuntu/cifar10_miller_logits/preactresnet34/run_0.npz
+    #    - /home/ubuntu/cifar10_miller_logits/preactresnet34/run_2.npz
+    #    - /home/ubuntu/cifar10_miller_logits/preactresnet34/run_4.npz
+    #    npz_flag: cifar10
+    preactresnet50:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/preactresnet50/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/preactresnet50/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/preactresnet50/run_2.npz
+        npz_flag: cifar10
+    regnetx_200mf:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/regnetx_200mf/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/regnetx_200mf/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/regnetx_200mf/run_2.npz
+        npz_flag: cifar10
+    regnetx_400mf:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/regnetx_400mf/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/regnetx_400mf/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/regnetx_400mf/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/regnetx_400mf/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/regnetx_400mf/run_4.npz
+        npz_flag: cifar10
+    resnet101:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/resnet101/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet101/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet101/run_2.npz
+        npz_flag: cifar10
+    resnet18:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/resnet18/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet18/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet18/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet18/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet18/run_4.npz
+        npz_flag: cifar10
+    resnet34:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/resnet34/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet34/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet34/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet34/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/resnet34/run_4.npz
+        npz_flag: cifar10
+    resnext29_2x64d:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/resnext29_2x64d/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/resnext29_2x64d/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/resnext29_2x64d/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/resnext29_2x64d/run_2.npz
+        npz_flag: cifar10
+    resnext29_32x4d:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/resnext29_32x4d/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/resnext29_32x4d/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/resnext29_32x4d/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/resnext29_32x4d/run_2.npz
+        npz_flag: cifar10
+    senet18:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/senet18/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/senet18/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/senet18/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/senet18/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/senet18/run_4.npz
+        npz_flag: cifar10
+    shufflenetg2:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg2/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg2/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg2/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg2/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg2/run_4.npz
+        npz_flag: cifar10
+    shufflenetg3:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg3/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg3/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg3/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetg3/run_2.npz
+        npz_flag: cifar10
+    shufflenetv2_0_5:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_0_5/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_0_5/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_0_5/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_0_5/run_2.npz
+        npz_flag: cifar10
+    shufflenetv2_1:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1/run_4.npz
+        npz_flag: cifar10
+    shufflenetv2_1_5:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1_5/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1_5/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1_5/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1_5/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_1_5/run_4.npz
+        npz_flag: cifar10
+    shufflenetv2_2:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_6.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_5.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/shufflenetv2_2/run_4.npz
+        npz_flag: cifar10
+    vgg11:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/vgg11/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg11/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg11/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg11/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg11/run_4.npz
+        npz_flag: cifar10
+    vgg13:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/vgg13/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg13/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg13/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg13/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg13/run_4.npz
+        npz_flag: cifar10
+    vgg16:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/vgg16/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg16/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg16/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg16/run_2.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg16/run_4.npz
+        npz_flag: cifar10
+    vgg19:
+        labelpaths:
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        - ../results/robust_results11-17-21_03:43.39_base_densenet121ind_labels.npy
+        modelnames:
+        - /home/ubuntu/cifar10_miller_logits/vgg19/run_1.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg19/run_3.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg19/run_0.npz
+        - /home/ubuntu/cifar10_miller_logits/vgg19/run_2.npz
+        npz_flag: cifar10
